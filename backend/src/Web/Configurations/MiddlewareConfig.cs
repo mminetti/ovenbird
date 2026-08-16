@@ -1,4 +1,4 @@
-using Ardalis.ListStartupServices;
+﻿using Ardalis.ListStartupServices;
 using Infrastructure.Data;
 using Scalar.AspNetCore;
 
@@ -21,30 +21,26 @@ public static class MiddlewareConfig
 
         app.UseFastEndpoints();
 
-        if (app.Environment.IsDevelopment())
+        app.UseSwaggerGen(options =>
         {
-            app.UseSwaggerGen(options =>
-            {
-                options.Path = "/openapi/{documentName}.json";
-            },
-            settings =>
-            {
-                settings.Path = "/swagger";
-                settings.DocumentPath = "/openapi/{documentName}.json";
-            });
+            options.Path = "/openapi/{documentName}.json";
+        },
+        settings =>
+        {
+            settings.Path = "/swagger";
+            settings.DocumentPath = "/openapi/{documentName}.json";
+        });
 
-            app.MapScalarApiReference(options =>
-            {
-                options.WithTitle("Clean Architecture API");
-                options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
-            });
-        }
+        app.MapScalarApiReference(options =>
+        {
+            options.WithTitle("Ovenbird API");
+            options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
+        });
 
         app.UseHttpsRedirection(); // Note this will drop Authorization headers
 
-        // Run migrations and seed in Development or when explicitly requested via environment variable
-        var shouldMigrate = app.Environment.IsDevelopment() ||
-                            app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
+        // Run migrations and seed when explicitly requested via environment variable
+        var shouldMigrate = app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
 
         if (shouldMigrate)
         {
@@ -64,20 +60,11 @@ public static class MiddlewareConfig
         try
         {
             logger.LogInformation("Applying database migrations...");
+            
             var context = services.GetRequiredService<AppDbContext>();
+            await context.Database.MigrateAsync();
 
-            // For SQLite, use EnsureCreated instead of migrations (common for dev/local scenarios)
-            // For SQL Server, use migrations (production scenario)
-            if (context.Database.IsSqlite())
-            {
-                await context.Database.EnsureCreatedAsync();
-                logger.LogInformation("SQLite database created successfully");
-            }
-            else
-            {
-                await context.Database.MigrateAsync();
-                logger.LogInformation("Database migrations applied successfully");
-            }
+            logger.LogInformation("Database migrations applied successfully");
         }
         catch (Exception ex)
         {
@@ -95,8 +82,10 @@ public static class MiddlewareConfig
         try
         {
             logger.LogInformation("Seeding database...");
+
             var context = services.GetRequiredService<AppDbContext>();
             await SeedData.InitializeAsync(context);
+
             logger.LogInformation("Database seeded successfully");
         }
         catch (Exception ex)

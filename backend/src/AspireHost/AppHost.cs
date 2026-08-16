@@ -1,4 +1,4 @@
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -7,7 +7,7 @@ var sqlServer = builder.AddSqlServer("sqlserver")
   .WithLifetime(ContainerLifetime.Persistent);
 
 // Add the database
-var cleanArchDb = sqlServer.AddDatabase("cleanarchitecture");
+var cleanArchDb = sqlServer.AddDatabase("db");
 
 // Papercut SMTP container for email testing
 var papercut = builder.AddContainer("papercut", "jijiechen/papercut", "latest")
