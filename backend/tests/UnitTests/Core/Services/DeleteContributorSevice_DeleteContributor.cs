@@ -1,4 +1,4 @@
-using Core.Services;
+﻿using Core.Services;
 
 namespace UnitTests.Core.Services;
 
@@ -19,7 +19,7 @@ public class DeleteContributorService_DeleteContributor
     public async Task ReturnsNotFoundGivenCantFindContributor()
     {
         int missingId = 9999;
-        var result = await _service.DeleteContributor(ContributorId.From(missingId));
+        var result = await _service.DeleteContributor(missingId);
 
         result.Status.ShouldBe(Ardalis.Result.ResultStatus.NotFound);
     }

@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 using Core.ContributorAggregate.Events;
 using Core.Interfaces;
 
@@ -15,7 +15,7 @@ public class DeleteContributorService(IRepository<Contributor> _repository,
   IMediator _mediator,
   ILogger<DeleteContributorService> _logger) : IDeleteContributorService
 {
-    public async ValueTask<Result> DeleteContributor(ContributorId contributorId)
+    public async ValueTask<Result> DeleteContributor(int contributorId)
     {
         _logger.LogInformation("Deleting Contributor {contributorId}", contributorId);
         Contributor? aggregateToDelete = await _repository.GetByIdAsync(contributorId);

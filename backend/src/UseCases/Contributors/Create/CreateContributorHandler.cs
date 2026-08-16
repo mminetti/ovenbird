@@ -1,11 +1,11 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace UseCases.Contributors.Create;
 
 public class CreateContributorHandler(IRepository<Contributor> _repository)
-  : ICommandHandler<CreateContributorCommand, Result<ContributorId>>
+  : ICommandHandler<CreateContributorCommand, Result<int>>
 {
-    public async ValueTask<Result<ContributorId>> Handle(CreateContributorCommand command,
+    public async ValueTask<Result<int>> Handle(CreateContributorCommand command,
       CancellationToken cancellationToken)
     {
         var newContributor = new Contributor(command.Name);

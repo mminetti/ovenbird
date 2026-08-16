@@ -5,7 +5,6 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
-    <NuGetAudit>false</NuGetAudit>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

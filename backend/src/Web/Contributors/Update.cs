@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.Get;
@@ -49,8 +49,8 @@ public class Update(IMediator mediator)
       ExecuteAsync(UpdateContributorRequest request, CancellationToken ct)
     {
         var cmd = new UpdateContributorCommand(
-          ContributorId.From(request.Id),
-          ContributorName.From(request.Name!));
+          request.Id,
+          request.Name!);
 
         var result = await _mediator.Send(cmd, ct);
 
@@ -62,5 +62,5 @@ public sealed class UpdateContributorMapper
   : Mapper<UpdateContributorRequest, UpdateContributorResponse, ContributorDto>
 {
     public override UpdateContributorResponse FromEntity(ContributorDto e)
-      => new(new ContributorRecord(e.Id.Value, e.Name.Value, ""));
+      => new(new ContributorRecord(e.Id, e.Name, ""));
 }

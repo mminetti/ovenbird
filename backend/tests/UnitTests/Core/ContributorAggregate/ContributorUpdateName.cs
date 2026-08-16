@@ -1,11 +1,11 @@
-using Core.ContributorAggregate.Events;
+﻿using Core.ContributorAggregate.Events;
 
 namespace UnitTests.Core.ContributorAggregate;
 
 public class ContributorUpdateName
 {
-    private readonly ContributorName _initialName = ContributorName.From("initial name");
-    private readonly ContributorName _newName = ContributorName.From("new name");
+    private readonly string _initialName = "initial name";
+    private readonly string _newName = "new name";
     private Contributor? _testContributor;
     private Contributor CreateContributor()
     {

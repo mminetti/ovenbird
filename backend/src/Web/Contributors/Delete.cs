@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Core.ContributorAggregate;
 using UseCases.Contributors.Delete;
 using Web.Extensions;
@@ -44,7 +44,7 @@ public class Delete
     public override async Task<Results<NoContent, NotFound, ProblemHttpResult>>
       ExecuteAsync(DeleteContributorRequest req, CancellationToken ct)
     {
-        var cmd = new DeleteContributorCommand(ContributorId.From(req.ContributorId));
+        var cmd = new DeleteContributorCommand(req.ContributorId);
         var result = await _mediator.Send(cmd, ct);
 
         return result.ToDeleteResult();

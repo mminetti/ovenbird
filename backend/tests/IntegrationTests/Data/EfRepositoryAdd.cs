@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace IntegrationTests.Data;
 
@@ -7,7 +7,7 @@ public class EfRepositoryAdd : BaseEfRepoTestFixture
     [Fact]
     public async Task AddsContributorAndSetsId()
     {
-        var testContributorName = ContributorName.From("testContributor");
+        var testContributorName = "testContributor";
         var testContributorStatus = ContributorStatus.NotSet;
         var repository = GetRepository();
         var Contributor = new Contributor(testContributorName);
@@ -20,6 +20,6 @@ public class EfRepositoryAdd : BaseEfRepoTestFixture
         newContributor.ShouldNotBeNull();
         testContributorName.ShouldBe(newContributor.Name);
         testContributorStatus.ShouldBe(newContributor.Status);
-        newContributor.Id.Value.ShouldBeGreaterThan(0);
+        newContributor.Id.ShouldBeGreaterThan(0);
     }
 }

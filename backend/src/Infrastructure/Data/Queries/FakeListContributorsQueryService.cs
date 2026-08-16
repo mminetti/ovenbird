@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.List;
 
@@ -12,7 +12,7 @@ public class FakeListContributorsQueryService : IListContributorsQueryService
         for (int i = 1; i <= 25; i++)
         {
             var phone = new PhoneNumber("+1", "555", "1234567");
-            items.Add(new ContributorDto(ContributorId.From(i), ContributorName.From($"Fake {i}"), phone));
+            items.Add(new ContributorDto(i, $"Fake {i}", phone));
         }
 
         int totalPages = (int)Math.Ceiling(items.Count / (double)perPage);

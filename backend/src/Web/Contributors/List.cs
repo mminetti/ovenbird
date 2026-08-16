@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.List;
@@ -124,7 +124,7 @@ public sealed class ListContributorsMapper
     public override ContributorListResponse FromEntity(UseCases.PagedResult<ContributorDto> e)
     {
         var items = e.Items
-          .Select(c => new ContributorRecord(c.Id.Value, c.Name.Value, c.PhoneNumber.ToString()))
+          .Select(c => new ContributorRecord(c.Id, c.Name, c.PhoneNumber.ToString()))
           .ToList();
 
         return new ContributorListResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

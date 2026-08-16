@@ -1,10 +1,10 @@
-using Core.ContributorAggregate.Events;
+﻿using Core.ContributorAggregate.Events;
 
 namespace Core.ContributorAggregate;
 
-public class Contributor(ContributorName name) : EntityBase<Contributor, ContributorId>, IAggregateRoot
+public class Contributor(string name) : EntityBase<Contributor, int>, IAggregateRoot
 {
-    public ContributorName Name { get; private set; } = name;
+    public string Name { get; private set; } = name;
     public ContributorStatus Status { get; private set; } = ContributorStatus.NotSet;
     public PhoneNumber? PhoneNumber { get; private set; }
 
@@ -14,7 +14,7 @@ public class Contributor(ContributorName name) : EntityBase<Contributor, Contrib
         return this;
     }
 
-    public Contributor UpdateName(ContributorName newName)
+    public Contributor UpdateName(string newName)
     {
         if (Name == newName) return this;
         Name = newName;

@@ -1,8 +1,8 @@
-namespace Core.ContributorAggregate.Specifications;
+﻿namespace Core.ContributorAggregate.Specifications;
 
 public class ContributorByIdSpec : Specification<Contributor>
 {
-    public ContributorByIdSpec(ContributorId contributorId) =>
+    public ContributorByIdSpec(int contributorId) =>
       Query
           .Where(contributor => contributor.Id == contributorId);
 }

@@ -1,5 +1,5 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace UseCases.Contributors.Delete;
 
-public record DeleteContributorCommand(ContributorId ContributorId) : ICommand<Result>;
+public record DeleteContributorCommand(int ContributorId) : ICommand<Result>;

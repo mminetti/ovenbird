@@ -1,5 +1,5 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace UseCases.Contributors.Update;
 
-public record UpdateContributorCommand(ContributorId ContributorId, ContributorName NewName) : ICommand<Result<ContributorDto>>;
+public record UpdateContributorCommand(int ContributorId, string NewName) : ICommand<Result<ContributorDto>>;

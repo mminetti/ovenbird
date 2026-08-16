@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace IntegrationTests.Data;
 
@@ -9,7 +9,7 @@ public class EfRepositoryUpdate : BaseEfRepoTestFixture
     {
         // add a Contributor
         var repository = GetRepository();
-        var initialName = ContributorName.From(Guid.NewGuid().ToString());
+        var initialName = Guid.NewGuid().ToString();
         var Contributor = new Contributor(initialName);
 
         await repository.AddAsync(Contributor);
@@ -23,7 +23,7 @@ public class EfRepositoryUpdate : BaseEfRepoTestFixture
         newContributor.ShouldNotBeNull();
 
         Contributor.ShouldNotBeSameAs(newContributor);
-        var newName = ContributorName.From(Guid.NewGuid().ToString());
+        var newName = Guid.NewGuid().ToString();
         newContributor.UpdateName(newName);
 
         // Update the item

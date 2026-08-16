@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
 using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.Get;
@@ -44,7 +44,7 @@ public class GetById(IMediator mediator)
     public override async Task<Results<Ok<ContributorRecord>, NotFound, ProblemHttpResult>>
       ExecuteAsync(GetContributorByIdRequest request, CancellationToken ct)
     {
-        var result = await mediator.Send(new GetContributorQuery(ContributorId.From(request.ContributorId)), ct);
+        var result = await mediator.Send(new GetContributorQuery(request.ContributorId), ct);
 
         return result.ToGetByIdResult(Map.FromEntity);
     }
@@ -53,5 +53,5 @@ public sealed class GetContributorByIdMapper
   : Mapper<GetContributorByIdRequest, ContributorRecord, ContributorDto>
 {
     public override ContributorRecord FromEntity(ContributorDto e)
-      => new(e.Id.Value, e.Name.Value, e.PhoneNumber.ToString());
+      => new(e.Id, e.Name, e.PhoneNumber.ToString());
 }

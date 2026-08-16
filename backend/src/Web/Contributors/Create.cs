@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Core.ContributorAggregate;
@@ -51,11 +51,11 @@ public class Create(IMediator mediator)
     public override async Task<Results<Created<CreateContributorResponse>, ValidationProblem, ProblemHttpResult>>
       ExecuteAsync(CreateContributorRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new CreateContributorCommand(ContributorName.From(request.Name!), request.PhoneNumber));
+        var result = await _mediator.Send(new CreateContributorCommand(request.Name!, request.PhoneNumber));
 
         return result.ToCreatedResult(
           id => $"/Contributors/{id}",
-          id => new CreateContributorResponse(id.Value, request.Name!));
+          id => new CreateContributorResponse(id, request.Name!));
     }
 }
 
@@ -76,7 +76,7 @@ public class CreateContributorValidator : Validator<CreateContributorRequest>
           .NotEmpty()
           .WithMessage("Name is required.")
           .MinimumLength(2)
-          .MaximumLength(ContributorName.MaxLength);
+          .MaximumLength(500);
     }
 }
 

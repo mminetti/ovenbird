@@ -13,8 +13,8 @@ public static class InfrastructureServiceExtensions
       ConfigurationManager config,
       ILogger logger)
     {
-        string? connectionString = config.GetConnectionString("DefaultConnection")
-            ?? config.GetConnectionString("db");
+        string? connectionString = config.GetConnectionString("db")
+            ?? config.GetConnectionString("DefaultConnection");
 
         Guard.Against.Null(connectionString);
 

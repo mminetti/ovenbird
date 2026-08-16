@@ -1,4 +1,4 @@
-using Infrastructure.Data;
+﻿using Infrastructure.Data;
 using Web.Contributors;
 
 
@@ -15,7 +15,7 @@ public class ContributorGetById(CustomWebApplicationFactory<Program> factory) : 
         var result = await _client.GetAndDeserializeAsync<ContributorRecord>(GetContributorByIdRequest.BuildRoute(1));
 
         result.Id.ShouldBe(1);
-        result.Name.ShouldBe(SeedData.Contributor1.Name.Value);
+        result.Name.ShouldBe(SeedData.Contributor1.Name);
     }
 
     [Fact]

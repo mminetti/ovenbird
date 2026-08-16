@@ -1,5 +1,5 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace UseCases.Contributors;
 
-public record ContributorDto(ContributorId Id, ContributorName Name, PhoneNumber PhoneNumber);
+public record ContributorDto(int Id, string Name, PhoneNumber PhoneNumber);

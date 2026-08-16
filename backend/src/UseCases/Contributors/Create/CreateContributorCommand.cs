@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace UseCases.Contributors.Create;
 
@@ -6,4 +6,4 @@ namespace UseCases.Contributors.Create;
 /// Create a new Contributor.
 /// </summary>
 /// <param name="Name"></param>
-public record CreateContributorCommand(ContributorName Name, string? PhoneNumber) : ICommand<Result<ContributorId>>;
+public record CreateContributorCommand(string Name, string? PhoneNumber) : ICommand<Result<int>>;
