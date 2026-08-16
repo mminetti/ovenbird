@@ -6,28 +6,26 @@
   </Configurations>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
-    <File Path=".template.config/template.json" />
-    <File Path="CleanArchitecture.nuspec" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="src/Ovenbird.Core/Ovenbird.Core.csproj" />
-    <Project Path="src/Ovenbird.Infrastructure/Ovenbird.Infrastructure.csproj" />
-    <Project Path="src/Ovenbird.UseCases/Ovenbird.UseCases.csproj" />
-    <Project Path="src/Ovenbird.Web/Ovenbird.Web.csproj" />
+    <Project Path="src/Core/Core.csproj" />
+    <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/UseCases/UseCases.csproj" />
+    <Project Path="src/Web/Web.csproj" />
   </Folder>
   <Folder Name="/src/_aspire/">
-    <Project Path="src/Ovenbird.AspireHost/Ovenbird.AspireHost.csproj" />
-    <Project Path="src/Ovenbird.ServiceDefaults/Ovenbird.ServiceDefaults.csproj" />
+    <Project Path="src/AspireHost/AspireHost.csproj" />
+    <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/Ovenbird.FunctionalTests/Ovenbird.FunctionalTests.csproj">
-      <BuildDependency Project="src/Ovenbird.Web/Ovenbird.Web.csproj" />
+    <Project Path="tests/FunctionalTests/FunctionalTests.csproj">
+      <BuildDependency Project="src/Web/Web.csproj" />
     </Project>
-    <Project Path="tests/Ovenbird.IntegrationTests/Ovenbird.IntegrationTests.csproj">
-      <BuildDependency Project="src/Ovenbird.Infrastructure/Ovenbird.Infrastructure.csproj" />
+    <Project Path="tests/IntegrationTests/IntegrationTests.csproj">
+      <BuildDependency Project="src/Infrastructure/Infrastructure.csproj" />
     </Project>
-    <Project Path="tests/Ovenbird.UnitTests/Ovenbird.UnitTests.csproj" />
+    <Project Path="tests/UnitTests/UnitTests.csproj" />
   </Folder>
 </Solution>

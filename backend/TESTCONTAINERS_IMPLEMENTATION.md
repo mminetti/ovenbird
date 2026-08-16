@@ -14,13 +14,13 @@ Successfully migrated functional tests from in-memory database to **Testcontaine
 <PackageVersion Include="Testcontainers.MsSql" Version="4.3.0" />
 ```
 
-**Updated `tests\Ovenbird.FunctionalTests\Ovenbird.FunctionalTests.csproj`:**
+**Updated `tests\FunctionalTests\FunctionalTests.csproj`:**
 - Removed: `Microsoft.EntityFrameworkCore.InMemory`
 - Added: `Testcontainers` and `Testcontainers.MsSql`
 
 ### 2. CustomWebApplicationFactory
 
-**File:** `tests\Ovenbird.FunctionalTests\CustomWebApplicationFactory.cs`
+**File:** `tests\FunctionalTests\CustomWebApplicationFactory.cs`
 
 Key changes:
 - Implements `IAsyncLifetime` for proper async initialization/cleanup
@@ -74,7 +74,7 @@ dotnet test
 
 Or specifically for functional tests:
 ```bash
-dotnet test tests\Ovenbird.FunctionalTests\Ovenbird.FunctionalTests.csproj
+dotnet test tests\FunctionalTests\FunctionalTests.csproj
 ```
 
 ## Notes
