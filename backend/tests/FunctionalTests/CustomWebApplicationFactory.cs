@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Infrastructure.Data;
 using Testcontainers.MsSql;
@@ -9,7 +9,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
 {
     private MsSqlContainer? _dbContainer;
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         try
         {

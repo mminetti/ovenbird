@@ -1,4 +1,4 @@
-using Infrastructure.Data;
+﻿using Infrastructure.Data;
 using Web.Contributors;
 
 namespace FunctionalTests.ApiEndpoints;
@@ -14,7 +14,7 @@ public class ContributorList(CustomWebApplicationFactory<Program> factory) : ICl
         var result = await _client.GetAndDeserializeAsync<ContributorListResponse>("/Contributors");
 
         Assert.Equal(SeedData.NUMBER_OF_CONTRIBUTORS, result.TotalCount);
-        Assert.Contains(result.Items, i => i.Name == SeedData.Contributor1.Name);
-        Assert.Contains(result.Items, i => i.Name == SeedData.Contributor2.Name);
+        Assert.Contains(result.Items, i => i.Name == "Contributor 1");
+        Assert.Contains(result.Items, i => i.Name == "Contributor 2");
     }
 }

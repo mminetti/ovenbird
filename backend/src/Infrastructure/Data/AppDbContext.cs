@@ -1,6 +1,10 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 
 namespace Infrastructure.Data;
+
+// Package Manager Console
+// dotnet ef migrations add _MIGRATION_NAME_ --startup-project "src\Web" --project "src\Infrastructure" --output-dir Data/Migrations
+// dotnet ef migrations script _MIGRATION_NAME_FROM_ --idempotent --context "AppDbContext" --startup-project "src\Web" --project "src\Infrastructure"
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
