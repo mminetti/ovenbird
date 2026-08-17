@@ -19,6 +19,14 @@ public static class MiddlewareConfig
             app.UseHsts();
         }
 
+        var entraEnabled = app.Configuration.GetValue<bool>("Authentication:AzureAdEnabled");
+
+        if (entraEnabled)
+        {
+            app.UseAuthentication();
+            app.UseAuthorization();
+        }
+
         app.UseFastEndpoints();
 
         app.UseSwaggerGen(options =>
@@ -31,10 +39,22 @@ public static class MiddlewareConfig
             settings.DocumentPath = "/openapi/{documentName}.json";
         });
 
-        app.MapScalarApiReference(options =>
+        
+
+        app.MapScalarApiReference("/docs", options =>
         {
             options.WithTitle("Ovenbird API");
             options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
+
+            if (entraEnabled)
+            {
+                options.AddAuthorizationCodeFlow("oauth2", flow =>
+                {
+                    flow.WithClientId(app.Configuration["AzureAd:ClientId"] ?? string.Empty)
+                        .WithSelectedScopes([app.Configuration["AzureAd:DefaultScope"] ?? string.Empty])
+                        .WithPkce(Pkce.Sha256);
+                });
+            }
         });
 
         app.UseHttpsRedirection(); // Note this will drop Authorization headers

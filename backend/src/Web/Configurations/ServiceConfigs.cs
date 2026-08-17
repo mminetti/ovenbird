@@ -1,13 +1,23 @@
-using Core.Interfaces;
+﻿using Core.Interfaces;
 using Infrastructure;
 using Infrastructure.Email;
+using Microsoft.Identity.Web;
 
 namespace Web.Configurations;
 
 public static class ServiceConfigs
 {
-    public static IServiceCollection AddServiceConfigs(this IServiceCollection services, Microsoft.Extensions.Logging.ILogger logger, WebApplicationBuilder builder)
+    public static IServiceCollection AddServiceConfigs(this IServiceCollection services, 
+        Microsoft.Extensions.Logging.ILogger logger, WebApplicationBuilder builder)
     {
+        var entraEnabled = builder.Configuration.GetValue<bool>("Authentication:AzureAdEnabled");
+
+        if (entraEnabled)
+        {
+            services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
+            services.AddAuthorization();
+        }
+
         services.AddInfrastructureServices(builder.Configuration, logger);
         builder.AddWolverine(logger);
 
