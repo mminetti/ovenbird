@@ -1,6 +1,7 @@
 ﻿using Ardalis.ListStartupServices;
 using Infrastructure.Data;
 using Scalar.AspNetCore;
+using Web.Configurations.Auth;
 
 namespace Web.Configurations;
 
@@ -19,13 +20,9 @@ public static class MiddlewareConfig
             app.UseHsts();
         }
 
-        var entraEnabled = app.Configuration.GetValue<bool>("Authentication:AzureAdEnabled");
+        var authStrategy = AuthStrategyFactory.Create(app.Configuration);
 
-        if (entraEnabled)
-        {
-            app.UseAuthentication();
-            app.UseAuthorization();
-        }
+        authStrategy.ConfigureMiddleware(app);
 
         app.UseFastEndpoints();
 
@@ -46,15 +43,7 @@ public static class MiddlewareConfig
             options.WithTitle("Ovenbird API");
             options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
 
-            if (entraEnabled)
-            {
-                options.AddAuthorizationCodeFlow("oauth2", flow =>
-                {
-                    flow.WithClientId(app.Configuration["AzureAd:ClientId"] ?? string.Empty)
-                        .WithSelectedScopes([app.Configuration["AzureAd:DefaultScope"] ?? string.Empty])
-                        .WithPkce(Pkce.Sha256);
-                });
-            }
+            authStrategy.ConfigureScalarAuth(options, app.Configuration);
         });
 
         app.UseHttpsRedirection(); // Note this will drop Authorization headers
