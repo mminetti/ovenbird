@@ -12,7 +12,7 @@ namespace Core.Services;
 /// <param name="_mediator"></param>
 /// <param name="_logger"></param>
 public class DeleteContributorService(IRepository<Contributor> _repository,
-  IMediator _mediator,
+  IMessageBus _bus,
   ILogger<DeleteContributorService> _logger) : IDeleteContributorService
 {
     public async ValueTask<Result> DeleteContributor(int contributorId)
@@ -23,7 +23,7 @@ public class DeleteContributorService(IRepository<Contributor> _repository,
 
         await _repository.DeleteAsync(aggregateToDelete);
         var domainEvent = new ContributorDeletedEvent(contributorId);
-        await _mediator.Publish(domainEvent);
+        await _bus.PublishAsync(domainEvent);
 
         return Result.Success();
     }

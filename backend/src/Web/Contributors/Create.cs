@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Core.ContributorAggregate;
 using UseCases.Contributors.Create;
 using Web.Extensions;
 
@@ -12,13 +11,13 @@ namespace Web.Contributors;
 // is the recommended approach. More files, but fewer merge conflicts and easier to 
 // see what changed in a given commit or PR.
 
-public class Create(IMediator mediator)
+public class Create(IMessageBus bus)
   : Endpoint<CreateContributorRequest,
           Results<Created<CreateContributorResponse>,
                           ValidationProblem,
                           ProblemHttpResult>>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IMessageBus _bus = bus;
 
     public override void Configure()
     {
@@ -51,7 +50,7 @@ public class Create(IMediator mediator)
     public override async Task<Results<Created<CreateContributorResponse>, ValidationProblem, ProblemHttpResult>>
       ExecuteAsync(CreateContributorRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new CreateContributorCommand(request.Name!, request.PhoneNumber));
+        var result = await _bus.InvokeAsync<Result<int>>(new CreateContributorCommand(request.Name!, request.PhoneNumber));
 
         return result.ToCreatedResult(
           id => $"/Contributors/{id}",

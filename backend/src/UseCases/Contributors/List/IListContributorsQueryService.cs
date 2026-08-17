@@ -1,4 +1,4 @@
-namespace UseCases.Contributors.List;
+﻿namespace UseCases.Contributors.List;
 
 /// <summary>
 /// Represents a service that will actually fetch the necessary data
@@ -6,5 +6,5 @@ namespace UseCases.Contributors.List;
 /// </summary>
 public interface IListContributorsQueryService
 {
-    Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage);
+    Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken cancellationToken);
 }

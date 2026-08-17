@@ -4,9 +4,9 @@ using Core.Interfaces;
 namespace Core.ContributorAggregate.Handlers;
 
 public class ContributorDeletedHandler(ILogger<ContributorDeletedHandler> logger,
-  IEmailSender emailSender) : INotificationHandler<ContributorDeletedEvent>
+  IEmailSender emailSender)
 {
-    public async ValueTask Handle(ContributorDeletedEvent domainEvent, CancellationToken cancellationToken)
+    public async Task Handle(ContributorDeletedEvent domainEvent, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling Contributed Deleted event for {contributorId}", domainEvent.ContributorId);
 

@@ -5,9 +5,9 @@ namespace Core.ContributorAggregate.Handlers;
 
 public class ContributorNameUpdatedEmailNotificationHandler(
   ILogger<ContributorNameUpdatedEmailNotificationHandler> logger,
-  IEmailSender emailSender) : INotificationHandler<ContributorNameUpdatedEvent>
+  IEmailSender emailSender)
 {
-    public async ValueTask Handle(ContributorNameUpdatedEvent domainEvent, CancellationToken cancellationToken)
+    public async Task Handle(ContributorNameUpdatedEvent domainEvent, CancellationToken cancellationToken)
     {
         logger.LogInformation("Handling Contributor Name Updated event for {contributorId}", domainEvent.Contributor.Id);
 

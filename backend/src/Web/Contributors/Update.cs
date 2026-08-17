@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Core.ContributorAggregate;
 using UseCases.Contributors;
-using UseCases.Contributors.Get;
 using UseCases.Contributors.Update;
 using Web.Extensions;
 
 namespace Web.Contributors;
 
-public class Update(IMediator mediator)
+public class Update(IMessageBus bus)
   : Endpoint<
         UpdateContributorRequest,
         Results<Ok<UpdateContributorResponse>, NotFound, ProblemHttpResult>,
         UpdateContributorMapper>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IMessageBus _bus = bus;
 
     public override void Configure()
     {
@@ -52,7 +50,7 @@ public class Update(IMediator mediator)
           request.Id,
           request.Name!);
 
-        var result = await _mediator.Send(cmd, ct);
+        var result = await _bus.InvokeAsync<Result<ContributorDto>>(cmd, ct);
 
         return result.ToUpdateResult(Map.FromEntity);
     }

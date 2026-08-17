@@ -1,6 +1,6 @@
-namespace UseCases.Contributors.List;
+﻿namespace UseCases.Contributors.List;
 
-public class ListContributorsHandler : IQueryHandler<ListContributorsQuery, Result<PagedResult<ContributorDto>>>
+public class ListContributorsHandler
 {
     private readonly IListContributorsQueryService _query;
 
@@ -9,11 +9,11 @@ public class ListContributorsHandler : IQueryHandler<ListContributorsQuery, Resu
         _query = query;
     }
 
-    public async ValueTask<Result<PagedResult<ContributorDto>>> Handle(ListContributorsQuery request,
+    public async Task<Result<PagedResult<ContributorDto>>> Handle(ListContributorsQuery request,
                                                                        CancellationToken cancellationToken)
     {
 
-        var result = await _query.ListAsync(request.Page ?? 1, request.PerPage ?? Constants.DEFAULT_PAGE_SIZE);
+        var result = await _query.ListAsync(request.Page ?? 1, request.PerPage ?? Constants.DEFAULT_PAGE_SIZE, cancellationToken);
 
         return Result.Success(result);
     }

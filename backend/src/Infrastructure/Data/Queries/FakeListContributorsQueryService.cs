@@ -6,7 +6,7 @@ namespace Infrastructure.Data.Queries;
 
 public class FakeListContributorsQueryService : IListContributorsQueryService
 {
-    public Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage)
+    public Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken cancellationToken)
     {
         var items = new List<ContributorDto>();
         for (int i = 1; i <= 25; i++)

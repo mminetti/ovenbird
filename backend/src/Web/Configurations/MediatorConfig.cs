@@ -1,6 +1,6 @@
-using Ardalis.SharedKernel;
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 using Infrastructure;
+using Infrastructure.Data;
 using UseCases.Contributors.Create;
 
 namespace Web.Configurations;
@@ -8,38 +8,26 @@ namespace Web.Configurations;
 public static class MediatorConfig
 {
     // Should be called from ServiceConfigs.cs, not Program.cs
-    public static IServiceCollection AddMediatorSourceGen(this IServiceCollection services,
+    public static WebApplicationBuilder AddWolverine(this WebApplicationBuilder builder,
       Microsoft.Extensions.Logging.ILogger logger)
     {
-        logger.LogInformation("Registering Mediator SourceGen and Behaviors");
-        services.AddMediator(options =>
+        logger.LogInformation("Registering Wolverine");
+
+        builder.Host.UseWolverine(opts =>
         {
-            // Lifetime: Singleton is fastest per docs; Scoped/Transient also supported.
-            options.ServiceLifetime = ServiceLifetime.Scoped;
+            // Supply any TYPE from each assembly you want scanned
+            opts.Discovery.IncludeAssembly(typeof(Contributor).Assembly);          // Core
+            opts.Discovery.IncludeAssembly(typeof(CreateContributorCommand).Assembly); // UseCases
+            opts.Discovery.IncludeAssembly(typeof(InfrastructureServiceExtensions).Assembly); // Infrastructure
+            opts.Discovery.IncludeAssembly(typeof(MediatorConfig).Assembly);       // Web
 
-            // Supply any TYPE from each assembly you want scanned (the generator finds the assembly from the type)
-            options.Assemblies =
-        [
-          typeof(Contributor),                       // Core
-        typeof(CreateContributorCommand),         // UseCases
-        typeof(InfrastructureServiceExtensions), // Infrastructure
-        typeof(MediatorConfig)                  // Web
-        ];
-
-            // Register pipeline behaviors here (order matters)
-            options.PipelineBehaviors =
-        [
-          typeof(LoggingBehavior<,>)
-        ];
-
-            // If you have stream behaviors:
-            // options.StreamPipelineBehaviors = [ typeof(YourStreamBehavior<,>) ];
+            // EF Core always registers DbContextOptions<T> via an internal opaque lambda factory
+            // (EntityFrameworkServiceCollectionExtensions.CreateDbContextOptions).
+            // This is fundamental to EF Core's DI integration and cannot be avoided.
+            // We tell Wolverine to use service location specifically for AppDbContext.
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
         });
 
-        // Alternative: register behaviors via DI yourself (useful if not doing AOT):
-        // services.AddScoped(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-        // services.AddScoped(typeof(IPipelineBehavior<,>), typeof(CachingBehavior<,>));
-
-        return services;
+        return builder;
     }
 }

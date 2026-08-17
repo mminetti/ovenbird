@@ -3,9 +3,8 @@ using Core.ContributorAggregate;
 namespace UseCases.Contributors.Update;
 
 public class UpdateContributorHandler(IRepository<Contributor> _repository)
-  : ICommandHandler<UpdateContributorCommand, Result<ContributorDto>>
 {
-    public async ValueTask<Result<ContributorDto>> Handle(UpdateContributorCommand command,
+    public async Task<Result<ContributorDto>> Handle(UpdateContributorCommand command,
       CancellationToken ct)
     {
         var existingContributor = await _repository.GetByIdAsync(command.ContributorId, ct);

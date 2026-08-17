@@ -1,9 +1,8 @@
-global using System.Runtime.CompilerServices;
-global using Ardalis.SharedKernel;
-global using Mediator;
+﻿global using Ardalis.SharedKernel;
+global using Core.ContributorAggregate;
 global using Microsoft.Extensions.Logging;
 global using NSubstitute;
-global using Core.ContributorAggregate;
-global using UseCases.Contributors.Create;
 global using Shouldly;
+global using UseCases.Contributors.Create;
+global using Wolverine;
 global using Xunit;

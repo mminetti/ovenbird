@@ -3,9 +3,8 @@ using Core.Interfaces;
 namespace UseCases.Contributors.Delete;
 
 public class DeleteContributorHandler(IDeleteContributorService _deleteContributorService)
-  : ICommandHandler<DeleteContributorCommand, Result>
 {
-    public async ValueTask<Result> Handle(DeleteContributorCommand request, CancellationToken cancellationToken) =>
+    public async Task<Result> Handle(DeleteContributorCommand request, CancellationToken cancellationToken) =>
       // This Approach: Keep Domain Events in the Domain Model / Core project; this becomes a pass-through
       // This is @ardalis's preferred approach
       await _deleteContributorService.DeleteContributor(request.ContributorId);

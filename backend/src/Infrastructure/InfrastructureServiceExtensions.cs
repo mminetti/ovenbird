@@ -19,7 +19,7 @@ public static class InfrastructureServiceExtensions
         Guard.Against.Null(connectionString);
 
         services.AddScoped<EventDispatchInterceptor>();
-        services.AddScoped<IDomainEventDispatcher, MediatorDomainEventDispatcher>();
+        services.AddScoped<IDomainEventDispatcher, WolverineDomainEventDispatcher>();
 
         services.AddDbContext<AppDbContext>((provider, options) =>
         {

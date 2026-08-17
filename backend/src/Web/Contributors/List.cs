@@ -5,9 +5,9 @@ using UseCases.Contributors.List;
 
 namespace Web.Contributors;
 
-public class List(IMediator mediator) : Endpoint<ListContributorsRequest, ContributorListResponse, ListContributorsMapper>
+public class List(IMessageBus bus) : Endpoint<ListContributorsRequest, ContributorListResponse, ListContributorsMapper>
 {
-    private readonly IMediator _mediator = mediator;
+    private readonly IMessageBus _bus = bus;
 
     public override void Configure()
     {
@@ -48,7 +48,7 @@ public class List(IMediator mediator) : Endpoint<ListContributorsRequest, Contri
 
     public override async Task HandleAsync(ListContributorsRequest request, CancellationToken cancellationToken)
     {
-        var result = await _mediator.Send(new ListContributorsQuery(request.Page, request.PerPage));
+        var result = await _bus.InvokeAsync<Result<UseCases.PagedResult<ContributorDto>>>(new ListContributorsQuery(request.Page, request.PerPage));
         if (!result.IsSuccess)
         {
             await Send.ErrorsAsync(statusCode: 400, cancellationToken);

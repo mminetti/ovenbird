@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Core.ContributorAggregate;
 using UseCases.Contributors.Delete;
 using Web.Extensions;
 
@@ -11,8 +10,8 @@ public class Delete
                      NotFound,
                      ProblemHttpResult>>
 {
-    private readonly IMediator _mediator;
-    public Delete(IMediator mediator) => _mediator = mediator;
+    private readonly IMessageBus _bus;
+    public Delete(IMessageBus bus) => _bus = bus;
 
     public override void Configure()
     {
@@ -45,7 +44,7 @@ public class Delete
       ExecuteAsync(DeleteContributorRequest req, CancellationToken ct)
     {
         var cmd = new DeleteContributorCommand(req.ContributorId);
-        var result = await _mediator.Send(cmd, ct);
+        var result = await _bus.InvokeAsync<Result>(cmd, ct);
 
         return result.ToDeleteResult();
     }

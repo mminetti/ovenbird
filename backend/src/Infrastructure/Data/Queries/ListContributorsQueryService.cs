@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.List;
 
@@ -14,7 +14,7 @@ public class ListContributorsQueryService : IListContributorsQueryService
         _db = db;
     }
 
-    public async Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage)
+    public async Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken cancellationToken)
     {
         var items = await _db.Contributors.FromSqlRaw("SELECT Id, Name, PhoneNumber_CountryCode, PhoneNumber_Number, PhoneNumber_Extension FROM Contributors") // don't fetch other big columns
           .OrderBy(c => c.Id)
@@ -22,9 +22,9 @@ public class ListContributorsQueryService : IListContributorsQueryService
           .Take(perPage)
           .Select(c => new ContributorDto(c.Id, c.Name, c.PhoneNumber ?? PhoneNumber.Unknown))
           .AsNoTracking()
-          .ToListAsync();
+          .ToListAsync(cancellationToken);
 
-        int totalCount = await _db.Contributors.CountAsync();
+        int totalCount = await _db.Contributors.CountAsync(cancellationToken);
         int totalPages = (int)Math.Ceiling(totalCount / (double)perPage);
         var result = new UseCases.PagedResult<ContributorDto>(items, page, perPage, totalCount, totalPages);
 

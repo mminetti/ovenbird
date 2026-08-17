@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.Get;
 using Web.Extensions;
 
 namespace Web.Contributors;
 
-public class GetById(IMediator mediator)
+public class GetById(IMessageBus bus)
   : Endpoint<GetContributorByIdRequest,
              Results<Ok<ContributorRecord>,
                      NotFound,
@@ -44,7 +43,7 @@ public class GetById(IMediator mediator)
     public override async Task<Results<Ok<ContributorRecord>, NotFound, ProblemHttpResult>>
       ExecuteAsync(GetContributorByIdRequest request, CancellationToken ct)
     {
-        var result = await mediator.Send(new GetContributorQuery(request.ContributorId), ct);
+        var result = await bus.InvokeAsync<Result<ContributorDto>>(new GetContributorQuery(request.ContributorId), ct);
 
         return result.ToGetByIdResult(Map.FromEntity);
     }
