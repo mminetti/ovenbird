@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.ContributorAggregate;
 using Core.ContributorAggregate.Specifications;
 
 namespace UseCases.Contributors.Get;
@@ -8,10 +8,10 @@ namespace UseCases.Contributors.Get;
 /// </summary>
 public class GetContributorHandler(IReadRepository<Contributor> _repository)
 {
-    public async Task<Result<ContributorDto>> Handle(GetContributorQuery request, CancellationToken cancellationToken)
+    public async Task<Result<ContributorDto>> Handle(GetContributorQuery request, CancellationToken ct)
     {
         var spec = new ContributorByIdSpec(request.ContributorId);
-        var entity = await _repository.FirstOrDefaultAsync(spec, cancellationToken);
+        var entity = await _repository.FirstOrDefaultAsync(spec, ct);
         if (entity == null) return Result.NotFound();
 
         return new ContributorDto(entity.Id, entity.Name, entity.PhoneNumber ?? PhoneNumber.Unknown);

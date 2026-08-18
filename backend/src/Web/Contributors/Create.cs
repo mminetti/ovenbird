@@ -48,9 +48,9 @@ public class Create(IMessageBus bus)
     }
 
     public override async Task<Results<Created<CreateContributorResponse>, ValidationProblem, ProblemHttpResult>>
-      ExecuteAsync(CreateContributorRequest request, CancellationToken cancellationToken)
+      ExecuteAsync(CreateContributorRequest request, CancellationToken ct)
     {
-        var result = await _bus.InvokeAsync<Result<int>>(new CreateContributorCommand(request.Name!, request.PhoneNumber));
+        var result = await _bus.InvokeAsync<Result<int>>(new CreateContributorCommand(request.Name!, request.PhoneNumber), ct);
 
         return result.ToCreatedResult(
           id => $"/Contributors/{id}",

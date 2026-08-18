@@ -1,4 +1,5 @@
 ﻿using Core.ContributorAggregate;
+using UseCases;
 using UseCases.Contributors;
 using UseCases.Contributors.List;
 
@@ -6,7 +7,7 @@ namespace Infrastructure.Data.Queries;
 
 public class FakeListContributorsQueryService : IListContributorsQueryService
 {
-    public Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken cancellationToken)
+    public Task<PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {
         var items = new List<ContributorDto>();
         for (int i = 1; i <= 25; i++)
@@ -16,7 +17,7 @@ public class FakeListContributorsQueryService : IListContributorsQueryService
         }
 
         int totalPages = (int)Math.Ceiling(items.Count / (double)perPage);
-        var result = new UseCases.PagedResult<ContributorDto>(items, page, perPage, items.Count, totalPages);
+        var result = new PagedResult<ContributorDto>(items, page, perPage, items.Count, totalPages);
         return Task.FromResult(result);
     }
 }

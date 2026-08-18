@@ -9,11 +9,9 @@ public class ListContributorsHandler
         _query = query;
     }
 
-    public async Task<Result<PagedResult<ContributorDto>>> Handle(ListContributorsQuery request,
-                                                                       CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ContributorDto>>> Handle(ListContributorsQuery request, CancellationToken ct)
     {
-
-        var result = await _query.ListAsync(request.Page ?? 1, request.PerPage ?? Constants.DEFAULT_PAGE_SIZE, cancellationToken);
+        var result = await _query.ListAsync(request.Page ?? 1, request.PerPage ?? Constants.DEFAULT_PAGE_SIZE, ct);
 
         return Result.Success(result);
     }

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Infrastructure.Data;
 
@@ -8,13 +8,15 @@ public class EventDispatchInterceptor(IDomainEventDispatcher domainEventDispatch
     private readonly IDomainEventDispatcher _domainEventDispatcher = domainEventDispatcher;
 
     // Called after SaveChangesAsync has completed successfully
-    public override async ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result,
-      CancellationToken cancellationToken = new CancellationToken())
+    public override async ValueTask<int> SavedChangesAsync(
+        SaveChangesCompletedEventData eventData, 
+        int result, 
+        CancellationToken ct)
     {
         var context = eventData.Context;
         if (context is not AppDbContext appDbContext)
         {
-            return await base.SavedChangesAsync(eventData, result, cancellationToken).ConfigureAwait(false);
+            return await base.SavedChangesAsync(eventData, result, ct).ConfigureAwait(false);
         }
 
         // Retrieve all tracked entities that have domain events
@@ -26,7 +28,7 @@ public class EventDispatchInterceptor(IDomainEventDispatcher domainEventDispatch
         // Dispatch and clear domain events
         await _domainEventDispatcher.DispatchAndClearEvents(entitiesWithEvents);
 
-        return await base.SavedChangesAsync(eventData, result, cancellationToken);
+        return await base.SavedChangesAsync(eventData, result, ct);
 
     }
 }

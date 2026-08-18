@@ -6,5 +6,5 @@
 /// </summary>
 public interface IListContributorsQueryService
 {
-    Task<UseCases.PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken cancellationToken);
+    Task<PagedResult<ContributorDto>> ListAsync(int page, int perPage, CancellationToken ct);
 }
