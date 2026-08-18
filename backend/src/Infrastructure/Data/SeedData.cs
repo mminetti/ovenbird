@@ -1,4 +1,5 @@
 ﻿using Core.ContributorAggregate;
+using Core.Security;
 
 namespace Infrastructure.Data;
 
@@ -20,6 +21,15 @@ public static class SeedData
         {
             dbContext.Contributors.Add(new Contributor($"Contributor {i}"));
         }
+
+        dbContext.User.Add(new User
+        {
+            ExternalIdentifier = "ext-1",
+            Name = "Seed User 1",
+            Email = "user1@example.com",
+            IsActive = true
+        });
+
         await dbContext.SaveChangesAsync();
     }
 }
