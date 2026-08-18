@@ -13,7 +13,7 @@ public class UpdateUserHandler(IRepository<User> repository)
             return Result.NotFound();
         }
 
-        user.Name = command.Name;
+        user.UpdateName(command.Name);
         user.Email = command.Email;
         user.IsActive = command.IsActive;
 

@@ -1,7 +1,7 @@
-﻿using Core.ContributorAggregate;
+﻿using Core.Security;
 using Infrastructure;
 using Infrastructure.Data;
-using UseCases.Contributors.Create;
+using UseCases.Security.Users.Create;
 
 namespace Web.Configurations;
 
@@ -16,8 +16,8 @@ public static class MediatorConfig
         builder.Host.UseWolverine(opts =>
         {
             // Supply any TYPE from each assembly you want scanned
-            opts.Discovery.IncludeAssembly(typeof(Contributor).Assembly);          // Core
-            opts.Discovery.IncludeAssembly(typeof(CreateContributorCommand).Assembly); // UseCases
+            opts.Discovery.IncludeAssembly(typeof(User).Assembly);          // Core
+            opts.Discovery.IncludeAssembly(typeof(CreateUserCommand).Assembly); // UseCases
             opts.Discovery.IncludeAssembly(typeof(InfrastructureServiceExtensions).Assembly); // Infrastructure
             opts.Discovery.IncludeAssembly(typeof(MediatorConfig).Assembly);       // Web
 

@@ -1,20 +1,18 @@
-﻿using Core.Security;
+﻿using Core.Interfaces.Security;
+using Core.Security;
+using Core.Security.Events;
 
 namespace UseCases.Security.Users.Delete;
 
-public class DeleteUserHandler(IRepository<User> repository)
+public class DeleteUserHandler(
+    IDeleteUserService deleteUserService)
+    //IRepository<User> repository,
+    //IMessageBus _bus
 {
     public async Task<Result> Handle(DeleteUserCommand command, CancellationToken ct)
     {
-        var user = await repository.GetByIdAsync(command.UserId, ct);
+        var result = await deleteUserService.DeleteUserAsync(command.UserId, ct);
 
-        if (user is null)
-        {
-            return Result.NotFound();
-        }
-
-        await repository.DeleteAsync(user, ct);
-
-        return Result.Success();
+        return result;
     }
 }

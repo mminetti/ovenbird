@@ -1,4 +1,4 @@
-﻿using Core.ContributorAggregate;
+﻿using Core.Security;
 
 namespace IntegrationTests.Data;
 
@@ -7,16 +7,23 @@ public class EfRepositoryDelete : BaseEfRepoTestFixture
     [Fact]
     public async Task DeletesItemAfterAddingIt()
     {
-        // add a Contributor
+        // add a user
         var repository = GetRepository();
-        var initialName = Guid.NewGuid().ToString();
-        var Contributor = new Contributor(initialName);
-        await repository.AddAsync(Contributor, CancellationToken.None);
+
+        var user = new User
+        {
+            ExternalIdentifier = Guid.NewGuid().ToString(),
+            Name = "User",
+            Email = "test@test.com",
+            IsActive = true
+        };
+
+        await repository.AddAsync(user, CancellationToken.None);
 
         // delete the item
-        await repository.DeleteAsync(Contributor, CancellationToken.None);
+        await repository.DeleteAsync(user, CancellationToken.None);
 
         // verify it's no longer there
-        (await repository.ListAsync(CancellationToken.None)).ShouldNotContain(Contributor => Contributor.Name == initialName);
+        (await repository.ListAsync(CancellationToken.None)).ShouldNotContain(x => x.Name == user.Name);
     }
 }

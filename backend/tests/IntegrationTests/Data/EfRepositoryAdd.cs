@@ -1,4 +1,4 @@
-﻿using Core.ContributorAggregate;
+﻿using Core.Security;
 
 namespace IntegrationTests.Data;
 
@@ -7,19 +7,23 @@ public class EfRepositoryAdd : BaseEfRepoTestFixture
     [Fact]
     public async Task AddsContributorAndSetsId()
     {
-        var testContributorName = "testContributor";
-        var testContributorStatus = ContributorStatus.NotSet;
         var repository = GetRepository();
-        var Contributor = new Contributor(testContributorName);
+        var user = new User
+        {
+            ExternalIdentifier = Guid.NewGuid().ToString(),
+            Name = "User",
+            Email = "test@test.com",
+            IsActive = true
+        };
 
-        await repository.AddAsync(Contributor, CancellationToken.None);
+        await repository.AddAsync(user, CancellationToken.None);
 
-        var newContributor = (await repository.ListAsync(CancellationToken.None))
+        var newUser = (await repository.ListAsync(CancellationToken.None))
                         .FirstOrDefault();
 
-        newContributor.ShouldNotBeNull();
-        testContributorName.ShouldBe(newContributor.Name);
-        testContributorStatus.ShouldBe(newContributor.Status);
-        newContributor.Id.ShouldBeGreaterThan(0);
+        newUser.ShouldNotBeNull();
+        user.Name.ShouldBe(newUser.Name);
+        user.Email.ShouldBe(newUser.Email);
+        newUser.Id.ShouldBeGreaterThan(0);
     }
 }

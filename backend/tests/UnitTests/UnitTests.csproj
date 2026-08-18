@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Core\Services\ToDoItemSearchService_GetAllIncompleteItems.cs" />
-    <Compile Remove="Core\Services\ToDoItemSearchService_GetNextIncompleteItem.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Shouldly" />
     <PackageReference Include="NSubstitute" />
     <PackageReference Include="xunit.runner.visualstudio">
@@ -27,10 +22,6 @@
     <None Update="xunit.runner.json">
 	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\Services\" />
   </ItemGroup>
 
   <ItemGroup>

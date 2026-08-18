@@ -1,5 +1,4 @@
-﻿using Core.ContributorAggregate;
-using Core.Security;
+﻿using Core.Security;
 
 namespace Infrastructure.Data;
 
@@ -9,7 +8,6 @@ namespace Infrastructure.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<Contributor> Contributors => Set<Contributor>();
     public DbSet<User> User => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

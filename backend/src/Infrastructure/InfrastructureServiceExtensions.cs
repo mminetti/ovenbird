@@ -1,9 +1,7 @@
-﻿using Core.Interfaces;
-using Core.Services;
+﻿using Core.Interfaces.Security;
+using Core.Services.Security;
 using Infrastructure.Data;
-using Infrastructure.Data.Queries;
 using Infrastructure.Data.Queries.Security;
-using UseCases.Contributors.List;
 using UseCases.Security.Users.List;
 
 namespace Infrastructure;
@@ -33,9 +31,8 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
                .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
-               .AddScoped<IListContributorsQueryService, ListContributorsQueryService>()
                .AddScoped<IListUsersQueryService, ListUsersQueryService>()
-               .AddScoped<IDeleteContributorService, DeleteContributorService>();
+               .AddScoped<IDeleteUserService, DeleteUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 

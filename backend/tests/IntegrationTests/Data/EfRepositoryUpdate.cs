@@ -1,4 +1,4 @@
-﻿using Core.ContributorAggregate;
+﻿using Core.Security;
 
 namespace IntegrationTests.Data;
 
@@ -7,35 +7,40 @@ public class EfRepositoryUpdate : BaseEfRepoTestFixture
     [Fact]
     public async Task UpdatesItemAfterAddingIt()
     {
-        // add a Contributor
         var repository = GetRepository();
-        var initialName = Guid.NewGuid().ToString();
-        var Contributor = new Contributor(initialName);
 
-        await repository.AddAsync(Contributor, CancellationToken.None);
+        var user = new User
+        {
+            ExternalIdentifier = Guid.NewGuid().ToString(),
+            Name = "User",
+            Email = "test@test.com",
+            IsActive = true
+        };
+
+        await repository.AddAsync(user, CancellationToken.None);
 
         // detach the item so we get a different instance
-        _dbContext.Entry(Contributor).State = EntityState.Detached;
+        _dbContext.Entry(user).State = EntityState.Detached;
 
-        // fetch the item and update its title
-        var newContributor = (await repository.ListAsync(CancellationToken.None))
-            .FirstOrDefault(Contributor => Contributor.Name == initialName);
-        newContributor.ShouldNotBeNull();
+        // fetch the item and update its name
+        var newUser = (await repository.ListAsync(CancellationToken.None))
+            .FirstOrDefault(x => x.Name == user.Name);
+        newUser.ShouldNotBeNull();
 
-        Contributor.ShouldNotBeSameAs(newContributor);
+        user.ShouldNotBeSameAs(newUser);
         var newName = Guid.NewGuid().ToString();
-        newContributor.UpdateName(newName);
+        newUser.UpdateName(newName);
 
         // Update the item
-        await repository.UpdateAsync(newContributor, CancellationToken.None);
+        await repository.UpdateAsync(newUser, CancellationToken.None);
 
         // Fetch the updated item
         var updatedItem = (await repository.ListAsync(CancellationToken.None))
             .FirstOrDefault(Contributor => Contributor.Name == newName);
 
         updatedItem.ShouldNotBeNull();
-        Contributor.Name.ShouldNotBe(updatedItem.Name);
-        Contributor.Status.ShouldBe(updatedItem.Status);
-        newContributor.Id.ShouldBe(updatedItem.Id);
+        user.Name.ShouldNotBe(updatedItem.Name);
+        user.Email.ShouldBe(updatedItem.Email);
+        newUser.Id.ShouldBe(updatedItem.Id);
     }
 }

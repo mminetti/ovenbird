@@ -1,4 +1,5 @@
 ﻿using Core.Common;
+using Core.Security.Events;
 
 namespace Core.Security;
 
@@ -10,4 +11,12 @@ public class User : AuditableEntityBase<int>
     public bool IsActive { get; set; }
 
     public ICollection<Role> Roles { get; set; } = [];
+
+    public User UpdateName(string newName)
+    {
+        if (Name == newName) return this;
+        Name = newName;
+        RegisterDomainEvent(new UserNameUpdatedEvent(this));
+        return this;
+    }
 }

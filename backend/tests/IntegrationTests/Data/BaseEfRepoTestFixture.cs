@@ -1,4 +1,4 @@
-using Core.ContributorAggregate;
+﻿using Core.Security;
 using Infrastructure.Data;
 
 namespace IntegrationTests.Data;
@@ -36,8 +36,8 @@ public abstract class BaseEfRepoTestFixture
         return builder.Options;
     }
 
-    protected EfRepository<Contributor> GetRepository()
+    protected EfRepository<User> GetRepository()
     {
-        return new EfRepository<Contributor>(_dbContext);
+        return new EfRepository<User>(_dbContext);
     }
 }

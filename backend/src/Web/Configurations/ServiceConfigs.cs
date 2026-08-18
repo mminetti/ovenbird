@@ -1,6 +1,4 @@
-﻿using Core.Interfaces;
-using Infrastructure;
-using Infrastructure.Email;
+﻿using Infrastructure;
 using Web.Configurations.Auth;
 
 namespace Web.Configurations;
@@ -16,20 +14,6 @@ public static class ServiceConfigs
 
         services.AddInfrastructureServices(builder.Configuration, logger);
         builder.AddWolverine(logger);
-
-        if (builder.Environment.IsDevelopment())
-        {
-            // Use a local test email server - configured in Aspire
-            // See: https://ardalis.com/configuring-a-local-test-email-server/
-            services.AddScoped<IEmailSender, MimeKitEmailSender>();
-
-            // Otherwise use this:
-            //builder.Services.AddScoped<IEmailSender, FakeEmailSender>();
-        }
-        else
-        {
-            services.AddScoped<IEmailSender, MimeKitEmailSender>();
-        }
 
         logger.LogInformation("{Project} services registered", "Wolverine and Email Sender");
 
