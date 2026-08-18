@@ -1,4 +1,4 @@
-namespace Web.Security.Users.GetById;
+﻿namespace Web.Security.Users.Get;
 
 public class GetUserByIdRequest
 {

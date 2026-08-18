@@ -1,7 +1,7 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Web.Security.Users.Create;
-using Web.Security.Users.GetById;
+using Web.Security.Users.Get;
 
 namespace FunctionalTests.ApiEndpoints;
 

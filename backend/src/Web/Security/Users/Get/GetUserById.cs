@@ -4,7 +4,7 @@ using UseCases.Security.Users;
 using UseCases.Security.Users.Get;
 using Web.Extensions;
 
-namespace Web.Security.Users.GetById;
+namespace Web.Security.Users.Get;
 
 public class GetUserById(IMessageBus bus)
     : Endpoint<GetUserByIdRequest,

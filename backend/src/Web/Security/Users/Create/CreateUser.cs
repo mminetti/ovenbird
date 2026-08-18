@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Security.Users.Create;
 using Web.Extensions;
-using Web.Security.Users.GetById;
+using Web.Security.Users.Get;
 
 namespace Web.Security.Users.Create;
 
