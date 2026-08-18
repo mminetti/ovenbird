@@ -2,8 +2,9 @@
 using Core.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries;
+using Infrastructure.Data.Queries.Security;
 using UseCases.Contributors.List;
-using UseCases.Users.List;
+using UseCases.Security.Users.List;
 
 namespace Infrastructure;
 

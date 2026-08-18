@@ -1,8 +1,9 @@
-﻿using FluentValidation;
-using UseCases.Users;
-using UseCases.Users.List;
+﻿using Ardalis.Result;
+using FluentValidation;
+using UseCases.Security.Users;
+using UseCases.Security.Users.List;
 
-namespace Web.Security.Users;
+namespace Web.Security.Users.List;
 
 public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersResponse, ListUsersMapper>
 {

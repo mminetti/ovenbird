@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Ardalis.Result;
+using System.ComponentModel.DataAnnotations;
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Contributors.Create;

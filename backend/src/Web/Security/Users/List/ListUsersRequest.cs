@@ -1,4 +1,4 @@
-﻿namespace Web.Security.Users;
+﻿namespace Web.Security.Users.List;
 
 public sealed class ListUsersRequest
 {

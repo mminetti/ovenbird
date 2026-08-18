@@ -1,4 +1,4 @@
-﻿namespace UseCases.Users.List;
+﻿namespace UseCases.Security.Users.List;
 
 public class ListUsersHandler(IListUsersQueryService query)
 {

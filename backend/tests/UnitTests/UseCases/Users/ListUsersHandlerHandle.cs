@@ -1,5 +1,6 @@
 ﻿using UseCases;
-using UseCases.Users;
+using UseCases.Security.Users;
+using UseCases.Security.Users.List;
 using UseCases.Users.List;
 
 namespace UnitTests.UseCases.Users;

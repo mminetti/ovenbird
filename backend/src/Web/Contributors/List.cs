@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Ardalis.Result;
+using FluentValidation;
 using Core.ContributorAggregate;
 using UseCases.Contributors;
 using UseCases.Contributors.List;

@@ -1,8 +1,8 @@
 ﻿using UseCases;
-using UseCases.Users;
-using UseCases.Users.List;
+using UseCases.Security.Users;
+using UseCases.Security.Users.List;
 
-namespace Infrastructure.Data.Queries;
+namespace Infrastructure.Data.Queries.Security;
 
 public class ListUsersQueryService(AppDbContext db) : IListUsersQueryService
 {

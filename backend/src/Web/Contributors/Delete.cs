@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Ardalis.Result;
+using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Contributors.Delete;
 using Web.Extensions;
 
