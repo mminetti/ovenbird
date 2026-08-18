@@ -1,0 +1,24 @@
+﻿using Core.Security;
+
+namespace UseCases.Security.Users.Update;
+
+public class UpdateUserHandler(IRepository<User> repository)
+{
+    public async Task<Result<UserDto>> Handle(UpdateUserCommand command, CancellationToken ct)
+    {
+        var user = await repository.GetByIdAsync(command.UserId, ct);
+
+        if (user is null)
+        {
+            return Result.NotFound();
+        }
+
+        user.Name = command.Name;
+        user.Email = command.Email;
+        user.IsActive = command.IsActive;
+
+        await repository.UpdateAsync(user, ct);
+
+        return Result.Success(new UserDto(user.Id, user.Name, user.Email, user.IsActive));
+    }
+}
