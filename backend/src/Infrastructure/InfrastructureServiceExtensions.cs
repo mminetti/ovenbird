@@ -41,7 +41,6 @@ public static class InfrastructureServiceExtensions
         });
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
-            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListModulesQueryService, ListModulesQueryService>()

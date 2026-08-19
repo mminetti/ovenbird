@@ -1,10 +1,10 @@
-using UseCases;
+﻿using UseCases;
 using UseCases.Security.Modules;
 using UseCases.Security.Modules.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListModulesQueryService(AppDbContext db) : IListModulesQueryService
+public class ListModulesQueryService(ReadDbContext db) : IListModulesQueryService
 {
     public async Task<PagedResult<ModuleDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {

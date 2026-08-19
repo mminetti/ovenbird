@@ -1,10 +1,10 @@
-using UseCases;
+﻿using UseCases;
 using UseCases.Security.Roles;
 using UseCases.Security.Roles.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListRolesQueryService(AppDbContext db) : IListRolesQueryService
+public class ListRolesQueryService(ReadDbContext db) : IListRolesQueryService
 {
     public async Task<PagedResult<RoleDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {

@@ -1,10 +1,10 @@
-using UseCases;
+﻿using UseCases;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListPermissionsQueryService(AppDbContext db) : IListPermissionsQueryService
+public class ListPermissionsQueryService(ReadDbContext db) : IListPermissionsQueryService
 {
     public async Task<PagedResult<PermissionDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {

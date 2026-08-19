@@ -4,7 +4,7 @@ using UseCases.Security.Users.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListUsersQueryService(AppDbContext db) : IListUsersQueryService
+public class ListUsersQueryService(ReadDbContext db) : IListUsersQueryService
 {
     public async Task<PagedResult<UserDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {
