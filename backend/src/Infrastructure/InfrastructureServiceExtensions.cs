@@ -13,8 +13,7 @@ public static class InfrastructureServiceExtensions
       ConfigurationManager config,
       ILogger logger)
     {
-        string? connectionString = config.GetConnectionString("db")
-            ?? config.GetConnectionString("DefaultConnection");
+        string? connectionString = config.GetConnectionString("db") ?? config.GetConnectionString("DefaultConnection");
 
         Guard.Against.Null(connectionString);
 
@@ -30,9 +29,9 @@ public static class InfrastructureServiceExtensions
         });
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
-               .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
-               .AddScoped<IListUsersQueryService, ListUsersQueryService>()
-               .AddScoped<IDeleteUserService, DeleteUserService>();
+            .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
+            .AddScoped<IListUsersQueryService, ListUsersQueryService>()
+            .AddScoped<IDeleteUserService, DeleteUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 

@@ -9,6 +9,9 @@ namespace Infrastructure.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<User> User => Set<User>();
+    public DbSet<Role> Role => Set<Role>();
+    public DbSet<Core.Security.Module> Module => Set<Core.Security.Module>();
+    public DbSet<Permission> Permission => Set<Permission>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

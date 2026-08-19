@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Security.Users.Create;
 using Web.Extensions;
+using Web.Resources;
 using Web.Security.Users.Get;
 
 namespace Web.Security.Users.Create;
@@ -18,18 +19,17 @@ public class CreateUser(IMessageBus bus)
         Summary(s =>
         {
             s.Summary = "Create a user";
-            s.Description = "Creates a new user with the provided name, email, and external identifier.";
+            s.Description = "Creates a new user with the provided details.";
             s.ExampleRequest = new CreateUserRequest
             {
                 Name = "Alice",
                 Email = "alice@example.com",
                 ExternalIdentifier = "ext-alice"
             };
-            s.ResponseExamples[201] = new CreateUserResponse(1, "Alice", "alice@example.com");
 
-            s.Responses[201] = "User created successfully";
-            s.Responses[400] = "Invalid input data - validation errors";
-            s.Responses[500] = "Internal server error";
+            s.Responses[201] = Endpoints.Response201Created;
+            s.Responses[400] = Endpoints.Response400BadRequest;
+            s.Responses[500] = Endpoints.Response500InternalServerError;
         });
 
         Tags("Security");

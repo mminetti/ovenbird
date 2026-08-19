@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Security.Users;
 using UseCases.Security.Users.Get;
 using Web.Extensions;
+using Web.Resources;
 
 namespace Web.Security.Users.Get;
 
@@ -21,10 +22,11 @@ public class GetUserById(IMessageBus bus)
             s.Summary = "Get a user";
             s.Description = "Retrieves a specific user by their unique identifier.";
             s.ExampleRequest = new GetUserByIdRequest { UserId = 1 };
-            s.ResponseExamples[200] = new UserRecord(1, "Alice", "alice@example.com", true);
 
-            s.Responses[200] = "User found and returned successfully";
-            s.Responses[404] = "User with specified ID not found";
+            s.Responses[200] = Endpoints.Response200Ok;
+            s.Responses[400] = Endpoints.Response400BadRequest;
+            s.Responses[404] = Endpoints.Response404NotFound;
+            s.Responses[500] = Endpoints.Response500InternalServerError;
         });
 
         Tags("Security");
@@ -32,7 +34,9 @@ public class GetUserById(IMessageBus bus)
         Description(builder => builder
             .Accepts<GetUserByIdRequest>()
             .Produces<UserRecord>(200, "application/json")
-            .ProducesProblem(404));
+            .ProducesProblem(404)
+            .ProducesProblem(400)
+            .ProducesProblem(500));
     }
 
     public override async Task<Results<Ok<UserRecord>, NotFound, ProblemHttpResult>>

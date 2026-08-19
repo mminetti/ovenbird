@@ -4,6 +4,8 @@ namespace Web.Security.Users.List;
 
 public sealed class ListUsersRequest
 {
+    public const string Route = "/security/users";
+
     [BindFrom("page")]
     public int Page { get; init; } = 1;
 
