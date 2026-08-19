@@ -1,3 +1,8 @@
-﻿namespace Web.Security.Users;
+using Web.Security.Roles;
 
-public record UserRecord(int Id, string Name, string Email, bool IsActive);
+namespace Web.Security.Users;
+
+public record UserRecord(int Id, string Name, string Email, bool IsActive)
+{
+    public IReadOnlyList<RoleRecord> Roles { get; init; } = [];
+}

@@ -1,3 +1,8 @@
-﻿namespace UseCases.Security.Users;
+using UseCases.Security.Roles;
 
-public record UserDto(int Id, string Name, string Email, bool IsActive);
+namespace UseCases.Security.Users;
+
+public record UserDto(int Id, string Name, string Email, bool IsActive)
+{
+    public IReadOnlyList<RoleDto> Roles { get; init; } = [];
+}

@@ -4,6 +4,7 @@ using UseCases.Security.Users;
 using UseCases.Security.Users.Get;
 using Web.Extensions;
 using Web.Resources;
+using Web.Security.Roles;
 
 namespace Web.Security.Users.Get;
 
@@ -50,5 +51,12 @@ public class GetUser(IMessageBus bus)
 
 public sealed class GetUserByIdMapper : Mapper<GetUserRequest, UserRecord, UserDto>
 {
-    public override UserRecord FromEntity(UserDto e) => new(e.Id, e.Name, e.Email, e.IsActive);
+    public override UserRecord FromEntity(UserDto e)
+    {
+        var roles = e.Roles
+            .Select(r => new RoleRecord(r.Id, r.Name))
+            .ToList();
+
+        return new UserRecord(e.Id, e.Name, e.Email, e.IsActive) { Roles = roles };
+    }
 }
