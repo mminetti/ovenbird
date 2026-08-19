@@ -1,9 +1,10 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Security.Roles;
 using UseCases.Security.Roles.Get;
 using Web.Extensions;
 using Web.Resources;
+using Web.Security.Permissions;
 
 namespace Web.Security.Roles.Get;
 
@@ -50,5 +51,12 @@ public class GetRole(IMessageBus bus)
 
 public sealed class GetRoleByIdMapper : Mapper<GetRoleRequest, RoleRecord, RoleDto>
 {
-    public override RoleRecord FromEntity(RoleDto e) => new(e.Id, e.Name);
+    public override RoleRecord FromEntity(RoleDto e)
+    {
+        var permissions = e.Permissions
+            .Select(p => new PermissionRecord(p.Id, p.ModuleId, p.Name, p.Description))
+            .ToList();
+
+        return new RoleRecord(e.Id, e.Name) { Permissions = permissions };
+    }
 }

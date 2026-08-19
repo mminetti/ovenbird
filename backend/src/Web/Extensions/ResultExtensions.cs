@@ -52,6 +52,31 @@ public static class ResultExtensions
     }
 
     /// <summary>
+    /// Maps Result to TypedResults for endpoints that return NoContent, NotFound, ValidationProblem, or ProblemHttpResult
+    /// </summary>
+    public static Results<NoContent, NotFound, ValidationProblem, ProblemHttpResult> ToNoContentResult(
+      this Result result)
+    {
+        return result.Status switch
+        {
+            ResultStatus.Ok => TypedResults.NoContent(),
+            ResultStatus.NotFound => TypedResults.NotFound(),
+            ResultStatus.Invalid => TypedResults.ValidationProblem(
+              result.ValidationErrors
+                .GroupBy(e => e.Identifier ?? string.Empty)
+                .ToDictionary(
+                  g => g.Key,
+                  g => g.Select(e => e.ErrorMessage).ToArray()
+                )
+            ),
+            _ => TypedResults.Problem(
+              title: "Operation failed",
+              detail: string.Join("; ", result.Errors),
+              statusCode: StatusCodes.Status400BadRequest)
+        };
+    }
+
+    /// <summary>
     /// Maps Result to TypedResults for Delete endpoints that return NoContent, NotFound, or ProblemHttpResult
     /// </summary>
     public static Results<NoContent, NotFound, ProblemHttpResult> ToDeleteUpdateResult(

@@ -17,23 +17,31 @@ public class GetRoleHandlerHandle
     }
 
     [Fact]
-    public async Task ReturnsRoleDtoWhenExists()
+    public async Task ReturnsRoleDtoWithPermissionsWhenExists()
     {
-        var role = new Role { Id = 1, Name = "Admin" };
+        var role = new Role
+        {
+            Id = 1,
+            Name = "Admin",
+            Permissions = [new Permission { Id = 10, ModuleId = 1, Name = "users.read", Description = "Can read users" }]
+        };
 
-        _repository.FirstOrDefaultAsync(Arg.Any<RoleByIdSpec>(), Arg.Any<CancellationToken>())
+        _repository.FirstOrDefaultAsync(Arg.Any<RoleWithPermissionsByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(role);
 
         var result = await _handler.Handle(new GetRoleQuery(1), CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe(new RoleDto(1, "Admin"));
+        result.Value.Id.ShouldBe(1);
+        result.Value.Name.ShouldBe("Admin");
+        result.Value.Permissions.Count.ShouldBe(1);
+        result.Value.Permissions[0].Id.ShouldBe(10);
     }
 
     [Fact]
     public async Task ReturnsNotFoundWhenRoleDoesNotExist()
     {
-        _repository.FirstOrDefaultAsync(Arg.Any<RoleByIdSpec>(), Arg.Any<CancellationToken>())
+        _repository.FirstOrDefaultAsync(Arg.Any<RoleWithPermissionsByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns((Role?)null);
 
         var result = await _handler.Handle(new GetRoleQuery(999), CancellationToken.None);
