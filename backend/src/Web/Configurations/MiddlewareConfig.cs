@@ -11,14 +11,14 @@ public static class MiddlewareConfig
     {
         if (app.Environment.IsDevelopment())
         {
-            app.UseDeveloperExceptionPage();
             app.UseShowAllServicesMiddleware(); // see https://github.com/ardalis/AspNetCoreStartupServices
         }
         else
         {
-            app.UseDefaultExceptionHandler(); // from FastEndpoints
             app.UseHsts();
         }
+
+        app.UseDefaultExceptionHandler(); // from FastEndpoints
 
         var authStrategy = AuthStrategyFactory.Create(app.Configuration);
 

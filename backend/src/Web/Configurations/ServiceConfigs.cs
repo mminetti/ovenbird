@@ -19,6 +19,4 @@ public static class ServiceConfigs
 
         return services;
     }
-
-
 }
