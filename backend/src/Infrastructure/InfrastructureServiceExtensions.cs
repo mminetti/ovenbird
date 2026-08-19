@@ -3,6 +3,7 @@ using Core.Services.Security;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries.Security;
 using UseCases.Security.Modules.List;
+using UseCases.Security.Roles.List;
 using UseCases.Security.Users.List;
 
 namespace Infrastructure;
@@ -43,6 +44,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListModulesQueryService, ListModulesQueryService>()
+            .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
