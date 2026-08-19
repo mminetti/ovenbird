@@ -1,6 +1,6 @@
 ﻿/// <summary>
 /// A domain event that is dispatched whenever a user is deleted.
-/// The DeleteContributorService is used to dispatch this event.
+/// The DeleteUserService is used to dispatch this event.
 /// </summary>
 namespace Core.Security.Events;
 

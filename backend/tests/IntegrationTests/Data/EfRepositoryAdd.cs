@@ -5,7 +5,7 @@ namespace IntegrationTests.Data;
 public class EfRepositoryAdd : BaseEfRepoTestFixture
 {
     [Fact]
-    public async Task AddsContributorAndSetsId()
+    public async Task AddsUserAndSetsId()
     {
         var repository = GetRepository();
         var user = new User

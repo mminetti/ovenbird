@@ -1,4 +1,4 @@
-using Core.Security;
+﻿using Core.Security;
 using UseCases.Security.Users.Update;
 
 namespace UnitTests.UseCases.Users;

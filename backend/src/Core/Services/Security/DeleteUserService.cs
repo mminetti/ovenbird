@@ -11,7 +11,7 @@ public class DeleteUserService(
 {
     public async Task<Result> DeleteUserAsync(int userId, CancellationToken ct)
     {
-        logger.LogInformation("Deleting Contributor {contributorId}", userId);
+        logger.LogInformation("Deleting User {userId}", userId);
 
         User? user = await repository.GetByIdAsync(userId, ct);
 

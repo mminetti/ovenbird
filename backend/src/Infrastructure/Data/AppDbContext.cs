@@ -10,8 +10,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<User> User => Set<User>();
     public DbSet<Role> Role => Set<Role>();
-    public DbSet<Core.Security.Module> Module => Set<Core.Security.Module>();
     public DbSet<Permission> Permission => Set<Permission>();
+    public DbSet<Core.Security.Module> Module => Set<Core.Security.Module>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -15,11 +15,14 @@ public static class InfrastructureServiceExtensions
     {
         string? connectionString = config.GetConnectionString("db") ?? config.GetConnectionString("DefaultConnection");
 
+        string? readConnectionString = config.GetConnectionString("db") ?? config.GetConnectionString("ReadConnection");
+
         Guard.Against.Null(connectionString);
 
         services.AddScoped<EventDispatchInterceptor>();
         services.AddScoped<IDomainEventDispatcher, WolverineDomainEventDispatcher>();
 
+        // Register write DbContext
         services.AddDbContext<AppDbContext>((provider, options) =>
         {
             var eventDispatchInterceptor = provider.GetRequiredService<EventDispatchInterceptor>();
@@ -28,8 +31,15 @@ public static class InfrastructureServiceExtensions
             options.AddInterceptors(eventDispatchInterceptor);
         });
 
+        // Register read DbContext
+        services.AddDbContext<ReadDbContext>(options =>
+        {
+            options.UseSqlServer(readConnectionString);
+        });
+
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfRepository<>))
+            .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>();
 

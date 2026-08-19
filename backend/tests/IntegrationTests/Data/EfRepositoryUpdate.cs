@@ -36,7 +36,7 @@ public class EfRepositoryUpdate : BaseEfRepoTestFixture
 
         // Fetch the updated item
         var updatedItem = (await repository.ListAsync(CancellationToken.None))
-            .FirstOrDefault(Contributor => Contributor.Name == newName);
+            .FirstOrDefault(x => x.Name == newName);
 
         updatedItem.ShouldNotBeNull();
         user.Name.ShouldNotBe(updatedItem.Name);
