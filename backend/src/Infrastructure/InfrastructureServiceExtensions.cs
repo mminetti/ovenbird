@@ -3,6 +3,7 @@ using Core.Services.Security;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries.Security;
 using UseCases.Security.Modules.List;
+using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
 using UseCases.Security.Users.List;
 
@@ -45,6 +46,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListModulesQueryService, ListModulesQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
+            .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
