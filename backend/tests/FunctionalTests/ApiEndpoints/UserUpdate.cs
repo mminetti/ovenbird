@@ -23,13 +23,7 @@ public class UserUpdate(CustomWebApplicationFactory<Program> factory) : IClassFi
         var ct = TestContext.Current.CancellationToken;
         var response = await _client.PutAsJsonAsync(UpdateUserRequest.BuildRoute(1), request, ct);
 
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-        var body = await response.Content.ReadFromJsonAsync<UpdateUserResponse>(ct);
-        body.ShouldNotBeNull();
-        body!.User.Name.ShouldBe("Updated Name");
-        body.User.Email.ShouldBe("updated@example.com");
-        body.User.IsActive.ShouldBeFalse();
+        response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
     }
 
     [Fact]

@@ -1,24 +1,24 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
-using UseCases.Security.Users.Update;
+using UseCases.Security.Modules.Update;
 using Web.Extensions;
 using Web.Resources;
 
-namespace Web.Security.Users.Update;
+namespace Web.Security.Modules.Update;
 
-public class UpdateUser(IMessageBus bus)
-    : Endpoint<UpdateUserRequest, Results<NoContent, NotFound, ProblemHttpResult>>
+public class UpdateModule(IMessageBus bus)
+    : Endpoint<UpdateModuleRequest, Results<NoContent, NotFound, ProblemHttpResult>>
 {
     public override void Configure()
     {
-        Put(UpdateUserRequest.Route);
+        Put(UpdateModuleRequest.Route);
         AllowAnonymous();
 
         Summary(s =>
         {
-            s.Summary = "Update a user";
-            s.Description = "Updates an existing user with the provided details.";
-            s.ExampleRequest = new UpdateUserRequest { UserId = 1, Id = 1, Name = "Alice Updated", Email = "alice@example.com", IsActive = true };
+            s.Summary = "Update a module";
+            s.Description = "Updates an existing module with the provided details.";
+            s.ExampleRequest = new UpdateModuleRequest { ModuleId = 1, Id = 1, Name = "Administration Updated" };
 
             s.Responses[204] = Endpoints.Response200OkUpdated;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -29,7 +29,7 @@ public class UpdateUser(IMessageBus bus)
         Tags("Security");
 
         Description(builder => builder
-            .Accepts<UpdateUserRequest>("application/json")
+            .Accepts<UpdateModuleRequest>("application/json")
             .Produces(204)
             .ProducesProblem(400)
             .ProducesProblem(404)
@@ -37,10 +37,10 @@ public class UpdateUser(IMessageBus bus)
     }
 
     public override async Task<Results<NoContent, NotFound, ProblemHttpResult>>
-        ExecuteAsync(UpdateUserRequest request, CancellationToken ct)
+        ExecuteAsync(UpdateModuleRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result>(
-            new UpdateUserCommand(request.UserId, request.Name, request.Email, request.IsActive), ct);
+            new UpdateModuleCommand(request.ModuleId, request.Name), ct);
 
         return result.ToDeleteUpdateResult();
     }

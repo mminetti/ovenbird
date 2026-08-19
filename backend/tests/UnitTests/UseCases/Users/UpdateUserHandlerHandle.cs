@@ -26,9 +26,6 @@ public class UpdateUserHandlerHandle
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.Name.ShouldBe("Alice Updated");
-        result.Value.Email.ShouldBe("alice2@example.com");
-        result.Value.IsActive.ShouldBeFalse();
         await _repository.Received(1).UpdateAsync(user, Arg.Any<CancellationToken>());
     }
 

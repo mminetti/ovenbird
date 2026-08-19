@@ -135,6 +135,9 @@
   <data name="Response204Deleted" xml:space="preserve">
     <value>Deleted - The resource was successfully deleted</value>
   </data>
+  <data name="Response204Updated" xml:space="preserve">
+    <value>Updated - The resource was successfully updated</value>
+  </data>
   <data name="Response400BadRequest" xml:space="preserve">
     <value>Bad Request - The request is invalid or missing required fields</value>
   </data>

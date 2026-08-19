@@ -54,7 +54,7 @@ public static class ResultExtensions
     /// <summary>
     /// Maps Result to TypedResults for Delete endpoints that return NoContent, NotFound, or ProblemHttpResult
     /// </summary>
-    public static Results<NoContent, NotFound, ProblemHttpResult> ToDeleteResult(
+    public static Results<NoContent, NotFound, ProblemHttpResult> ToDeleteUpdateResult(
       this Result result)
     {
         return result.Status switch

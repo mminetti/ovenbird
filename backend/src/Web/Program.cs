@@ -23,7 +23,7 @@ builder.Services.AddFastEndpoints()
                     {
                         s.Title = "Ovenbird API";
                         s.Version = "v1";
-                        
+
                         authStrategy.ConfigureSwaggerAuth(s, builder.Configuration);
                     };
                     o.ShortSchemaNames = true;

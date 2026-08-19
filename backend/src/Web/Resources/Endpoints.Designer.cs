@@ -115,6 +115,15 @@ namespace Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Updated - The resource was successfully updated.
+        /// </summary>
+        public static string Response204Updated {
+            get {
+                return ResourceManager.GetString("Response204Updated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad Request - The request is invalid or missing required fields.
         /// </summary>
         public static string Response400BadRequest {

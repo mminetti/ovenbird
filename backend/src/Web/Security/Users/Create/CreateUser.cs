@@ -49,6 +49,6 @@ public class CreateUser(IMessageBus bus)
 
         return result.ToCreatedResult(
             id => GetUserRequest.BuildRoute(id),
-            id => new CreateUserResponse(id, request.Name, request.Email));
+            id => new CreateUserResponse(id));
     }
 }

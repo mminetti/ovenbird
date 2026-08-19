@@ -4,7 +4,7 @@ namespace UseCases.Security.Users.Update;
 
 public class UpdateUserHandler(IRepository<User> repository)
 {
-    public async Task<Result<UserDto>> Handle(UpdateUserCommand command, CancellationToken ct)
+    public async Task<Result> Handle(UpdateUserCommand command, CancellationToken ct)
     {
         var user = await repository.GetByIdAsync(command.UserId, ct);
 
@@ -19,6 +19,6 @@ public class UpdateUserHandler(IRepository<User> repository)
 
         await repository.UpdateAsync(user, ct);
 
-        return Result.Success(new UserDto(user.Id, user.Name, user.Email, user.IsActive));
+        return Result.Success();
     }
 }
