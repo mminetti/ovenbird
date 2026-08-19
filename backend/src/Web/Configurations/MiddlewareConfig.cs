@@ -41,6 +41,9 @@ public static class MiddlewareConfig
         app.MapScalarApiReference("/docs", options =>
         {
             options.WithTitle("Ovenbird API");
+            options.SortTagsAlphabetically();
+            options.SortOperationsByMethod();
+
             options.WithOpenApiRoutePattern("/openapi/{documentName}.json");
 
             authStrategy.ConfigureScalarAuth(options, app.Configuration);
