@@ -26,6 +26,7 @@ public static class MediatorConfig
             // This is fundamental to EF Core's DI integration and cannot be avoided.
             // We tell Wolverine to use service location specifically for AppDbContext.
             opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
         });
 
         return builder;
