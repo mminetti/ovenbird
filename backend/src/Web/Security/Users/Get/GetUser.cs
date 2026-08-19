@@ -7,21 +7,21 @@ using Web.Resources;
 
 namespace Web.Security.Users.Get;
 
-public class GetUserById(IMessageBus bus)
-    : Endpoint<GetUserByIdRequest,
+public class GetUser(IMessageBus bus)
+    : Endpoint<GetUserRequest,
                Results<Ok<UserRecord>, NotFound, ProblemHttpResult>,
                GetUserByIdMapper>
 {
     public override void Configure()
     {
-        Get(GetUserByIdRequest.Route);
+        Get(GetUserRequest.Route);
         AllowAnonymous();
 
         Summary(s =>
         {
             s.Summary = "Get a user";
             s.Description = "Retrieves a specific user by their unique identifier.";
-            s.ExampleRequest = new GetUserByIdRequest { UserId = 1 };
+            s.ExampleRequest = new GetUserRequest { UserId = 1 };
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -32,7 +32,7 @@ public class GetUserById(IMessageBus bus)
         Tags("Security");
 
         Description(builder => builder
-            .Accepts<GetUserByIdRequest>()
+            .Accepts<GetUserRequest>()
             .Produces<UserRecord>(200, "application/json")
             .ProducesProblem(404)
             .ProducesProblem(400)
@@ -40,7 +40,7 @@ public class GetUserById(IMessageBus bus)
     }
 
     public override async Task<Results<Ok<UserRecord>, NotFound, ProblemHttpResult>>
-        ExecuteAsync(GetUserByIdRequest request, CancellationToken ct)
+        ExecuteAsync(GetUserRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result<UserDto>>(new GetUserQuery(request.UserId), ct);
 
@@ -48,7 +48,7 @@ public class GetUserById(IMessageBus bus)
     }
 }
 
-public sealed class GetUserByIdMapper : Mapper<GetUserByIdRequest, UserRecord, UserDto>
+public sealed class GetUserByIdMapper : Mapper<GetUserRequest, UserRecord, UserDto>
 {
     public override UserRecord FromEntity(UserDto e) => new(e.Id, e.Name, e.Email, e.IsActive);
 }

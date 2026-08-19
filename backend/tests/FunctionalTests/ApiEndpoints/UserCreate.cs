@@ -33,7 +33,7 @@ public class UserCreate(CustomWebApplicationFactory<Program> factory) : IClassFi
         body.Id.ShouldBeGreaterThan(0);
 
         // verify the Location header resolves to the created user
-        string expectedRoute = GetUserByIdRequest.BuildRoute(body.Id);
+        string expectedRoute = GetUserRequest.BuildRoute(body.Id);
         response.Headers.Location!.ToString().ShouldContain(expectedRoute);
     }
 

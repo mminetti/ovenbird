@@ -11,7 +11,7 @@ public class UserGetById(CustomWebApplicationFactory<Program> factory) : IClassF
     [Fact]
     public async Task ReturnsSeedUserGivenId1()
     {
-        var result = await _client.GetAndDeserializeAsync<UserRecord>(GetUserByIdRequest.BuildRoute(1));
+        var result = await _client.GetAndDeserializeAsync<UserRecord>(GetUserRequest.BuildRoute(1));
 
         result.Id.ShouldBe(1);
         result.Name.ShouldBe("Seed User 1");
@@ -22,7 +22,7 @@ public class UserGetById(CustomWebApplicationFactory<Program> factory) : IClassF
     [Fact]
     public async Task ReturnsNotFoundGivenUnknownId()
     {
-        string route = GetUserByIdRequest.BuildRoute(9999);
+        string route = GetUserRequest.BuildRoute(9999);
         _ = await _client.GetAndEnsureNotFoundAsync(route);
     }
 }
