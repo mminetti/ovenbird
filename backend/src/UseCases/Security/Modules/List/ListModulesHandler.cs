@@ -1,8 +1,10 @@
+﻿using UseCases.Common;
+
 namespace UseCases.Security.Modules.List;
 
 public class ListModulesHandler(IListModulesQueryService query)
 {
-    public async Task<Result<PagedResult<ModuleDto>>> Handle(ListModulesQuery request, CancellationToken ct)
+    public async Task<Result<ItemPagedResult<ModuleDto>>> Handle(ListModulesQuery request, CancellationToken ct)
     {
         var result = await query.ListAsync(
             request.Page ?? 1,

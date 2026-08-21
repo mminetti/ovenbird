@@ -4,10 +4,11 @@ namespace Web.Configurations;
 
 public static class OptionConfigs
 {
-    public static IServiceCollection AddOptionConfigs(this IServiceCollection services,
-                                                      IConfiguration configuration,
-                                                      Microsoft.Extensions.Logging.ILogger logger,
-                                                      WebApplicationBuilder builder)
+    public static IServiceCollection AddOptionConfigs(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Microsoft.Extensions.Logging.ILogger logger,
+        WebApplicationBuilder builder)
     {
         // Configure Web Behavior
         services.Configure<CookiePolicyOptions>(options =>
@@ -21,7 +22,7 @@ public static class OptionConfigs
             // add list services for diagnostic purposes - see https://github.com/ardalis/AspNetCoreStartupServices
             services.Configure<ServiceConfig>(config =>
             {
-                config.Services = new List<ServiceDescriptor>(builder.Services);
+                config.Services = [.. builder.Services];
 
                 // optional - default path to view services is /listallservices - recommended to choose your own path
                 config.Path = "/listservices";

@@ -8,7 +8,7 @@ namespace Web.Configurations.Auth;
 /// </summary>
 public class NoAuthStrategy : IAuthStrategy
 {
-    public void ConfigureServices(IServiceCollection services, WebApplicationBuilder builder) { }
+    public void ConfigureServices(IServiceCollection services, IConfiguration configuration) { }
     public void ConfigureMiddleware(WebApplication app) { }
     public void ConfigureSwaggerAuth(AspNetCoreOpenApiDocumentGeneratorSettings settings, IConfiguration configuration) { }
     public void ConfigureScalarAuth(ScalarOptions options, IConfiguration configuration) { }

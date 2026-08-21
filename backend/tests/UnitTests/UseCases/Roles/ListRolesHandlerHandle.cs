@@ -1,4 +1,4 @@
-using UseCases;
+﻿using UseCases.Common;
 using UseCases.Security.Roles;
 using UseCases.Security.Roles.List;
 
@@ -22,7 +22,7 @@ public class ListRolesHandlerHandle
             new(1, "Admin"),
             new(2, "Editor"),
         };
-        var pagedResult = new global::UseCases.PagedResult<RoleDto>(roles, 1, 10, 2, 1);
+        var pagedResult = new ItemPagedResult<RoleDto>(roles, 1, 10, 2, 1);
 
         _query.ListAsync(1, 10, Arg.Any<CancellationToken>())
             .Returns(pagedResult);
@@ -38,7 +38,7 @@ public class ListRolesHandlerHandle
     [Fact]
     public async Task UsesDefaultsWhenPageAndPerPageAreNull()
     {
-        var pagedResult = new global::UseCases.PagedResult<RoleDto>([], 1, Constants.DEFAULT_PAGE_SIZE, 0, 0);
+        var pagedResult = new ItemPagedResult<RoleDto>([], 1, Constants.DEFAULT_PAGE_SIZE, 0, 0);
 
         _query.ListAsync(1, Constants.DEFAULT_PAGE_SIZE, Arg.Any<CancellationToken>())
             .Returns(pagedResult);

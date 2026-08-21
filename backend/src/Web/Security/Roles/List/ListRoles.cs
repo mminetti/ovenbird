@@ -1,4 +1,5 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
+using UseCases.Common;
 using UseCases.Security.Roles;
 using UseCases.Security.Roles.List;
 using Web.Resources;
@@ -21,7 +22,7 @@ public class ListRoles(IMessageBus bus) : Endpoint<ListRolesRequest, ListRolesRe
             s.ExampleRequest = new ListRolesRequest { Page = 1, PerPage = 10 };
 
             s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, UseCases.Constants.MAX_PAGE_SIZE, UseCases.Constants.DEFAULT_PAGE_SIZE);
+            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.MAX_PAGE_SIZE, Constants.DEFAULT_PAGE_SIZE);
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -39,7 +40,7 @@ public class ListRoles(IMessageBus bus) : Endpoint<ListRolesRequest, ListRolesRe
 
     public override async Task HandleAsync(ListRolesRequest request, CancellationToken ct)
     {
-        var result = await _bus.InvokeAsync<Result<UseCases.PagedResult<RoleDto>>>(
+        var result = await _bus.InvokeAsync<Result<ItemPagedResult<RoleDto>>>(
             new ListRolesQuery(request.Page, request.PerPage), ct);
 
         if (!result.IsSuccess)
@@ -55,9 +56,9 @@ public class ListRoles(IMessageBus bus) : Endpoint<ListRolesRequest, ListRolesRe
 }
 
 public sealed class ListRolesMapper
-    : Mapper<ListRolesRequest, ListRolesResponse, UseCases.PagedResult<RoleDto>>
+    : Mapper<ListRolesRequest, ListRolesResponse, ItemPagedResult<RoleDto>>
 {
-    public override ListRolesResponse FromEntity(UseCases.PagedResult<RoleDto> e)
+    public override ListRolesResponse FromEntity(ItemPagedResult<RoleDto> e)
     {
         var items = e.Items
             .Select(r => new RoleRecord(r.Id, r.Name))

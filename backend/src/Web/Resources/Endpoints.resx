@@ -138,11 +138,17 @@
   <data name="Response204Updated" xml:space="preserve">
     <value>Updated - The resource was successfully updated</value>
   </data>
+  <data name="Response401Unauthorized" xml:space="preserve">
+    <value>Unauthorized - Authentication is required to access this resource</value>
+  </data>
   <data name="Response400BadRequest" xml:space="preserve">
     <value>Bad Request - The request is invalid or missing required fields</value>
   </data>
   <data name="Response404NotFound" xml:space="preserve">
     <value>Not Found - The specified resource was not found</value>
+  </data>
+  <data name="Response409Conflict" xml:space="preserve">
+    <value>Conflict - The operation could not be completed due to a conflict with the current state of the resource</value>
   </data>
   <data name="Response500InternalServerError" xml:space="preserve">
     <value>Internal Server Error - An unexpected error occurred on the server</value>

@@ -1,8 +1,9 @@
-using Core.Security;
+﻿using Core.Security;
+using Core.Security.Events;
 
 namespace UseCases.Security.Roles.Delete;
 
-public class DeleteRoleHandler(IRepository<Role> repository)
+public class DeleteRoleHandler(IRepository<Role> repository, IMessageBus bus)
 {
     public async Task<Result> Handle(DeleteRoleCommand command, CancellationToken ct)
     {
@@ -14,6 +15,8 @@ public class DeleteRoleHandler(IRepository<Role> repository)
         }
 
         await repository.DeleteAsync(role, ct);
+
+        await bus.PublishAsync(new RoleDeletedEvent(role));
 
         return Result.Success();
     }

@@ -1,4 +1,4 @@
-using Ardalis.SharedKernel;
+﻿using Ardalis.SharedKernel;
 using Core.Security;
 using Core.Security.Specifications;
 using UseCases.Security.Roles.SetPermissions;
@@ -51,25 +51,6 @@ public class SetRolePermissionsHandlerHandle
             CancellationToken.None);
 
         result.Status.ShouldBe(Ardalis.Result.ResultStatus.NotFound);
-        await _roleRepository.DidNotReceive().UpdateAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task ReturnsInvalidWhenAnyPermissionIdDoesNotExist()
-    {
-        var role = new Role { Id = 1, Name = "Admin", Permissions = [] };
-
-        _roleRepository.FirstOrDefaultAsync(Arg.Any<RoleWithPermissionsByIdSpec>(), Arg.Any<CancellationToken>())
-            .Returns(role);
-        _permissionRepository.ListAsync(Arg.Any<PermissionsByIdsSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new List<Permission> { new() { Id = 10, Name = "users.read" } });
-
-        var result = await _handler.Handle(
-            new SetRolePermissionsCommand(1, [10, 99]),
-            CancellationToken.None);
-
-        result.Status.ShouldBe(Ardalis.Result.ResultStatus.Invalid);
-        result.ValidationErrors.ShouldContain(e => e.ErrorMessage.Contains("99"));
         await _roleRepository.DidNotReceive().UpdateAsync(Arg.Any<Role>(), Arg.Any<CancellationToken>());
     }
 

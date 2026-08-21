@@ -11,20 +11,27 @@ public static class MiddlewareConfig
     {
         if (app.Environment.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
             app.UseShowAllServicesMiddleware(); // see https://github.com/ardalis/AspNetCoreStartupServices
         }
         else
         {
+            app.UseDefaultExceptionHandler(); // from FastEndpoints
             app.UseHsts();
         }
 
-        app.UseDefaultExceptionHandler(); // from FastEndpoints
+        var authStrategy = app.Services.GetRequiredService<IAuthStrategy>();
 
-        var authStrategy = AuthStrategyFactory.Create(app.Configuration);
+        app.UseMiddleware<CurrentUserExceptionMiddleware>(); // maps current-user resolution failures to 401/503
 
-        authStrategy.ConfigureMiddleware(app);
+        authStrategy.ConfigureMiddleware(app); // UseAuthentication -> triggers CurrentUserClaimsTransformation
 
-        app.UseFastEndpoints();
+        app.UseAuthorization();                // sees the permission claims added by the transformation
+
+        app.UseFastEndpoints(c =>
+        {
+            c.Security.PermissionsClaimType = AuthConstants.PermissionsClaimType;
+        });
 
         app.UseSwaggerGen(options =>
         {
@@ -36,11 +43,9 @@ public static class MiddlewareConfig
             settings.DocumentPath = "/openapi/{documentName}.json";
         });
 
-        
-
         app.MapScalarApiReference("/docs", options =>
         {
-            options.WithTitle("Ovenbird API");
+            options.WithTitle("Nexus API");
             //options.SortTagsAlphabetically();
             //options.SortOperationsByMethod();
 

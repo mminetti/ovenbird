@@ -124,6 +124,15 @@ namespace Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unauthorized - Authentication is required to access this resource.
+        /// </summary>
+        public static string Response401Unauthorized {
+            get {
+                return ResourceManager.GetString("Response401Unauthorized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad Request - The request is invalid or missing required fields.
         /// </summary>
         public static string Response400BadRequest {
@@ -138,6 +147,15 @@ namespace Web.Resources {
         public static string Response404NotFound {
             get {
                 return ResourceManager.GetString("Response404NotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conflict - The operation could not be completed due to a conflict with the current state of the resource.
+        /// </summary>
+        public static string Response409Conflict {
+            get {
+                return ResourceManager.GetString("Response409Conflict", resourceCulture);
             }
         }
         

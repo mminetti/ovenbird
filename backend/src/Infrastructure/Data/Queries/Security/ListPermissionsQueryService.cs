@@ -1,4 +1,4 @@
-﻿using UseCases;
+﻿using UseCases.Common;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.List;
 
@@ -6,7 +6,7 @@ namespace Infrastructure.Data.Queries.Security;
 
 public class ListPermissionsQueryService(ReadDbContext db) : IListPermissionsQueryService
 {
-    public async Task<PagedResult<PermissionDto>> ListAsync(int page, int perPage, CancellationToken ct)
+    public async Task<ItemPagedResult<PermissionDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {
         var items = await db.Permission
             .OrderBy(p => p.Id)
@@ -19,6 +19,6 @@ public class ListPermissionsQueryService(ReadDbContext db) : IListPermissionsQue
         int totalCount = await db.Permission.CountAsync(ct);
         int totalPages = (int)Math.Ceiling(totalCount / (double)perPage);
 
-        return new PagedResult<PermissionDto>(items, page, perPage, totalCount, totalPages);
+        return new ItemPagedResult<PermissionDto>(items, page, perPage, totalCount, totalPages);
     }
 }

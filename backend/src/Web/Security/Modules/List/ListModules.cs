@@ -1,4 +1,5 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
+using UseCases.Common;
 using UseCases.Security.Modules;
 using UseCases.Security.Modules.List;
 using Web.Resources;
@@ -21,7 +22,7 @@ public class ListModules(IMessageBus bus) : Endpoint<ListModulesRequest, ListMod
             s.ExampleRequest = new ListModulesRequest { Page = 1, PerPage = 10 };
 
             s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, UseCases.Constants.MAX_PAGE_SIZE, UseCases.Constants.DEFAULT_PAGE_SIZE);
+            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.MAX_PAGE_SIZE, Constants.DEFAULT_PAGE_SIZE);
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -39,7 +40,7 @@ public class ListModules(IMessageBus bus) : Endpoint<ListModulesRequest, ListMod
 
     public override async Task HandleAsync(ListModulesRequest request, CancellationToken ct)
     {
-        var result = await _bus.InvokeAsync<Result<UseCases.PagedResult<ModuleDto>>>(
+        var result = await _bus.InvokeAsync<Result<ItemPagedResult<ModuleDto>>>(
             new ListModulesQuery(request.Page, request.PerPage), ct);
 
         if (!result.IsSuccess)
@@ -55,9 +56,9 @@ public class ListModules(IMessageBus bus) : Endpoint<ListModulesRequest, ListMod
 }
 
 public sealed class ListModulesMapper
-    : Mapper<ListModulesRequest, ListModulesResponse, UseCases.PagedResult<ModuleDto>>
+    : Mapper<ListModulesRequest, ListModulesResponse, ItemPagedResult<ModuleDto>>
 {
-    public override ListModulesResponse FromEntity(UseCases.PagedResult<ModuleDto> e)
+    public override ListModulesResponse FromEntity(ItemPagedResult<ModuleDto> e)
     {
         var items = e.Items
             .Select(m => new ModuleRecord(m.Id, m.Name))

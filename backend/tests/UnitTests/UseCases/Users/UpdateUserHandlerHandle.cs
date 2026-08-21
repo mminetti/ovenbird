@@ -1,16 +1,19 @@
 ﻿using Core.Security;
+using NSubstitute;
 using UseCases.Security.Users.Update;
+using Wolverine;
 
 namespace UnitTests.UseCases.Users;
 
 public class UpdateUserHandlerHandle
 {
     private readonly IRepository<User> _repository = Substitute.For<IRepository<User>>();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly UpdateUserHandler _handler;
 
     public UpdateUserHandlerHandle()
     {
-        _handler = new UpdateUserHandler(_repository);
+        _handler = new UpdateUserHandler(_repository, _bus);
     }
 
     [Fact]

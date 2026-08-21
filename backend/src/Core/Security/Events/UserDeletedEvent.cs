@@ -4,7 +4,7 @@
 /// </summary>
 namespace Core.Security.Events;
 
-public sealed class UserDeletedEvent(int userId) : DomainEventBase
+public sealed class UserDeletedEvent(User user) : DomainEventBase
 {
-    public int UserId { get; set; } = userId;
+    public User User { get; set; } = user;
 }

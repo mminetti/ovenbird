@@ -13,5 +13,10 @@ public class PermissionConfiguration : BaseEntityTypeConfiguration<Permission, i
 
         builder.Property(x => x.Description)
             .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
+
+        builder.HasOne(x => x.Module)
+            .WithMany(x => x.Permissions)
+            .HasForeignKey(x => x.ModuleId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

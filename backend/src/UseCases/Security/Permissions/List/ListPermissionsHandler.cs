@@ -1,8 +1,10 @@
+﻿using UseCases.Common;
+
 namespace UseCases.Security.Permissions.List;
 
 public class ListPermissionsHandler(IListPermissionsQueryService query)
 {
-    public async Task<Result<PagedResult<PermissionDto>>> Handle(ListPermissionsQuery request, CancellationToken ct)
+    public async Task<Result<ItemPagedResult<PermissionDto>>> Handle(ListPermissionsQuery request, CancellationToken ct)
     {
         var result = await query.ListAsync(
             request.Page ?? 1,

@@ -5,6 +5,7 @@ using Infrastructure.Data.Queries.Security;
 using UseCases.Security.Modules.List;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
+using UseCases.Security.Users;
 using UseCases.Security.Users.List;
 
 namespace Infrastructure;
@@ -21,6 +22,8 @@ public static class InfrastructureServiceExtensions
         string? readConnectionString = config.GetConnectionString("db") ?? config.GetConnectionString("ReadConnection");
 
         Guard.Against.Null(connectionString);
+
+        services.AddHybridCache();
 
         services.AddScoped<EventDispatchInterceptor>();
         services.AddScoped<IDomainEventDispatcher, WolverineDomainEventDispatcher>();
@@ -46,7 +49,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListModulesQueryService, ListModulesQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
-            .AddScoped<IDeleteUserService, DeleteUserService>();
+            .AddScoped<IDeleteUserService, DeleteUserService>()
+            .AddScoped<CurrentUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 

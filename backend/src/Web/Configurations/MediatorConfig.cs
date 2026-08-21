@@ -7,7 +7,8 @@ namespace Web.Configurations;
 
 public static class MediatorConfig
 {
-    public static WebApplicationBuilder AddWolverine(this WebApplicationBuilder builder,
+    public static WebApplicationBuilder AddWolverine(
+        this WebApplicationBuilder builder,
         Microsoft.Extensions.Logging.ILogger logger)
     {
         logger.LogInformation("Registering Wolverine");

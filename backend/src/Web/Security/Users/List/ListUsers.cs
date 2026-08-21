@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using UseCases.Common;
 using UseCases.Security.Users;
 using UseCases.Security.Users.List;
 using Web.Resources;
@@ -13,6 +14,7 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
     {
         Get(ListUsersRequest.Route);
         AllowAnonymous();
+        //Permissions("user.read");
 
         Summary(s =>
         {
@@ -21,7 +23,7 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
             s.ExampleRequest = new ListUsersRequest { Page = 1, PerPage = 10 };
 
             s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, UseCases.Constants.MAX_PAGE_SIZE, UseCases.Constants.DEFAULT_PAGE_SIZE);
+            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.MAX_PAGE_SIZE, Constants.DEFAULT_PAGE_SIZE);
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -39,7 +41,7 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
 
     public override async Task HandleAsync(ListUsersRequest request, CancellationToken ct)
     {
-        var result = await _bus.InvokeAsync<Result<UseCases.PagedResult<UserDto>>>(
+        var result = await _bus.InvokeAsync<Result<ItemPagedResult<UserDto>>>(
             new ListUsersQuery(request.Page, request.PerPage), ct);
 
         if (!result.IsSuccess)
@@ -55,9 +57,9 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
 }
 
 public sealed class ListUsersMapper
-    : Mapper<ListUsersRequest, ListUsersResponse, UseCases.PagedResult<UserDto>>
+    : Mapper<ListUsersRequest, ListUsersResponse, ItemPagedResult<UserDto>>
 {
-    public override ListUsersResponse FromEntity(UseCases.PagedResult<UserDto> e)
+    public override ListUsersResponse FromEntity(ItemPagedResult<UserDto> e)
     {
         var items = e.Items
             .Select(u => new UserRecord(u.Id, u.Name, u.Email, u.IsActive))

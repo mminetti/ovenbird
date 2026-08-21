@@ -1,16 +1,19 @@
 using Core.Security;
+using NSubstitute;
 using UseCases.Security.Roles.Delete;
+using Wolverine;
 
 namespace UnitTests.UseCases.Roles;
 
 public class DeleteRoleHandlerHandle
 {
     private readonly IRepository<Role> _repository = Substitute.For<IRepository<Role>>();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly DeleteRoleHandler _handler;
 
     public DeleteRoleHandlerHandle()
     {
-        _handler = new DeleteRoleHandler(_repository);
+        _handler = new DeleteRoleHandler(_repository, _bus);
     }
 
     [Fact]

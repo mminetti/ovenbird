@@ -1,4 +1,5 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
+using UseCases.Common;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.List;
 using Web.Resources;
@@ -22,7 +23,7 @@ public class ListPermissions(IMessageBus bus)
             s.ExampleRequest = new ListPermissionsRequest { Page = 1, PerPage = 10 };
 
             s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, UseCases.Constants.MAX_PAGE_SIZE, UseCases.Constants.DEFAULT_PAGE_SIZE);
+            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.MAX_PAGE_SIZE, Constants.DEFAULT_PAGE_SIZE);
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -40,7 +41,7 @@ public class ListPermissions(IMessageBus bus)
 
     public override async Task HandleAsync(ListPermissionsRequest request, CancellationToken ct)
     {
-        var result = await _bus.InvokeAsync<Result<UseCases.PagedResult<PermissionDto>>>(
+        var result = await _bus.InvokeAsync<Result<ItemPagedResult<PermissionDto>>>(
             new ListPermissionsQuery(request.Page, request.PerPage), ct);
 
         if (!result.IsSuccess)
@@ -56,9 +57,9 @@ public class ListPermissions(IMessageBus bus)
 }
 
 public sealed class ListPermissionsMapper
-    : Mapper<ListPermissionsRequest, ListPermissionsResponse, UseCases.PagedResult<PermissionDto>>
+    : Mapper<ListPermissionsRequest, ListPermissionsResponse, ItemPagedResult<PermissionDto>>
 {
-    public override ListPermissionsResponse FromEntity(UseCases.PagedResult<PermissionDto> e)
+    public override ListPermissionsResponse FromEntity(ItemPagedResult<PermissionDto> e)
     {
         var items = e.Items
             .Select(p => new PermissionRecord(p.Id, p.ModuleId, p.Name, p.Description))

@@ -24,6 +24,10 @@ public static class ResultExtensions
                   g => g.Select(e => e.ErrorMessage).ToArray()
                 )
             ),
+            ResultStatus.Conflict => TypedResults.Problem(
+              title: "Conflict",
+              detail: string.Join("; ", result.Errors),
+              statusCode: StatusCodes.Status409Conflict),
             _ => TypedResults.Problem(
               title: "Create failed",
               detail: string.Join("; ", result.Errors),
@@ -69,6 +73,10 @@ public static class ResultExtensions
                   g => g.Select(e => e.ErrorMessage).ToArray()
                 )
             ),
+            ResultStatus.Conflict => TypedResults.Problem(
+              title: "Conflict",
+              detail: string.Join("; ", result.Errors),
+              statusCode: StatusCodes.Status409Conflict),
             _ => TypedResults.Problem(
               title: "Operation failed",
               detail: string.Join("; ", result.Errors),
@@ -86,8 +94,12 @@ public static class ResultExtensions
         {
             ResultStatus.Ok => TypedResults.NoContent(),
             ResultStatus.NotFound => TypedResults.NotFound(),
+            ResultStatus.Conflict => TypedResults.Problem(
+              title: "Conflict",
+              detail: string.Join("; ", result.Errors),
+              statusCode: StatusCodes.Status409Conflict),
             _ => TypedResults.Problem(
-              title: "Delete failed",
+              title: "Operation failed",
               detail: string.Join("; ", result.Errors),
               statusCode: StatusCodes.Status400BadRequest)
         };
@@ -105,6 +117,10 @@ public static class ResultExtensions
         {
             ResultStatus.Ok => TypedResults.Ok(mapResponse(result.Value)),
             ResultStatus.NotFound => TypedResults.NotFound(),
+            ResultStatus.Conflict => TypedResults.Problem(
+              title: "Conflict",
+              detail: string.Join("; ", result.Errors),
+              statusCode: StatusCodes.Status409Conflict),
             _ => TypedResults.Problem(
               title: $"{operationName} failed",
               detail: string.Join("; ", result.Errors),

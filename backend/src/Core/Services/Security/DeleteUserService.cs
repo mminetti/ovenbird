@@ -22,7 +22,7 @@ public class DeleteUserService(
 
         await repository.DeleteAsync(user, ct);
 
-        var domainEvent = new UserDeletedEvent(userId);
+        var domainEvent = new UserDeletedEvent(user);
 
         await _bus.PublishAsync(domainEvent);
 

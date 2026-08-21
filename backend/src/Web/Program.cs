@@ -14,14 +14,14 @@ startupLogger.LogInformation("Starting web host");
 builder.Services.AddOptionConfigs(builder.Configuration, startupLogger, builder);
 builder.Services.AddServiceConfigs(startupLogger, builder);
 
-var authStrategy = AuthStrategyFactory.Create(builder.Configuration);
+var authStrategy = builder.Services.AddAuthStrategy(builder.Configuration);
 
 builder.Services.AddFastEndpoints()
                 .SwaggerDocument(o =>
                 {
                     o.DocumentSettings = s =>
                     {
-                        s.Title = "Ovenbird API";
+                        s.Title = "Nexus API";
                         s.Version = "v1";
 
                         authStrategy.ConfigureSwaggerAuth(s, builder.Configuration);

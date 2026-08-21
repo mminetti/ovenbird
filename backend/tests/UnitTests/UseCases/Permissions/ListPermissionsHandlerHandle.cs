@@ -1,4 +1,4 @@
-using UseCases;
+﻿using UseCases.Common;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.List;
 
@@ -22,7 +22,7 @@ public class ListPermissionsHandlerHandle
             new(1, 1, "users.read", "Can read users"),
             new(2, 1, "users.write", "Can write users"),
         };
-        var pagedResult = new global::UseCases.PagedResult<PermissionDto>(permissions, 1, 10, 2, 1);
+        var pagedResult = new ItemPagedResult<PermissionDto>(permissions, 1, 10, 2, 1);
 
         _query.ListAsync(1, 10, Arg.Any<CancellationToken>())
             .Returns(pagedResult);
@@ -38,7 +38,7 @@ public class ListPermissionsHandlerHandle
     [Fact]
     public async Task UsesDefaultsWhenPageAndPerPageAreNull()
     {
-        var pagedResult = new global::UseCases.PagedResult<PermissionDto>([], 1, Constants.DEFAULT_PAGE_SIZE, 0, 0);
+        var pagedResult = new ItemPagedResult<PermissionDto>([], 1, Constants.DEFAULT_PAGE_SIZE, 0, 0);
 
         _query.ListAsync(1, Constants.DEFAULT_PAGE_SIZE, Arg.Any<CancellationToken>())
             .Returns(pagedResult);

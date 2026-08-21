@@ -11,6 +11,9 @@ public class UserConfiguration : BaseEntityTypeConfiguration<User, int>
         builder.Property(x => x.ExternalIdentifier)
             .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
 
+        builder.HasIndex(x => x.ExternalIdentifier)
+            .IsUnique();
+
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 

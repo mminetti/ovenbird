@@ -1,4 +1,4 @@
-﻿using UseCases;
+﻿using UseCases.Common;
 using UseCases.Security.Modules;
 using UseCases.Security.Modules.List;
 
@@ -6,7 +6,7 @@ namespace Infrastructure.Data.Queries.Security;
 
 public class ListModulesQueryService(ReadDbContext db) : IListModulesQueryService
 {
-    public async Task<PagedResult<ModuleDto>> ListAsync(int page, int perPage, CancellationToken ct)
+    public async Task<ItemPagedResult<ModuleDto>> ListAsync(int page, int perPage, CancellationToken ct)
     {
         var items = await db.Module
             .OrderBy(m => m.Id)
@@ -19,6 +19,6 @@ public class ListModulesQueryService(ReadDbContext db) : IListModulesQueryServic
         int totalCount = await db.Module.CountAsync(ct);
         int totalPages = (int)Math.Ceiling(totalCount / (double)perPage);
 
-        return new PagedResult<ModuleDto>(items, page, perPage, totalCount, totalPages);
+        return new ItemPagedResult<ModuleDto>(items, page, perPage, totalCount, totalPages);
     }
 }

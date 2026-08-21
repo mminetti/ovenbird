@@ -11,16 +11,14 @@ namespace Web.Configurations.Auth;
 /// </summary>
 public class AzureAdAuthStrategy : IAuthStrategy
 {
-    public void ConfigureServices(IServiceCollection services, WebApplicationBuilder builder)
+    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "AzureAd");
-        services.AddAuthorization();
+        services.AddMicrosoftIdentityWebApiAuthentication(configuration, "AzureAd");
     }
 
     public void ConfigureMiddleware(WebApplication app)
     {
         app.UseAuthentication();
-        app.UseAuthorization();
     }
 
     public void ConfigureSwaggerAuth(AspNetCoreOpenApiDocumentGeneratorSettings settings, IConfiguration configuration)

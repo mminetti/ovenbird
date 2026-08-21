@@ -170,6 +170,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ExternalIdentifier")
+                        .IsUnique();
+
                     b.ToTable("User");
                 });
 
@@ -208,7 +211,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Security.Module", "Module")
                         .WithMany("Permissions")
                         .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Module");

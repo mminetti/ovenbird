@@ -23,6 +23,7 @@ public class DeleteModule(IMessageBus bus)
             s.Responses[204] = Endpoints.Response204Deleted;
             s.Responses[400] = Endpoints.Response400BadRequest;
             s.Responses[404] = Endpoints.Response404NotFound;
+            s.Responses[409] = Endpoints.Response409Conflict;
             s.Responses[500] = Endpoints.Response500InternalServerError;
         });
 
@@ -33,6 +34,7 @@ public class DeleteModule(IMessageBus bus)
             .Produces(204)
             .ProducesProblem(400)
             .ProducesProblem(404)
+            .ProducesProblem(409)
             .ProducesProblem(500));
     }
 

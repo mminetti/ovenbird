@@ -1,8 +1,10 @@
-﻿namespace UseCases.Security.Users.List;
+﻿using UseCases.Common;
+
+namespace UseCases.Security.Users.List;
 
 public class ListUsersHandler(IListUsersQueryService query)
 {
-    public async Task<Result<PagedResult<UserDto>>> Handle(ListUsersQuery request, CancellationToken ct)
+    public async Task<Result<ItemPagedResult<UserDto>>> Handle(ListUsersQuery request, CancellationToken ct)
     {
         var result = await query.ListAsync(
             request.Page ?? 1,
