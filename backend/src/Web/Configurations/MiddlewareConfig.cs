@@ -45,7 +45,7 @@ public static class MiddlewareConfig
 
         app.MapScalarApiReference("/docs", options =>
         {
-            options.WithTitle("Nexus API");
+            options.WithTitle("Ovenbird API");
             //options.SortTagsAlphabetically();
             //options.SortOperationsByMethod();
 

@@ -21,7 +21,7 @@ builder.Services.AddFastEndpoints()
                 {
                     o.DocumentSettings = s =>
                     {
-                        s.Title = "Nexus API";
+                        s.Title = "Ovenbird API";
                         s.Version = "v1";
 
                         authStrategy.ConfigureSwaggerAuth(s, builder.Configuration);

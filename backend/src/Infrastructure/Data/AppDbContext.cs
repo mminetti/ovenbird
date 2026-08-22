@@ -1,4 +1,6 @@
-﻿using Core.Security;
+﻿using Core.Market;
+using Core.Security;
+using Core.Shared;
 
 namespace Infrastructure.Data;
 
@@ -12,6 +14,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Role> Role => Set<Role>();
     public DbSet<Permission> Permission => Set<Permission>();
     public DbSet<Core.Security.Module> Module => Set<Core.Security.Module>();
+    public DbSet<Company> Company => Set<Company>();
+    public DbSet<MarketDocument> MarketDocument => Set<MarketDocument>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

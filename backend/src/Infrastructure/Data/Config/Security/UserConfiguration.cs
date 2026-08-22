@@ -1,6 +1,6 @@
 ﻿using Core.Security;
 
-namespace Infrastructure.Data.Config;
+namespace Infrastructure.Data.Config.Security;
 
 public class UserConfiguration : BaseEntityTypeConfiguration<User, int>
 {
