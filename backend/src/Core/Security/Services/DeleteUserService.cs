@@ -1,8 +1,7 @@
-﻿using Core.Interfaces.Security;
-using Core.Security;
 using Core.Security.Events;
+using Core.Security.Interfaces;
 
-namespace Core.Services.Security;
+namespace Core.Security.Services;
 
 public class DeleteUserService(
     ILogger<DeleteUserService> logger, 

@@ -1,4 +1,4 @@
-﻿using Core.Interfaces.Security;
+﻿using Core.Security.Interfaces;
 
 namespace UseCases.Security.Users.Delete;
 

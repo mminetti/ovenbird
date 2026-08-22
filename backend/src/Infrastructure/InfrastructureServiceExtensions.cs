@@ -1,5 +1,5 @@
-﻿using Core.Interfaces.Security;
-using Core.Services.Security;
+using Core.Security.Interfaces;
+using Core.Security.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries.Security;
 using UseCases.Security.Modules.List;

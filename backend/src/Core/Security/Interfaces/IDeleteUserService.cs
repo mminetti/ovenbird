@@ -1,4 +1,4 @@
-﻿namespace Core.Interfaces.Security;
+﻿namespace Core.Security.Interfaces;
 
 public interface IDeleteUserService
 {

@@ -1,5 +1,5 @@
 ﻿using Ardalis.Result;
-using Core.Interfaces.Security;
+using Core.Security.Interfaces;
 using UseCases.Security.Users.Delete;
 
 namespace UnitTests.UseCases.Users;
