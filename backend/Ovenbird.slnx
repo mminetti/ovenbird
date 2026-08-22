@@ -15,6 +15,7 @@
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
     <Project Path="src/UseCases/UseCases.csproj" />
     <Project Path="src/Web/Web.csproj" />
+    <Project Path="src/Worker/Worker.csproj" Id="8a43fe81-b3a3-4793-bb03-733f4134e86b" />
   </Folder>
   <Folder Name="/src/_aspire/">
     <Project Path="src/AspireHost/AspireHost.csproj" />
