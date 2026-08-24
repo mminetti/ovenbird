@@ -14,55 +14,41 @@ namespace Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "CreatedAtUtc",
-                table: "MarketDocumentStatus");
+            // SQL Server cannot remove IDENTITY via AlterColumn — drop and recreate the tables.
+            migrationBuilder.DropForeignKey(
+                name: "FK_MarketDocument_MarketDocumentDirection_DirectionId",
+                table: "MarketDocument");
 
-            migrationBuilder.DropColumn(
-                name: "CreatedBy",
-                table: "MarketDocumentStatus");
+            migrationBuilder.DropForeignKey(
+                name: "FK_MarketDocument_MarketDocumentStatus_StatusId",
+                table: "MarketDocument");
 
-            migrationBuilder.DropColumn(
-                name: "LastModifiedAtUtc",
-                table: "MarketDocumentStatus");
+            migrationBuilder.DropTable(name: "MarketDocumentDirection");
+            migrationBuilder.DropTable(name: "MarketDocumentStatus");
 
-            migrationBuilder.DropColumn(
-                name: "LastModifiedBy",
-                table: "MarketDocumentStatus");
+            migrationBuilder.CreateTable(
+                name: "MarketDocumentDirection",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketDocumentDirection", x => x.Id);
+                });
 
-            migrationBuilder.DropColumn(
-                name: "CreatedAtUtc",
-                table: "MarketDocumentDirection");
-
-            migrationBuilder.DropColumn(
-                name: "CreatedBy",
-                table: "MarketDocumentDirection");
-
-            migrationBuilder.DropColumn(
-                name: "LastModifiedAtUtc",
-                table: "MarketDocumentDirection");
-
-            migrationBuilder.DropColumn(
-                name: "LastModifiedBy",
-                table: "MarketDocumentDirection");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "MarketDocumentStatus",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .OldAnnotation("SqlServer:Identity", "1, 1");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "MarketDocumentDirection",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .OldAnnotation("SqlServer:Identity", "1, 1");
+            migrationBuilder.CreateTable(
+                name: "MarketDocumentStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketDocumentStatus", x => x.Id);
+                });
 
             migrationBuilder.InsertData(
                 table: "MarketDocumentDirection",
@@ -82,6 +68,22 @@ namespace Infrastructure.Data.Migrations
                     { 2, "Done" },
                     { 3, "Error" }
                 });
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_MarketDocument_MarketDocumentDirection_DirectionId",
+                table: "MarketDocument",
+                column: "DirectionId",
+                principalTable: "MarketDocumentDirection",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_MarketDocument_MarketDocumentStatus_StatusId",
+                table: "MarketDocument",
+                column: "StatusId",
+                principalTable: "MarketDocumentStatus",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
@@ -112,79 +114,66 @@ namespace Infrastructure.Data.Migrations
                 keyColumn: "Id",
                 keyValue: 3);
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "MarketDocumentStatus",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .Annotation("SqlServer:Identity", "1, 1");
+            migrationBuilder.DropForeignKey(
+                name: "FK_MarketDocument_MarketDocumentDirection_DirectionId",
+                table: "MarketDocument");
 
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "CreatedAtUtc",
-                table: "MarketDocumentStatus",
-                type: "datetimeoffset",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+            migrationBuilder.DropForeignKey(
+                name: "FK_MarketDocument_MarketDocumentStatus_StatusId",
+                table: "MarketDocument");
 
-            migrationBuilder.AddColumn<string>(
-                name: "CreatedBy",
-                table: "MarketDocumentStatus",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true);
+            migrationBuilder.DropTable(name: "MarketDocumentDirection");
+            migrationBuilder.DropTable(name: "MarketDocumentStatus");
 
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "LastModifiedAtUtc",
-                table: "MarketDocumentStatus",
-                type: "datetimeoffset",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
+            migrationBuilder.CreateTable(
+                name: "MarketDocumentDirection",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketDocumentDirection", x => x.Id);
+                });
 
-            migrationBuilder.AddColumn<string>(
-                name: "LastModifiedBy",
-                table: "MarketDocumentStatus",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true);
+            migrationBuilder.CreateTable(
+                name: "MarketDocumentStatus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MarketDocumentStatus", x => x.Id);
+                });
 
-            migrationBuilder.AlterColumn<int>(
-                name: "Id",
-                table: "MarketDocumentDirection",
-                type: "int",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int")
-                .Annotation("SqlServer:Identity", "1, 1");
+            migrationBuilder.AddForeignKey(
+                name: "FK_MarketDocument_MarketDocumentDirection_DirectionId",
+                table: "MarketDocument",
+                column: "DirectionId",
+                principalTable: "MarketDocumentDirection",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
 
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "CreatedAtUtc",
-                table: "MarketDocumentDirection",
-                type: "datetimeoffset",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
-
-            migrationBuilder.AddColumn<string>(
-                name: "CreatedBy",
-                table: "MarketDocumentDirection",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true);
-
-            migrationBuilder.AddColumn<DateTimeOffset>(
-                name: "LastModifiedAtUtc",
-                table: "MarketDocumentDirection",
-                type: "datetimeoffset",
-                nullable: false,
-                defaultValue: new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)));
-
-            migrationBuilder.AddColumn<string>(
-                name: "LastModifiedBy",
-                table: "MarketDocumentDirection",
-                type: "nvarchar(500)",
-                maxLength: 500,
-                nullable: true);
+            migrationBuilder.AddForeignKey(
+                name: "FK_MarketDocument_MarketDocumentStatus_StatusId",
+                table: "MarketDocument",
+                column: "StatusId",
+                principalTable: "MarketDocumentStatus",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
     }
 }
