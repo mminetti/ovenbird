@@ -17,8 +17,6 @@ public class AzureBlobFileStorage : IFileStorage
         _containerClient = serviceClient.GetBlobContainerClient(_containerName);
     }
 
-    public string BuildFileReference(string storageKey) => $"{_containerName}/{storageKey}";
-
     public async Task<string> UploadAsync(Stream content, string storageKey, CancellationToken ct)
     {
         await _containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
@@ -26,7 +24,7 @@ public class AzureBlobFileStorage : IFileStorage
         var blobClient = _containerClient.GetBlobClient(storageKey);
         await blobClient.UploadAsync(content, overwrite: true, ct);
 
-        return BuildFileReference(storageKey);
+        return $"{_containerName}/{storageKey}";
     }
 
     public async Task<Stream> OpenReadAsync(string fileReference, CancellationToken ct)

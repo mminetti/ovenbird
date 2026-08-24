@@ -20,10 +20,9 @@ public class ImportMarketDocumentHandler(
 
         foreach (var remoteFilePath in remoteFilePaths)
         {
-            var storageKey = $"market-documents/{timeProvider.GetUtcNow():yyyy/MM/dd}/{Path.GetFileName(remoteFilePath)}";
-            var fileReference = fileStorage.BuildFileReference(storageKey);
-
-            var existing = await readRepository.FirstOrDefaultAsync(new MarketDocumentByFileSpec(fileReference), ct);
+            var name = Path.GetFileName(remoteFilePath);
+            
+            var existing = await readRepository.FirstOrDefaultAsync(new MarketDocumentByNameSpec(name), ct);
 
             if (existing is not null)
             {
@@ -33,13 +32,15 @@ public class ImportMarketDocumentHandler(
 
             using var ftpStream = await ftpService.DownloadAsync(remoteFilePath, ct);
 
+            var storageKey = $"market-documents/{timeProvider.GetUtcNow():yyyy/MM/dd}/{name}";
+
             var uploadedFileReference = await fileStorage.UploadAsync(ftpStream, storageKey, ct);
 
             var now = timeProvider.GetUtcNow();
 
             var document = new MarketDocument
             {
-                Name = Path.GetFileName(remoteFilePath),
+                Name = name,
                 File = uploadedFileReference,
                 CompanyId = command.CompanyId,
                 DirectionId = MarketDocumentDirections.Inbound,
