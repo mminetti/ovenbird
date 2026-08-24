@@ -11,7 +11,7 @@ public class ImportMarketDocumentHandler(
     IReadRepository<MarketDocument> readRepository,
     IRepository<MarketDocument> repository,
     IReadRepository<Company> companyRepository,
-    IFtpService ftpService,
+    MarketDocumentStrategyResolver strategyResolver,
     IFileStorage fileStorage,
     TimeProvider timeProvider)
 {
@@ -22,14 +22,16 @@ public class ImportMarketDocumentHandler(
 
         foreach (var company in companies)
         {
+            var strategy = strategyResolver.Resolve(company.Market.Identifier);
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.Market.TimeZoneId);
-            var remoteFilePaths = await ftpService.ListFilesAsync(command.RemoteDirectory, ct);
+
+            var remoteFilePaths = await strategy.ListFilesAsync(company, command.RemoteDirectory, ct);
 
             foreach (var remoteFilePath in remoteFilePaths)
             {
                 var fileName = Path.GetFileName(remoteFilePath);
 
-                var existing = await readRepository.FirstOrDefaultAsync(new MarketDocumentByNameSpec(fileName), ct);
+                var existing = await readRepository.FirstOrDefaultAsync(new MarketDocumentByNameAndCompanySpec(fileName, company.Id), ct);
 
                 if (existing is not null)
                 {
@@ -37,7 +39,7 @@ public class ImportMarketDocumentHandler(
                     continue;
                 }
 
-                using var ftpStream = await ftpService.DownloadAsync(remoteFilePath, ct);
+                using var ftpStream = await strategy.DownloadAsync(company, remoteFilePath, ct);
 
                 var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
                 var storageKey = $"market-documents/{company.Name}/{now:yyyy/MM/dd}/{fileName}";
