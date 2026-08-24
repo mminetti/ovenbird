@@ -1,8 +1,8 @@
-using Core.Security.Interfaces;
+﻿using Core.Security.Interfaces;
 using Core.Security.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries.Security;
-using Infrastructure.Services;
+using Infrastructure.Services.Files;
 using UseCases.Interfaces.Files;
 using UseCases.Security.Modules.List;
 using UseCases.Security.Permissions.List;
@@ -26,6 +26,7 @@ public static class InfrastructureServiceExtensions
         Guard.Against.Null(connectionString);
 
         services.AddHybridCache();
+        services.AddSingleton(TimeProvider.System);
 
         services.AddScoped<EventDispatchInterceptor>();
         services.AddScoped<IDomainEventDispatcher, WolverineDomainEventDispatcher>();
@@ -45,6 +46,9 @@ public static class InfrastructureServiceExtensions
             options.UseSqlServer(readConnectionString);
         });
 
+        services.Configure<FtpOptions>(config.GetSection(FtpOptions.SectionName));
+        services.Configure<AzureBlobStorageOptions>(config.GetSection(AzureBlobStorageOptions.SectionName));
+
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
@@ -52,12 +56,9 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
+            .AddScoped<IFtpService, FtpService>()
+            .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<CurrentUserService>();
-
-        services.Configure<FtpOptions>(config.GetSection(FtpOptions.SectionName));
-        services.Configure<AzureBlobStorageOptions>(config.GetSection(AzureBlobStorageOptions.SectionName));
-        services.AddScoped<IFtpService, FtpService>();
-        services.AddScoped<IFileStorage, AzureBlobFileStorage>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 

@@ -1,4 +1,4 @@
-namespace Infrastructure.Services;
+﻿namespace Infrastructure.Services.Files;
 
 public class AzureBlobStorageOptions
 {

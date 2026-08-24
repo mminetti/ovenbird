@@ -1,12 +1,25 @@
-using FluentFTP;
+﻿using FluentFTP;
 using Microsoft.Extensions.Options;
 using UseCases.Interfaces.Files;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Files;
 
 public class FtpService(IOptions<FtpOptions> options) : IFtpService
 {
     private readonly FtpOptions _options = options.Value;
+
+    public async Task<IReadOnlyList<string>> ListFilesAsync(string remoteDirectory, CancellationToken ct)
+    {
+        await using var client = new AsyncFtpClient(_options.Host, _options.Username, _options.Password, _options.Port);
+        await client.Connect(ct);
+
+        var listing = await client.GetListing(remoteDirectory, ct);
+
+        return listing
+            .Where(item => item.Type == FtpObjectType.File)
+            .Select(item => item.FullName)
+            .ToList();
+    }
 
     public async Task<Stream> DownloadAsync(string remotePath, CancellationToken ct)
     {

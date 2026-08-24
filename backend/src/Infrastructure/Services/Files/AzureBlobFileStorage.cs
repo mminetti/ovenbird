@@ -1,8 +1,8 @@
-using Azure.Storage.Blobs;
+﻿using Azure.Storage.Blobs;
 using Microsoft.Extensions.Options;
 using UseCases.Interfaces.Files;
 
-namespace Infrastructure.Services;
+namespace Infrastructure.Services.Files;
 
 public class AzureBlobFileStorage : IFileStorage
 {

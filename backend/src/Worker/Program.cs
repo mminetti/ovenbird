@@ -1,8 +1,8 @@
-using Infrastructure;
+﻿using Infrastructure;
 using Infrastructure.Data;
 using Quartz;
 using Wolverine;
-using Worker.Jobs;
+using Worker.Jobs.Market;
 
 var builder = Host.CreateApplicationBuilder(args);
 
