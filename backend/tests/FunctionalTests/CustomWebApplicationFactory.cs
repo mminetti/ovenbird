@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Infrastructure.Data;
 using Testcontainers.MsSql;
+using Infrastructure.Data.Interceptors;
 
 namespace FunctionalTests;
 

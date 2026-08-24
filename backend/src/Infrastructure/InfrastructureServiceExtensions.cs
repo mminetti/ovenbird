@@ -1,6 +1,7 @@
 ﻿using Core.Security.Interfaces;
 using Core.Security.Services;
 using Infrastructure.Data;
+using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Services.Files;
 using UseCases.Interfaces.Files;

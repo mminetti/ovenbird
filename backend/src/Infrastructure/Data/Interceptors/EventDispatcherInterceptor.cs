@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Diagnostics;
 
-namespace Infrastructure.Data;
+namespace Infrastructure.Data.Interceptors;
 
 // Intercepts SaveChanges to dispatch domain events after changes are successfully saved
 public class EventDispatchInterceptor(IDomainEventDispatcher domainEventDispatcher) : SaveChangesInterceptor

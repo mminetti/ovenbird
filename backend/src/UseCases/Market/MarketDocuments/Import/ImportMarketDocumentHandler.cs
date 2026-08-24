@@ -43,9 +43,7 @@ public class ImportMarketDocumentHandler(
                 File = uploadedFileReference,
                 CompanyId = command.CompanyId,
                 DirectionId = MarketDocumentDirections.Inbound,
-                StatusId = MarketDocumentStatuses.New,
-                CreatedAtUtc = now,
-                LastModifiedAtUtc = now
+                StatusId = MarketDocumentStatuses.New
             };
 
             var created = await repository.AddAsync(document, ct);

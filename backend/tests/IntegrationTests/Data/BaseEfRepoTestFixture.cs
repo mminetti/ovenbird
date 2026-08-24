@@ -1,5 +1,6 @@
 ﻿using Core.Security;
 using Infrastructure.Data;
+using Infrastructure.Data.Interceptors;
 
 namespace IntegrationTests.Data;
 
