@@ -1,8 +1,6 @@
-﻿using Core.Common;
+﻿namespace Core.Market;
 
-namespace Core.Market;
-
-public class MarketDocumentStatus : AuditableEntityBase<int>
+public class MarketDocumentStatus : EntityBase<int>
 {
     public string Name { get; set; } = string.Empty;
 }

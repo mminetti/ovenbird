@@ -5,9 +5,19 @@
     <PackageReference Include="Ardalis.SharedKernel" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" />
     <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="Azure.Storage.Blobs" />
+    <PackageReference Include="CsvHelper" />
+    <PackageReference Include="Dapper" />
+    <PackageReference Include="Dapper.SqlBuilder" />
+    <PackageReference Include="FluentFTP" />
     <PackageReference Include="MailKit" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
     <PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />
+    <PackageReference Include="Microsoft.Graph" />
+    <PackageReference Include="SendGrid" />
+    <PackageReference Include="SendGrid.Extensions.DependencyInjection" />
+    <PackageReference Include="smartystreets-dotnet-sdk" />
+    <PackageReference Include="Twilio" />
     <PackageReference Include="WolverineFx" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" ExcludeAssets="contentFiles" PrivateAssets="all">
       <IncludeAssets>runtime; compile; build; native; analyzers; buildtransitive</IncludeAssets>
@@ -25,5 +35,6 @@
   
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
+    <Folder Include="Services\" />
   </ItemGroup>
 </Project>
