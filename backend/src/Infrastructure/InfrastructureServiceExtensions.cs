@@ -2,6 +2,8 @@ using Core.Security.Interfaces;
 using Core.Security.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries.Security;
+using Infrastructure.Services;
+using UseCases.Interfaces.Files;
 using UseCases.Security.Modules.List;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
@@ -51,6 +53,11 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<CurrentUserService>();
+
+        services.Configure<FtpOptions>(config.GetSection(FtpOptions.SectionName));
+        services.Configure<AzureBlobStorageOptions>(config.GetSection(AzureBlobStorageOptions.SectionName));
+        services.AddScoped<IFtpService, FtpService>();
+        services.AddScoped<IFileStorage, AzureBlobFileStorage>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 
