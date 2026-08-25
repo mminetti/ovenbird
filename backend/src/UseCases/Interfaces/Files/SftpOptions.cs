@@ -1,4 +1,4 @@
-namespace UseCases.Interfaces.Files;
+﻿namespace UseCases.Interfaces.Files;
 
 public class SftpOptions
 {
@@ -6,4 +6,5 @@ public class SftpOptions
     public int Port { get; set; } = 22;
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string RemoteDirectory {  get; set; } = string.Empty; 
 }

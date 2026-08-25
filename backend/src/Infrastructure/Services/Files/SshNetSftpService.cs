@@ -1,4 +1,4 @@
-using Renci.SshNet;
+﻿using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using UseCases.Interfaces.Files;
 
@@ -9,14 +9,14 @@ public class SshNetSftpService : ISftpService
     private static SftpClient CreateClient(SftpOptions options) =>
         new(options.Host, options.Port, options.Username, options.Password);
 
-    public async Task<IReadOnlyList<string>> ListAsync(SftpOptions options, string remoteDirectory, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ListAsync(SftpOptions options, CancellationToken ct)
     {
         using var client = CreateClient(options);
         await client.ConnectAsync(ct);
 
         var files = new List<string>();
 
-        await foreach (SftpFile file in client.ListDirectoryAsync(remoteDirectory, ct))
+        await foreach (SftpFile file in client.ListDirectoryAsync(options.RemoteDirectory, ct))
         {
             if (file.IsRegularFile)
             {

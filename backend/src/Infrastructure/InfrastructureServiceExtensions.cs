@@ -5,7 +5,7 @@ using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Services.Files;
 using UseCases.Interfaces.Files;
-using UseCases.Market.MarketDocuments;
+using UseCases.Market.MarketDocuments.Import.Strategies;
 using UseCases.Security.Modules.List;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
@@ -61,8 +61,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFtpService, FluentFtpService>()
             .AddScoped<ISftpService, SshNetSftpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
-            .AddScoped<IMarketConnectionStrategy, BigDataConnectionStrategy>()
-            .AddScoped<MarketConnectionStrategyResolver>()
+            .AddScoped<IMarketImportStrategy, BigDataImportStrategy>()
+            .AddScoped<MarketImportStrategyResolver>()
             .AddScoped<CurrentUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");

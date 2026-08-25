@@ -3,7 +3,7 @@ using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
 using Core.Shared.Specifications;
-using UseCases.Interfaces.Files;
+using UseCases.Market.MarketDocuments.Import.Strategies;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
@@ -12,33 +12,28 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> repository,
     IReadRepository<Company> companyRepository,
     IReadRepository<SystemIntegration> systemIntegrationRepository,
-    MarketConnectionStrategyResolver strategyResolver,
-    IFileStorage fileStorage,
+    MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
+    private readonly string _identifier = "edi.import";
+    private readonly string _handlerIdentifier = "edi.import.handler";
+
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
-        var companies = await companyRepository.ListAsync(new CompanyWithMarketAndSystemIntegrationsSpec(), ct);
-        var globalIntegrations = await systemIntegrationRepository.ListAsync(new SystemIntegrationsWithoutCompanySpec(), ct);
+        var companies = await companyRepository.ListAsync(new CompanyWithMarketSpec(), ct);
+        var integrations = await systemIntegrationRepository.ListAsync(ct);
 
         foreach (var company in companies)
         {
-            foreach (var globalIntegration in globalIntegrations)
-            {
-                var hasCompanySpecificIntegration = company.SystemIntegrations.Any(si =>
-                    string.Equals(si.Identifier, globalIntegration.Identifier, StringComparison.OrdinalIgnoreCase));
+            var integration = GetRequiredIntegration(integrations, company.Id, _identifier);
 
-                if (!hasCompanySpecificIntegration)
-                {
-                    company.SystemIntegrations.Add(globalIntegration);
-                }
-            }
+            var identifier = integration.GetRequiredValue(_handlerIdentifier);
 
-            var connection = strategyResolver.Resolve(company.Market.Identifier);
+            var import = strategyResolver.Resolve(identifier);
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.Market.TimeZoneId);
 
-            var remoteFilePaths = await connection.ListFilesAsync(company, command.RemoteDirectory, ct);
+            var remoteFilePaths = await import.ListFilesAsync(integration, ct);
 
             foreach (var remoteFilePath in remoteFilePaths)
             {
@@ -53,12 +48,12 @@ public class ImportMarketDocumentHandler(
                     continue;
                 }
 
-                using var ftpStream = await connection.DownloadFileAsync(company, remoteFilePath, ct);
+                using var ftpStream = await import.DownloadFileAsync(integration, remoteFilePath, ct);
 
                 var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
                 var storageKey = $"market-documents/{company.Name}/{now:yyyy/MM/dd}/{fileName}";
 
-                var uploadedFileReference = await fileStorage.UploadAsync(ftpStream, storageKey, ct);
+                var uploadedFileReference = await import.UploadDocumentAsync(integration, ftpStream, storageKey, ct);
 
                 var document = new MarketDocument
                 {
@@ -76,5 +71,13 @@ public class ImportMarketDocumentHandler(
         }
 
         return Result.Success<IReadOnlyList<long>>(documentIds);
+    }
+
+    private static SystemIntegration GetRequiredIntegration(
+        IList<SystemIntegration> integrations, int companyId, string identifier)
+    {
+        return integrations.FirstOrDefault(x => x.Identifier == identifier &&
+                (x.CompanyId == companyId || x.CompanyId is null))
+                ?? throw new InvalidOperationException($"Integration {identifier} for company {companyId} not found");
     }
 }

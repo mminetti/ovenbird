@@ -18,8 +18,7 @@ public class MarketDocumentImportJob(
         logger.LogInformation("Starting MarketDocument import from {RemoteDirectory}", opts.RemoteDirectory);
 
         var result = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
-            new ImportMarketDocumentCommand(opts.RemoteDirectory, opts.CompanyId),
-            context.CancellationToken);
+            new ImportMarketDocumentCommand(), context.CancellationToken);
 
         if (!result.IsSuccess)
         {
