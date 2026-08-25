@@ -49,7 +49,6 @@ public static class InfrastructureServiceExtensions
         });
 
         services.Configure<FtpOptions>(config.GetSection(FtpOptions.SectionName));
-        services.Configure<SftpOptions>(config.GetSection(SftpOptions.SectionName));
         services.Configure<AzureBlobStorageOptions>(config.GetSection(AzureBlobStorageOptions.SectionName));
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))

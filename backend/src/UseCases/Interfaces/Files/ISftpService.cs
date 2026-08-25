@@ -1,8 +1,8 @@
-﻿namespace UseCases.Interfaces.Files;
+namespace UseCases.Interfaces.Files;
 
 public interface ISftpService
 {
-    Task<IReadOnlyList<string>> ListAsync(string remoteDirectory, CancellationToken ct);
-    Task UploadAsync(Stream content, string remotePath, CancellationToken ct);
-    Task<Stream> DownloadAsync(string remotePath, CancellationToken ct);
+    Task<IReadOnlyList<string>> ListAsync(SftpOptions options, string remoteDirectory, CancellationToken ct);
+    Task UploadAsync(SftpOptions options, Stream content, string remotePath, CancellationToken ct);
+    Task<Stream> DownloadAsync(SftpOptions options, string remotePath, CancellationToken ct);
 }

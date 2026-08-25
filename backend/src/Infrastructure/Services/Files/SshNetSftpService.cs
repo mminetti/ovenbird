@@ -1,19 +1,17 @@
-﻿using Microsoft.Extensions.Options;
 using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using UseCases.Interfaces.Files;
 
 namespace Infrastructure.Services.Files;
 
-public class SshNetSftpService(IOptions<SftpOptions> options) : ISftpService
+public class SshNetSftpService : ISftpService
 {
-    private readonly SftpOptions _options = options.Value;
+    private static SftpClient CreateClient(SftpOptions options) =>
+        new(options.Host, options.Port, options.Username, options.Password);
 
-    private SftpClient CreateClient() => new(_options.Host, _options.Port, _options.Username, _options.Password);
-
-    public async Task<IReadOnlyList<string>> ListAsync(string remoteDirectory, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ListAsync(SftpOptions options, string remoteDirectory, CancellationToken ct)
     {
-        using var client = CreateClient();
+        using var client = CreateClient(options);
         await client.ConnectAsync(ct);
 
         var files = new List<string>();
@@ -29,9 +27,9 @@ public class SshNetSftpService(IOptions<SftpOptions> options) : ISftpService
         return files;
     }
 
-    public async Task<Stream> DownloadAsync(string remotePath, CancellationToken ct)
+    public async Task<Stream> DownloadAsync(SftpOptions options, string remotePath, CancellationToken ct)
     {
-        using var client = CreateClient();
+        using var client = CreateClient(options);
         await client.ConnectAsync(ct);
 
         var stream = new MemoryStream();
@@ -41,9 +39,9 @@ public class SshNetSftpService(IOptions<SftpOptions> options) : ISftpService
         return stream;
     }
 
-    public async Task UploadAsync(Stream content, string remotePath, CancellationToken ct)
+    public async Task UploadAsync(SftpOptions options, Stream content, string remotePath, CancellationToken ct)
     {
-        using var client = CreateClient();
+        using var client = CreateClient(options);
         await client.ConnectAsync(ct);
 
         await client.UploadFileAsync(content, remotePath, canOverride: true, uploadProgress: null, ct);

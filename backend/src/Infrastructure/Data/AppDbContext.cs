@@ -16,6 +16,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Core.Security.Module> Module => Set<Core.Security.Module>();
     public DbSet<Company> Company => Set<Company>();
     public DbSet<MarketDocument> MarketDocument => Set<MarketDocument>();
+    public DbSet<SystemIntegration> SystemIntegration => Set<SystemIntegration>();
+    public DbSet<SystemIntegrationField> SystemIntegrationField => Set<SystemIntegrationField>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

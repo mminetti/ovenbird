@@ -10,5 +10,5 @@ public interface IMarketConnectionStrategy
 
     Task<Stream> DownloadFileAsync(Company company, string remoteFilePath, CancellationToken ct);
 
-    Task UploadFileAsync(Stream content, string remoteFilePath, CancellationToken ct);
+    Task UploadFileAsync(Company company, Stream content, string remoteFilePath, CancellationToken ct);
 }

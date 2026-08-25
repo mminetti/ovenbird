@@ -11,6 +11,7 @@ public class ImportMarketDocumentHandler(
     IReadRepository<MarketDocument> readRepository,
     IRepository<MarketDocument> repository,
     IReadRepository<Company> companyRepository,
+    IReadRepository<SystemIntegration> systemIntegrationRepository,
     MarketConnectionStrategyResolver strategyResolver,
     IFileStorage fileStorage,
     TimeProvider timeProvider)
@@ -18,10 +19,22 @@ public class ImportMarketDocumentHandler(
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
-        var companies = await companyRepository.ListAsync(new CompanyWithMarketSpec(), ct);
+        var companies = await companyRepository.ListAsync(new CompanyWithMarketAndSystemIntegrationsSpec(), ct);
+        var globalIntegrations = await systemIntegrationRepository.ListAsync(new SystemIntegrationsWithoutCompanySpec(), ct);
 
         foreach (var company in companies)
         {
+            foreach (var globalIntegration in globalIntegrations)
+            {
+                var hasCompanySpecificIntegration = company.SystemIntegrations.Any(si =>
+                    string.Equals(si.Identifier, globalIntegration.Identifier, StringComparison.OrdinalIgnoreCase));
+
+                if (!hasCompanySpecificIntegration)
+                {
+                    company.SystemIntegrations.Add(globalIntegration);
+                }
+            }
+
             var connection = strategyResolver.Resolve(company.Market.Identifier);
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.Market.TimeZoneId);
 

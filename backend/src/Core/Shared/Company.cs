@@ -8,4 +8,5 @@ public class Company : AuditableEntityBase<int>
     public int MarketId { get; set; }
 
     public Market.Market Market { get; set; } = default!;
+    public IList<SystemIntegration> SystemIntegrations { get; set; } = [];
 }
