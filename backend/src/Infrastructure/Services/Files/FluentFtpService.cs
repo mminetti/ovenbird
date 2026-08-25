@@ -4,11 +4,11 @@ using UseCases.Interfaces.Files;
 
 namespace Infrastructure.Services.Files;
 
-public class FtpService(IOptions<FtpOptions> options) : IFtpService
+public class FluentFtpService(IOptions<FtpOptions> options) : IFtpService
 {
     private readonly FtpOptions _options = options.Value;
 
-    public async Task<IReadOnlyList<string>> ListFilesAsync(string remoteDirectory, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ListAsync(string remoteDirectory, CancellationToken ct)
     {
         await using var client = new AsyncFtpClient(_options.Host, _options.Username, _options.Password, _options.Port);
         await client.Connect(ct);

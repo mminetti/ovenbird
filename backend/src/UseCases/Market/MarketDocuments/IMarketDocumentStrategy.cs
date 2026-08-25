@@ -8,7 +8,7 @@ public interface IMarketDocumentStrategy
 
     Task<IReadOnlyList<string>> ListFilesAsync(Company company, string remoteDirectory, CancellationToken ct);
 
-    Task<Stream> DownloadAsync(Company company, string remoteFilePath, CancellationToken ct);
+    Task<Stream> DownloadFileAsync(Company company, string remoteFilePath, CancellationToken ct);
 
-    Task UploadAsync(string remoteFilePath, CancellationToken ct);
+    Task UploadFileAsync(string remoteFilePath, CancellationToken ct);
 }

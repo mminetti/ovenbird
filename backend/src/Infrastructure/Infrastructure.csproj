@@ -17,6 +17,7 @@
     <PackageReference Include="SendGrid" />
     <PackageReference Include="SendGrid.Extensions.DependencyInjection" />
     <PackageReference Include="smartystreets-dotnet-sdk" />
+    <PackageReference Include="SSH.NET" />
     <PackageReference Include="Twilio" />
     <PackageReference Include="WolverineFx" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" ExcludeAssets="contentFiles" PrivateAssets="all">

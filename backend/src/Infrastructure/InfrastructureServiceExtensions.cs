@@ -49,6 +49,7 @@ public static class InfrastructureServiceExtensions
         });
 
         services.Configure<FtpOptions>(config.GetSection(FtpOptions.SectionName));
+        services.Configure<SftpOptions>(config.GetSection(SftpOptions.SectionName));
         services.Configure<AzureBlobStorageOptions>(config.GetSection(AzureBlobStorageOptions.SectionName));
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
@@ -58,7 +59,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
-            .AddScoped<IFtpService, FtpService>()
+            .AddScoped<IFtpService, FluentFtpService>()
+            .AddScoped<ISftpService, SshNetSftpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<IMarketDocumentStrategy, BigDataMarketDocumentStrategy>()
             .AddScoped<MarketDocumentStrategyResolver>()

@@ -31,7 +31,8 @@ public class ImportMarketDocumentHandler(
             {
                 var fileName = Path.GetFileName(remoteFilePath);
 
-                var existing = await readRepository.FirstOrDefaultAsync(new MarketDocumentByNameAndCompanySpec(fileName, company.Id), ct);
+                var existing = await readRepository.FirstOrDefaultAsync(
+                    new MarketDocumentByNameAndCompanySpec(fileName, company.Id), ct);
 
                 if (existing is not null)
                 {
@@ -39,7 +40,7 @@ public class ImportMarketDocumentHandler(
                     continue;
                 }
 
-                using var ftpStream = await strategy.DownloadAsync(company, remoteFilePath, ct);
+                using var ftpStream = await strategy.DownloadFileAsync(company, remoteFilePath, ct);
 
                 var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
                 var storageKey = $"market-documents/{company.Name}/{now:yyyy/MM/dd}/{fileName}";
