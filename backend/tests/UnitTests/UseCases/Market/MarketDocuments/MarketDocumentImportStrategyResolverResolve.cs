@@ -7,13 +7,13 @@ public class MarketDocumentImportStrategyResolverResolve
     [Fact]
     public void ReturnsExactMarketMatchWhenAvailable()
     {
-        var defaultStrategy = Substitute.For<IMarketDocumentStrategy>();
-        defaultStrategy.MarketIdentifier.Returns(BigDataMarketDocumentStrategy.Identifier);
+        var defaultStrategy = Substitute.For<IMarketConnectionStrategy>();
+        defaultStrategy.MarketIdentifier.Returns(BigDataConnectionStrategy.Identifier);
 
-        var b3Strategy = Substitute.For<IMarketDocumentStrategy>();
+        var b3Strategy = Substitute.For<IMarketConnectionStrategy>();
         b3Strategy.MarketIdentifier.Returns("b3");
 
-        var resolver = new MarketDocumentStrategyResolver([defaultStrategy, b3Strategy]);
+        var resolver = new MarketConnectionStrategyResolver([defaultStrategy, b3Strategy]);
 
         resolver.Resolve("B3").ShouldBe(b3Strategy);
     }
@@ -21,10 +21,10 @@ public class MarketDocumentImportStrategyResolverResolve
     [Fact]
     public void FallsBackToDefaultWhenNoExactMatch()
     {
-        var defaultStrategy = Substitute.For<IMarketDocumentStrategy>();
-        defaultStrategy.MarketIdentifier.Returns(BigDataMarketDocumentStrategy.Identifier);
+        var defaultStrategy = Substitute.For<IMarketConnectionStrategy>();
+        defaultStrategy.MarketIdentifier.Returns(BigDataConnectionStrategy.Identifier);
 
-        var resolver = new MarketDocumentStrategyResolver([defaultStrategy]);
+        var resolver = new MarketConnectionStrategyResolver([defaultStrategy]);
 
         resolver.Resolve("unknown-market").ShouldBe(defaultStrategy);
     }

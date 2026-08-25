@@ -62,8 +62,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFtpService, FluentFtpService>()
             .AddScoped<ISftpService, SshNetSftpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
-            .AddScoped<IMarketDocumentStrategy, BigDataMarketDocumentStrategy>()
-            .AddScoped<MarketDocumentStrategyResolver>()
+            .AddScoped<IMarketConnectionStrategy, BigDataConnectionStrategy>()
+            .AddScoped<MarketConnectionStrategyResolver>()
             .AddScoped<CurrentUserService>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");

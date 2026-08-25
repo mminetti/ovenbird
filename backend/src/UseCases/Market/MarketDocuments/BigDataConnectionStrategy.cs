@@ -3,7 +3,7 @@ using UseCases.Interfaces.Files;
 
 namespace UseCases.Market.MarketDocuments;
 
-public class BigDataMarketDocumentStrategy(ISftpService sftpService) : IMarketDocumentStrategy
+public class BigDataConnectionStrategy(ISftpService sftpService) : IMarketConnectionStrategy
 {
     public const string Identifier = "BigData";
 
@@ -19,8 +19,8 @@ public class BigDataMarketDocumentStrategy(ISftpService sftpService) : IMarketDo
         return sftpService.DownloadAsync(remoteFilePath, ct);
     }
 
-    public Task UploadFileAsync(string remoteFilePath, CancellationToken ct)
+    public Task UploadFileAsync(Stream content, string remoteFilePath, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        return sftpService.UploadAsync(content, remoteFilePath, ct);
     }
 }

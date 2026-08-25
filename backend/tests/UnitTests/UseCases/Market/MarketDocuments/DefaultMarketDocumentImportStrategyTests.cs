@@ -7,11 +7,11 @@ namespace UnitTests.UseCases.Market.MarketDocuments;
 public class DefaultMarketDocumentImportStrategyTests
 {
     private readonly ISftpService _sftpService = Substitute.For<ISftpService>();
-    private readonly BigDataMarketDocumentStrategy _strategy;
+    private readonly BigDataConnectionStrategy _strategy;
 
     public DefaultMarketDocumentImportStrategyTests()
     {
-        _strategy = new BigDataMarketDocumentStrategy(_sftpService);
+        _strategy = new BigDataConnectionStrategy(_sftpService);
     }
 
     [Fact]

@@ -2,7 +2,7 @@
 
 namespace UseCases.Market.MarketDocuments;
 
-public interface IMarketDocumentStrategy
+public interface IMarketConnectionStrategy
 {
     string MarketIdentifier { get; }
 
@@ -10,5 +10,5 @@ public interface IMarketDocumentStrategy
 
     Task<Stream> DownloadFileAsync(Company company, string remoteFilePath, CancellationToken ct);
 
-    Task UploadFileAsync(string remoteFilePath, CancellationToken ct);
+    Task UploadFileAsync(Stream content, string remoteFilePath, CancellationToken ct);
 }
