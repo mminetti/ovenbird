@@ -8,10 +8,10 @@ using UseCases.Market.MarketDocuments.Import.Strategies;
 namespace UseCases.Market.MarketDocuments.Import;
 
 public class ImportMarketDocumentHandler(
-    IReadRepository<MarketDocument> readRepository,
-    IRepository<MarketDocument> repository,
-    IReadRepository<Company> companyRepository,
-    IReadRepository<SystemIntegration> systemIntegrationRepository,
+    IRepository<MarketDocument> documentRepository,
+    IReadRepository<MarketDocument> documentReadRepository,
+    IReadRepository<Company> companyReadRepository,
+    IReadRepository<SystemIntegration> integrationReadRepository,
     MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
@@ -21,8 +21,8 @@ public class ImportMarketDocumentHandler(
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
-        var companies = await companyRepository.ListAsync(new CompanyWithMarketSpec(), ct);
-        var integrations = await systemIntegrationRepository.ListAsync(ct);
+        var companies = await companyReadRepository.ListAsync(new CompanyWithMarketSpec(), ct);
+        var integrations = await integrationReadRepository.ListAsync(ct);
 
         foreach (var company in companies)
         {
@@ -39,7 +39,7 @@ public class ImportMarketDocumentHandler(
             {
                 var fileName = Path.GetFileName(remoteFilePath);
 
-                var existing = await readRepository.FirstOrDefaultAsync(
+                var existing = await documentReadRepository.FirstOrDefaultAsync(
                     new MarketDocumentByNameAndCompanySpec(fileName, company.Id), ct);
 
                 if (existing is not null)
@@ -64,7 +64,7 @@ public class ImportMarketDocumentHandler(
                     StatusId = MarketDocumentStatuses.New
                 };
 
-                var created = await repository.AddAsync(document, ct);
+                var created = await documentRepository.AddAsync(document, ct);
 
                 documentIds.Add(created.Id);
             }

@@ -1,4 +1,4 @@
-using Core.Shared;
+﻿using Core.Shared;
 using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 
@@ -7,12 +7,13 @@ namespace UnitTests.UseCases.Market.MarketDocuments;
 public class BigDataImportStrategyTests
 {
     private readonly ISftpService _sftpService = Substitute.For<ISftpService>();
+    private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
     private readonly IFileStorage _fileStorage = Substitute.For<IFileStorage>();
     private readonly BigDataImportStrategy _strategy;
 
     public BigDataImportStrategyTests()
     {
-        _strategy = new BigDataImportStrategy(_sftpService, _fileStorage);
+        _strategy = new BigDataImportStrategy(_sftpService, _ftpService, _fileStorage);
     }
 
     [Fact]
@@ -21,7 +22,7 @@ public class BigDataImportStrategyTests
         var integration = CreateSftpIntegration("sftp.example.com", "2222", "user", "pass", "remote/dir");
 
         _sftpService.ListAsync(
-                Arg.Is<SftpOptions>(o =>
+                Arg.Is<FtpOptions>(o =>
                     o.Host == "sftp.example.com" && o.Port == 2222 && o.Username == "user" &&
                     o.Password == "pass" && o.RemoteDirectory == "remote/dir"),
                 Arg.Any<CancellationToken>())
@@ -37,12 +38,12 @@ public class BigDataImportStrategyTests
     {
         var integration = CreateSftpIntegration("sftp.example.com", port: null, "user", "pass", "remote/dir");
 
-        _sftpService.ListAsync(Arg.Is<SftpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
+        _sftpService.ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
             .Returns([]);
 
         await _strategy.ListFilesAsync(integration, CancellationToken.None);
 
-        await _sftpService.Received(1).ListAsync(Arg.Is<SftpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>());
+        await _sftpService.Received(1).ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -83,6 +84,7 @@ public class BigDataImportStrategyTests
         AddField("Username", username);
         AddField("Password", password);
         AddField("RemoteDirectory", remoteDirectory);
+        AddField("FtpType", "SFTP");
 
         integration.SystemIntegrationFields = fields;
 

@@ -48,9 +48,6 @@ public static class InfrastructureServiceExtensions
             options.UseSqlServer(readConnectionString);
         });
 
-        services.Configure<FtpOptions>(config.GetSection(FtpOptions.SectionName));
-        services.Configure<AzureBlobStorageOptions>(config.GetSection(AzureBlobStorageOptions.SectionName));
-
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()

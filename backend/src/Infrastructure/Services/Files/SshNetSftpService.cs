@@ -6,10 +6,10 @@ namespace Infrastructure.Services.Files;
 
 public class SshNetSftpService : ISftpService
 {
-    private static SftpClient CreateClient(SftpOptions options) =>
+    private static SftpClient CreateClient(FtpOptions options) =>
         new(options.Host, options.Port, options.Username, options.Password);
 
-    public async Task<IReadOnlyList<string>> ListAsync(SftpOptions options, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ListAsync(FtpOptions options, CancellationToken ct)
     {
         using var client = CreateClient(options);
         await client.ConnectAsync(ct);
@@ -27,7 +27,7 @@ public class SshNetSftpService : ISftpService
         return files;
     }
 
-    public async Task<Stream> DownloadAsync(SftpOptions options, string remotePath, CancellationToken ct)
+    public async Task<Stream> DownloadAsync(FtpOptions options, string remotePath, CancellationToken ct)
     {
         using var client = CreateClient(options);
         await client.ConnectAsync(ct);
@@ -39,7 +39,7 @@ public class SshNetSftpService : ISftpService
         return stream;
     }
 
-    public async Task UploadAsync(SftpOptions options, Stream content, string remotePath, CancellationToken ct)
+    public async Task UploadAsync(FtpOptions options, Stream content, string remotePath, CancellationToken ct)
     {
         using var client = CreateClient(options);
         await client.ConnectAsync(ct);

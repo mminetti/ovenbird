@@ -2,7 +2,7 @@
 
 public interface IFtpService
 {
-    Task<IReadOnlyList<string>> ListAsync(string remoteDirectory, CancellationToken ct);
-    Task UploadAsync(Stream content, string remotePath, CancellationToken ct);
-    Task<Stream> DownloadAsync(string remotePath, CancellationToken ct);
+    Task<IReadOnlyList<string>> ListAsync(FtpOptions options, CancellationToken ct);
+    Task UploadAsync(FtpOptions options, Stream content, string remotePath, CancellationToken ct);
+    Task<Stream> DownloadAsync(FtpOptions options, string remotePath, CancellationToken ct);
 }

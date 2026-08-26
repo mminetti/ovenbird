@@ -1,35 +1,40 @@
 ﻿using Azure.Storage.Blobs;
-using Microsoft.Extensions.Options;
 using UseCases.Interfaces.Files;
 
 namespace Infrastructure.Services.Files;
 
 public class AzureBlobFileStorage : IFileStorage
 {
-    private readonly BlobContainerClient _containerClient;
-    private readonly string _containerName;
-
-    public AzureBlobFileStorage(IOptions<AzureBlobStorageOptions> options)
+    private static BlobContainerClient GetClient(UseCases.Interfaces.Files.FileOptions options)
     {
-        _containerName = options.Value.ContainerName;
-
-        var serviceClient = new BlobServiceClient(options.Value.ConnectionString);
-        _containerClient = serviceClient.GetBlobContainerClient(_containerName);
+        var serviceClient = new BlobServiceClient(options.ConnectionString);
+        return serviceClient.GetBlobContainerClient(options.RootDirectory);
     }
 
-    public async Task<string> UploadAsync(Stream content, string storageKey, CancellationToken ct)
+    public async Task<string> UploadAsync(
+        UseCases.Interfaces.Files.FileOptions options, 
+        Stream content, 
+        string remotePath, 
+        CancellationToken ct)
     {
-        await _containerClient.CreateIfNotExistsAsync(cancellationToken: ct);
+        var client = GetClient(options);
 
-        var blobClient = _containerClient.GetBlobClient(storageKey);
+        await client.CreateIfNotExistsAsync(cancellationToken: ct);
+
+        var blobClient = client.GetBlobClient(remotePath);
         await blobClient.UploadAsync(content, overwrite: true, ct);
 
-        return $"{_containerName}/{storageKey}";
+        return $"{options.RootDirectory}/{remotePath}";
     }
 
-    public async Task<Stream> OpenReadAsync(string fileReference, CancellationToken ct)
+    public async Task<Stream> OpenReadAsync(
+        UseCases.Interfaces.Files.FileOptions options, 
+        string remotePath, 
+        CancellationToken ct)
     {
-        var blobClient = _containerClient.GetBlobClient(ExtractBlobName(fileReference));
+        var client = GetClient(options);
+
+        var blobClient = client.GetBlobClient(ExtractBlobName(remotePath));
 
         return await blobClient.OpenReadAsync(cancellationToken: ct);
     }

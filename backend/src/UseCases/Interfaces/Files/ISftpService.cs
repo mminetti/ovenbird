@@ -2,7 +2,7 @@
 
 public interface ISftpService
 {
-    Task<IReadOnlyList<string>> ListAsync(SftpOptions options, CancellationToken ct);
-    Task UploadAsync(SftpOptions options, Stream content, string remotePath, CancellationToken ct);
-    Task<Stream> DownloadAsync(SftpOptions options, string remotePath, CancellationToken ct);
+    Task<IReadOnlyList<string>> ListAsync(FtpOptions options, CancellationToken ct);
+    Task UploadAsync(FtpOptions options, Stream content, string remotePath, CancellationToken ct);
+    Task<Stream> DownloadAsync(FtpOptions options, string remotePath, CancellationToken ct);
 }

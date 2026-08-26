@@ -1,19 +1,19 @@
 ﻿using FluentFTP;
-using Microsoft.Extensions.Options;
 using UseCases.Interfaces.Files;
 
 namespace Infrastructure.Services.Files;
 
-public class FluentFtpService(IOptions<FtpOptions> options) : IFtpService
+public class FluentFtpService() : IFtpService
 {
-    private readonly FtpOptions _options = options.Value;
+    private static AsyncFtpClient CreateClient(FtpOptions options) =>
+        new(options.Host, options.Username, options.Password, options.Port);
 
-    public async Task<IReadOnlyList<string>> ListAsync(string remoteDirectory, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ListAsync(FtpOptions options, CancellationToken ct)
     {
-        await using var client = new AsyncFtpClient(_options.Host, _options.Username, _options.Password, _options.Port);
+        using var client = CreateClient(options);
         await client.Connect(ct);
 
-        var listing = await client.GetListing(remoteDirectory, ct);
+        var listing = await client.GetListing(options.RemoteDirectory, ct);
 
         return listing
             .Where(item => item.Type == FtpObjectType.File)
@@ -21,9 +21,9 @@ public class FluentFtpService(IOptions<FtpOptions> options) : IFtpService
             .ToList();
     }
 
-    public async Task<Stream> DownloadAsync(string remotePath, CancellationToken ct)
+    public async Task<Stream> DownloadAsync(FtpOptions options, string remotePath, CancellationToken ct)
     {
-        await using var client = new AsyncFtpClient(_options.Host, _options.Username, _options.Password, _options.Port);
+        using var client = CreateClient(options);
         await client.Connect(ct);
 
         var stream = new MemoryStream();
@@ -33,9 +33,9 @@ public class FluentFtpService(IOptions<FtpOptions> options) : IFtpService
         return stream;
     }
 
-    public async Task UploadAsync(Stream content, string remotePath, CancellationToken ct)
+    public async Task UploadAsync(FtpOptions options, Stream content, string remotePath, CancellationToken ct)
     {
-        await using var client = new AsyncFtpClient(_options.Host, _options.Username, _options.Password, _options.Port);
+        using var client = CreateClient(options);
         await client.Connect(ct);
 
         await client.UploadStream(content, remotePath, FtpRemoteExists.Overwrite, true, token: ct);
