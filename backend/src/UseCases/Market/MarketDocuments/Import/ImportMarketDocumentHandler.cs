@@ -11,7 +11,7 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Company> companyReadRepository,
-    IReadRepository<SystemIntegration> integrationReadRepository,
+    IReadRepository<Integration> integrationReadRepository,
     MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
@@ -31,7 +31,7 @@ public class ImportMarketDocumentHandler(
             var identifier = integration.GetRequiredValue(_handlerIdentifier);
 
             var import = strategyResolver.Resolve(identifier);
-            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.Market.TimeZoneId);
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.TimeZoneId);
 
             var remoteFilePaths = await import.ListFilesAsync(integration, ct);
 
@@ -73,11 +73,10 @@ public class ImportMarketDocumentHandler(
         return Result.Success<IReadOnlyList<long>>(documentIds);
     }
 
-    private static SystemIntegration GetRequiredIntegration(
-        IList<SystemIntegration> integrations, int companyId, string identifier)
+    private static Integration GetRequiredIntegration(
+        IList<Integration> integrations, int companyId, string identifier)
     {
-        return integrations.FirstOrDefault(x => x.Identifier == identifier &&
-                (x.CompanyId == companyId || x.CompanyId is null))
+        return integrations.FirstOrDefault(x => x.Name == identifier)
                 ?? throw new InvalidOperationException($"Integration {identifier} for company {companyId} not found");
     }
 }

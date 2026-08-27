@@ -11,6 +11,9 @@ public class CompanyConfiguration : BaseEntityTypeConfiguration<Company, int>
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        builder.Property(x => x.TimeZoneId)
+            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
+
         builder.HasOne(x => x.Market)
             .WithMany(x => x.Companies)
             .HasForeignKey(x => x.MarketId)

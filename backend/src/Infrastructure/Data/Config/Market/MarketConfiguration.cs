@@ -11,8 +11,5 @@ internal class MarketConfiguration : IEntityTypeConfiguration<Core.Market.Market
 
         builder.Property(x => x.Identifier)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.TimeZoneId)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
     }
 }

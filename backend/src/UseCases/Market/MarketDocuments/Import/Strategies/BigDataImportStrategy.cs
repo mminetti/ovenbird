@@ -20,7 +20,7 @@ public class BigDataImportStrategy(
 
     public string MarketIdentifier => Identifier;
 
-    public Task<IReadOnlyList<string>> ListFilesAsync(SystemIntegration integration, CancellationToken ct)
+    public Task<IReadOnlyList<string>> ListFilesAsync(Integration integration, CancellationToken ct)
     {
         var options = ResolveFtpOptions(integration);
 
@@ -34,7 +34,7 @@ public class BigDataImportStrategy(
         }
     }
 
-    public Task<Stream> DownloadFileAsync(SystemIntegration integration, string remoteFilePath, CancellationToken ct)
+    public Task<Stream> DownloadFileAsync(Integration integration, string remoteFilePath, CancellationToken ct)
     {
         var options = ResolveFtpOptions(integration);
 
@@ -48,7 +48,7 @@ public class BigDataImportStrategy(
         }
     }
 
-    public Task UploadFileAsync(SystemIntegration integration, Stream content, string remoteFilePath, CancellationToken ct)
+    public Task UploadFileAsync(Integration integration, Stream content, string remoteFilePath, CancellationToken ct)
     {
         var options = ResolveFtpOptions(integration);
 
@@ -62,14 +62,14 @@ public class BigDataImportStrategy(
         }
     }
 
-    public Task<string> UploadDocumentAsync(SystemIntegration integration, Stream content, string remoteFilePath, CancellationToken ct)
+    public Task<string> UploadDocumentAsync(Integration integration, Stream content, string remoteFilePath, CancellationToken ct)
     {
         var options = ResolveFileOptions(integration);
 
         return fileStorage.UploadAsync(options, content, remoteFilePath, ct);
     }
 
-    private static FtpOptions ResolveFtpOptions(SystemIntegration integration)
+    private static FtpOptions ResolveFtpOptions(Integration integration)
     {
         return new FtpOptions
         {
@@ -82,7 +82,7 @@ public class BigDataImportStrategy(
         };
     }
 
-    private static Interfaces.Files.FileOptions ResolveFileOptions(SystemIntegration integration)
+    private static Interfaces.Files.FileOptions ResolveFileOptions(Integration integration)
     {
         return new Interfaces.Files.FileOptions
         {

@@ -64,18 +64,18 @@ public class BigDataImportStrategyTests
             () => _strategy.ListFilesAsync(integration, CancellationToken.None));
     }
 
-    private static SystemIntegration CreateSftpIntegration(
+    private static Integration CreateSftpIntegration(
         string? host, string? port, string? username, string? password, string? remoteDirectory)
     {
-        var integration = new SystemIntegration { Id = 1, Identifier = "edi.import", Name = "Sftp" };
+        var integration = new Integration { Id = 1, Name = "Sftp" };
 
-        var fields = new List<SystemIntegrationField>();
+        var fields = new List<IntegrationField>();
 
         void AddField(string identifier, string? value)
         {
             if (value is not null)
             {
-                fields.Add(new SystemIntegrationField { SystemIntegrationId = integration.Id, Identifier = identifier, Name = identifier, Value = value });
+                fields.Add(new IntegrationField { IntegrationId = integration.Id, Name = identifier, Value = value });
             }
         }
 
@@ -86,7 +86,7 @@ public class BigDataImportStrategyTests
         AddField("RemoteDirectory", remoteDirectory);
         AddField("FtpType", "SFTP");
 
-        integration.SystemIntegrationFields = fields;
+        integration.IntegrationFields = fields;
 
         return integration;
     }

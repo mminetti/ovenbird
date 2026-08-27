@@ -5,8 +5,8 @@ namespace UseCases.Market.MarketDocuments.Import.Strategies;
 public interface IMarketImportStrategy
 {
     string MarketIdentifier { get; }
-    Task<IReadOnlyList<string>> ListFilesAsync(SystemIntegration integration, CancellationToken ct);
-    Task<Stream> DownloadFileAsync(SystemIntegration integration, string remoteFilePath, CancellationToken ct);
-    Task UploadFileAsync(SystemIntegration integration, Stream content, string remoteFilePath, CancellationToken ct);
-    Task<string> UploadDocumentAsync(SystemIntegration integration, Stream content, string remoteFilePath, CancellationToken ct);
+    Task<IReadOnlyList<string>> ListFilesAsync(Integration integration, CancellationToken ct);
+    Task<Stream> DownloadFileAsync(Integration integration, string remoteFilePath, CancellationToken ct);
+    Task UploadFileAsync(Integration integration, Stream content, string remoteFilePath, CancellationToken ct);
+    Task<string> UploadDocumentAsync(Integration integration, Stream content, string remoteFilePath, CancellationToken ct);
 }
