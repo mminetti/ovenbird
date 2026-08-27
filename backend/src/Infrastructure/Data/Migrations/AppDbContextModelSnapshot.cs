@@ -22,6 +22,21 @@ namespace Infrastructure.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ConfigurationIntegration", b =>
+                {
+                    b.Property<int>("ConfigurationsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("IntegrationsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ConfigurationsId", "IntegrationsId");
+
+                    b.HasIndex("IntegrationsId");
+
+                    b.ToTable("ConfigurationIntegration");
+                });
+
             modelBuilder.Entity("Core.Market.Market", b =>
                 {
                     b.Property<int>("Id")
@@ -371,9 +386,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("IntegrationId")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -389,8 +401,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("ConfigurationTypeId");
-
-                    b.HasIndex("IntegrationId");
 
                     b.ToTable("Configuration");
                 });
@@ -457,9 +467,6 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ConfigurationFieldId")
-                        .HasColumnType("int");
-
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -487,8 +494,6 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ConfigurationFieldId");
 
                     b.HasIndex("IntegrationImplementationId");
 
@@ -589,6 +594,21 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("UserRole", (string)null);
                 });
 
+            modelBuilder.Entity("ConfigurationIntegration", b =>
+                {
+                    b.HasOne("Core.Shared.Configuration", null)
+                        .WithMany()
+                        .HasForeignKey("ConfigurationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Shared.Integration", null)
+                        .WithMany()
+                        .HasForeignKey("IntegrationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Core.Market.MarketDocument", b =>
                 {
                     b.HasOne("Core.Shared.Company", "Company")
@@ -650,10 +670,6 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.Shared.Integration", null)
-                        .WithMany("Configurations")
-                        .HasForeignKey("IntegrationId");
-
                     b.Navigation("Company");
 
                     b.Navigation("ConfigurationType");
@@ -672,10 +688,6 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Shared.Integration", b =>
                 {
-                    b.HasOne("Core.Shared.ConfigurationField", null)
-                        .WithMany("Integrations")
-                        .HasForeignKey("ConfigurationFieldId");
-
                     b.HasOne("Core.Shared.IntegrationImplementation", "IntegrationImplementation")
                         .WithMany("Integrations")
                         .HasForeignKey("IntegrationImplementationId")
@@ -746,11 +758,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ConfigurationFields");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
-                {
-                    b.Navigation("Integrations");
-                });
-
             modelBuilder.Entity("Core.Shared.ConfigurationType", b =>
                 {
                     b.Navigation("Configurations");
@@ -758,8 +765,6 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Shared.Integration", b =>
                 {
-                    b.Navigation("Configurations");
-
                     b.Navigation("IntegrationFields");
                 });
 

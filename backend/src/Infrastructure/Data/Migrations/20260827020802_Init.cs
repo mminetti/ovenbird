@@ -132,6 +132,31 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SystemIntegration",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IntegrationImplementationId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemIntegration", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SystemIntegration_IntegrationImplementation_IntegrationImplementationId",
+                        column: x => x.IntegrationImplementationId,
+                        principalTable: "IntegrationImplementation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Company",
                 columns: table => new
                 {
@@ -204,6 +229,63 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SystemIntegrationField",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IntegrationId = table.Column<int>(type: "int", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    IsSecret = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemIntegrationField", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_SystemIntegrationField_SystemIntegration_IntegrationId",
+                        column: x => x.IntegrationId,
+                        principalTable: "SystemIntegration",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Configuration",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConfigurationTypeId = table.Column<int>(type: "int", nullable: false),
+                    CompanyId = table.Column<int>(type: "int", nullable: true),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Configuration", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Configuration_Company_CompanyId",
+                        column: x => x.CompanyId,
+                        principalTable: "Company",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Configuration_ConfigurationType_ConfigurationTypeId",
+                        column: x => x.ConfigurationTypeId,
+                        principalTable: "ConfigurationType",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MarketDocument",
                 columns: table => new
                 {
@@ -267,38 +349,6 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Configuration",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConfigurationTypeId = table.Column<int>(type: "int", nullable: false),
-                    CompanyId = table.Column<int>(type: "int", nullable: true),
-                    IntegrationId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Configuration", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Configuration_Company_CompanyId",
-                        column: x => x.CompanyId,
-                        principalTable: "Company",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Configuration_ConfigurationType_ConfigurationTypeId",
-                        column: x => x.ConfigurationTypeId,
-                        principalTable: "ConfigurationType",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ConfigurationField",
                 columns: table => new
                 {
@@ -324,57 +374,24 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SystemIntegration",
+                name: "ConfigurationIntegration",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    IntegrationImplementationId = table.Column<int>(type: "int", nullable: false),
-                    ConfigurationFieldId = table.Column<int>(type: "int", nullable: true),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    ConfigurationsId = table.Column<int>(type: "int", nullable: false),
+                    IntegrationsId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SystemIntegration", x => x.Id);
+                    table.PrimaryKey("PK_ConfigurationIntegration", x => new { x.ConfigurationsId, x.IntegrationsId });
                     table.ForeignKey(
-                        name: "FK_SystemIntegration_ConfigurationField_ConfigurationFieldId",
-                        column: x => x.ConfigurationFieldId,
-                        principalTable: "ConfigurationField",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_SystemIntegration_IntegrationImplementation_IntegrationImplementationId",
-                        column: x => x.IntegrationImplementationId,
-                        principalTable: "IntegrationImplementation",
+                        name: "FK_ConfigurationIntegration_Configuration_ConfigurationsId",
+                        column: x => x.ConfigurationsId,
+                        principalTable: "Configuration",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "SystemIntegrationField",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IntegrationId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
-                    IsSecret = table.Column<bool>(type: "bit", nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SystemIntegrationField", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SystemIntegrationField_SystemIntegration_IntegrationId",
-                        column: x => x.IntegrationId,
+                        name: "FK_ConfigurationIntegration_SystemIntegration_IntegrationsId",
+                        column: x => x.IntegrationsId,
                         principalTable: "SystemIntegration",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -415,14 +432,14 @@ namespace Infrastructure.Data.Migrations
                 column: "ConfigurationTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Configuration_IntegrationId",
-                table: "Configuration",
-                column: "IntegrationId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ConfigurationField_ConfigurationId",
                 table: "ConfigurationField",
                 column: "ConfigurationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConfigurationIntegration_IntegrationsId",
+                table: "ConfigurationIntegration",
+                column: "IntegrationsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MarketDocument_CompanyId",
@@ -450,11 +467,6 @@ namespace Infrastructure.Data.Migrations
                 column: "RolesId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SystemIntegration_ConfigurationFieldId",
-                table: "SystemIntegration",
-                column: "ConfigurationFieldId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_SystemIntegration_IntegrationImplementationId",
                 table: "SystemIntegration",
                 column: "IntegrationImplementationId");
@@ -474,33 +486,16 @@ namespace Infrastructure.Data.Migrations
                 name: "IX_UserRole_UsersId",
                 table: "UserRole",
                 column: "UsersId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Configuration_SystemIntegration_IntegrationId",
-                table: "Configuration",
-                column: "IntegrationId",
-                principalTable: "SystemIntegration",
-                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Company_Market_MarketId",
-                table: "Company");
+            migrationBuilder.DropTable(
+                name: "ConfigurationField");
 
-            migrationBuilder.DropForeignKey(
-                name: "FK_Configuration_Company_CompanyId",
-                table: "Configuration");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Configuration_ConfigurationType_ConfigurationTypeId",
-                table: "Configuration");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Configuration_SystemIntegration_IntegrationId",
-                table: "Configuration");
+            migrationBuilder.DropTable(
+                name: "ConfigurationIntegration");
 
             migrationBuilder.DropTable(
                 name: "MarketDocument");
@@ -515,6 +510,9 @@ namespace Infrastructure.Data.Migrations
                 name: "UserRole");
 
             migrationBuilder.DropTable(
+                name: "Configuration");
+
+            migrationBuilder.DropTable(
                 name: "MarketDocumentDirection");
 
             migrationBuilder.DropTable(
@@ -524,16 +522,13 @@ namespace Infrastructure.Data.Migrations
                 name: "Permission");
 
             migrationBuilder.DropTable(
+                name: "SystemIntegration");
+
+            migrationBuilder.DropTable(
                 name: "Role");
 
             migrationBuilder.DropTable(
                 name: "User");
-
-            migrationBuilder.DropTable(
-                name: "Module");
-
-            migrationBuilder.DropTable(
-                name: "Market");
 
             migrationBuilder.DropTable(
                 name: "Company");
@@ -542,16 +537,13 @@ namespace Infrastructure.Data.Migrations
                 name: "ConfigurationType");
 
             migrationBuilder.DropTable(
-                name: "SystemIntegration");
-
-            migrationBuilder.DropTable(
-                name: "ConfigurationField");
+                name: "Module");
 
             migrationBuilder.DropTable(
                 name: "IntegrationImplementation");
 
             migrationBuilder.DropTable(
-                name: "Configuration");
+                name: "Market");
         }
     }
 }

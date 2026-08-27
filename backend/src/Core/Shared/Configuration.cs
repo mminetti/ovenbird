@@ -10,6 +10,7 @@ public class Configuration : AuditableEntityBase<int>
     public int? CompanyId { get; set; }
 
     public ICollection<ConfigurationField> ConfigurationFields { get; set; } = [];
+    public ICollection<Integration> Integrations { get; set; } = [];
     public ConfigurationType ConfigurationType { get; set; } = default!;
     public Company? Company { get; set; }
 

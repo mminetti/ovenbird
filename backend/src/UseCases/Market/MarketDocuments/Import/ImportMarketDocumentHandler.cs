@@ -21,6 +21,7 @@ public class ImportMarketDocumentHandler(
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
+        // TODO: get configurations including company, fields and integrations with implementation and fields
         var companies = await companyReadRepository.ListAsync(new CompanyWithMarketSpec(), ct);
         var integrations = await integrationReadRepository.ListAsync(ct);
 
@@ -33,6 +34,7 @@ public class ImportMarketDocumentHandler(
             var import = strategyResolver.Resolve(identifier);
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.TimeZoneId);
 
+            // TODO: replace in IMarketImportStrategy Integration => Configuration
             var remoteFilePaths = await import.ListFilesAsync(integration, ct);
 
             foreach (var remoteFilePath in remoteFilePaths)

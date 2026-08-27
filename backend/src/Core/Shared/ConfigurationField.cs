@@ -9,5 +9,4 @@ public class ConfigurationField : AuditableEntityBase<int>
     public string? Value { get; set; }
 
     public Configuration Configuration { get; set; } = default!;
-    public ICollection<Integration> Integrations { get; set; } = [];
 }
