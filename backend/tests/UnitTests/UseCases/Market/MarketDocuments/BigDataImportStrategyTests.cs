@@ -1,4 +1,4 @@
-﻿using Core.Shared;
+using Core.Shared;
 using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 
@@ -19,7 +19,8 @@ public class BigDataImportStrategyTests
     [Fact]
     public async Task ListFilesAsyncDelegatesToSftpServiceUsingIntegrationFields()
     {
-        var integration = CreateSftpIntegration("sftp.example.com", "2222", "user", "pass", "remote/dir");
+        var configuration = CreateConfiguration(
+            CreateSftpIntegration("sftp.example.com", "2222", "user", "pass", "remote/dir"));
 
         _sftpService.ListAsync(
                 Arg.Is<FtpOptions>(o =>
@@ -28,7 +29,7 @@ public class BigDataImportStrategyTests
                 Arg.Any<CancellationToken>())
             .Returns(["remote/dir/file1.csv"]);
 
-        var files = await _strategy.ListFilesAsync(integration, CancellationToken.None);
+        var files = await _strategy.ListFilesAsync(configuration, CancellationToken.None);
 
         files.ShouldBe(["remote/dir/file1.csv"]);
     }
@@ -36,12 +37,13 @@ public class BigDataImportStrategyTests
     [Fact]
     public async Task ListFilesAsyncDefaultsPortWhenFieldMissing()
     {
-        var integration = CreateSftpIntegration("sftp.example.com", port: null, "user", "pass", "remote/dir");
+        var configuration = CreateConfiguration(
+            CreateSftpIntegration("sftp.example.com", port: null, "user", "pass", "remote/dir"));
 
         _sftpService.ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
             .Returns([]);
 
-        await _strategy.ListFilesAsync(integration, CancellationToken.None);
+        await _strategy.ListFilesAsync(configuration, CancellationToken.None);
 
         await _sftpService.Received(1).ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>());
     }
@@ -49,25 +51,51 @@ public class BigDataImportStrategyTests
     [Fact]
     public async Task ListFilesAsyncThrowsWhenRequiredFieldIsMissing()
     {
-        var integration = CreateSftpIntegration(host: null, "22", "user", "pass", "remote/dir");
+        var configuration = CreateConfiguration(
+            CreateSftpIntegration(host: null, "22", "user", "pass", "remote/dir"));
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => _strategy.ListFilesAsync(integration, CancellationToken.None));
+            () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
     }
 
     [Fact]
     public async Task ListFilesAsyncThrowsWhenRemoteDirectoryIsMissing()
     {
-        var integration = CreateSftpIntegration("sftp.example.com", "22", "user", "pass", remoteDirectory: null);
+        var configuration = CreateConfiguration(
+            CreateSftpIntegration("sftp.example.com", "22", "user", "pass", remoteDirectory: null));
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => _strategy.ListFilesAsync(integration, CancellationToken.None));
+            () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task ListFilesAsyncThrowsWhenFtpIntegrationIsMissing()
+    {
+        var configuration = new Configuration { Id = 1, Name = "edi.import" };
+
+        await Should.ThrowAsync<InvalidOperationException>(
+            () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
+    }
+
+    private static Configuration CreateConfiguration(Integration ftpIntegration)
+    {
+        return new Configuration
+        {
+            Id = 1,
+            Name = "edi.import",
+            Integrations = [ftpIntegration],
+        };
     }
 
     private static Integration CreateSftpIntegration(
         string? host, string? port, string? username, string? password, string? remoteDirectory)
     {
-        var integration = new Integration { Id = 1, Name = "Sftp" };
+        var integration = new Integration
+        {
+            Id = 1,
+            Name = "Sftp",
+            IntegrationImplementation = new IntegrationImplementation { Id = 1, Name = "Ftp" },
+        };
 
         var fields = new List<IntegrationField>();
 

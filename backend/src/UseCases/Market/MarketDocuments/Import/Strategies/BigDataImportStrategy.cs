@@ -1,4 +1,4 @@
-﻿using Core.Shared;
+using Core.Shared;
 using UseCases.Interfaces.Files;
 
 namespace UseCases.Market.MarketDocuments.Import.Strategies;
@@ -10,6 +10,9 @@ public class BigDataImportStrategy(
 {
     public const string Identifier = "BigData";
 
+    private const string FtpImplementation = "Ftp";
+    private const string FileStorageImplementation = "FileStorage";
+
     private const string HostFieldIdentifier = "Host";
     private const string PortFieldIdentifier = "Port";
     private const string UsernameFieldIdentifier = "Username";
@@ -20,9 +23,9 @@ public class BigDataImportStrategy(
 
     public string MarketIdentifier => Identifier;
 
-    public Task<IReadOnlyList<string>> ListFilesAsync(Integration integration, CancellationToken ct)
+    public Task<IReadOnlyList<string>> ListFilesAsync(Configuration configuration, CancellationToken ct)
     {
-        var options = ResolveFtpOptions(integration);
+        var options = ResolveFtpOptions(configuration);
 
         if (options.Type == "SFTP")
         {
@@ -34,9 +37,9 @@ public class BigDataImportStrategy(
         }
     }
 
-    public Task<Stream> DownloadFileAsync(Integration integration, string remoteFilePath, CancellationToken ct)
+    public Task<Stream> DownloadFileAsync(Configuration configuration, string remoteFilePath, CancellationToken ct)
     {
-        var options = ResolveFtpOptions(integration);
+        var options = ResolveFtpOptions(configuration);
 
         if (options.Type == "SFTP")
         {
@@ -48,9 +51,9 @@ public class BigDataImportStrategy(
         }
     }
 
-    public Task UploadFileAsync(Integration integration, Stream content, string remoteFilePath, CancellationToken ct)
+    public Task UploadFileAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
     {
-        var options = ResolveFtpOptions(integration);
+        var options = ResolveFtpOptions(configuration);
 
         if (options.Type == "SFTP")
         {
@@ -62,15 +65,17 @@ public class BigDataImportStrategy(
         }
     }
 
-    public Task<string> UploadDocumentAsync(Integration integration, Stream content, string remoteFilePath, CancellationToken ct)
+    public Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
     {
-        var options = ResolveFileOptions(integration);
+        var options = ResolveFileOptions(configuration);
 
         return fileStorage.UploadAsync(options, content, remoteFilePath, ct);
     }
 
-    private static FtpOptions ResolveFtpOptions(Integration integration)
+    private static FtpOptions ResolveFtpOptions(Configuration configuration)
     {
+        var integration = configuration.GetRequiredIntegration(FtpImplementation);
+
         return new FtpOptions
         {
             Host = integration.GetRequiredValue(HostFieldIdentifier),
@@ -82,8 +87,10 @@ public class BigDataImportStrategy(
         };
     }
 
-    private static Interfaces.Files.FileOptions ResolveFileOptions(Integration integration)
+    private static Interfaces.Files.FileOptions ResolveFileOptions(Configuration configuration)
     {
+        var integration = configuration.GetRequiredIntegration(FileStorageImplementation);
+
         return new Interfaces.Files.FileOptions
         {
             RootDirectory = integration.GetRequiredValue(RootDirectory),

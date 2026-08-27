@@ -1,4 +1,4 @@
-﻿using Core.Constants;
+using Core.Constants;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
@@ -10,32 +10,26 @@ namespace UseCases.Market.MarketDocuments.Import;
 public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
-    IReadRepository<Company> companyReadRepository,
-    IReadRepository<Integration> integrationReadRepository,
+    IReadRepository<Configuration> configurationReadRepository,
     MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
     private readonly string _identifier = "edi.import";
-    private readonly string _handlerIdentifier = "edi.import.handler";
 
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
-        // TODO: get configurations including company, fields and integrations with implementation and fields
-        var companies = await companyReadRepository.ListAsync(new CompanyWithMarketSpec(), ct);
-        var integrations = await integrationReadRepository.ListAsync(ct);
+        var configurations = await configurationReadRepository.ListAsync(new ConfigurationByNameSpec(_identifier), ct);
 
-        foreach (var company in companies)
+        foreach (var configuration in configurations)
         {
-            var integration = GetRequiredIntegration(integrations, company.Id, _identifier);
+            var company = configuration.Company
+                ?? throw new InvalidOperationException($"Configuration '{configuration.Name}' has no company.");
 
-            var identifier = integration.GetRequiredValue(_handlerIdentifier);
-
-            var import = strategyResolver.Resolve(identifier);
+            var import = strategyResolver.Resolve(configuration.ConfigurationType.Name);
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.TimeZoneId);
 
-            // TODO: replace in IMarketImportStrategy Integration => Configuration
-            var remoteFilePaths = await import.ListFilesAsync(integration, ct);
+            var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
 
             foreach (var remoteFilePath in remoteFilePaths)
             {
@@ -50,12 +44,12 @@ public class ImportMarketDocumentHandler(
                     continue;
                 }
 
-                using var ftpStream = await import.DownloadFileAsync(integration, remoteFilePath, ct);
+                using var ftpStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
 
                 var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
                 var storageKey = $"market-documents/{company.Name}/{now:yyyy/MM/dd}/{fileName}";
 
-                var uploadedFileReference = await import.UploadDocumentAsync(integration, ftpStream, storageKey, ct);
+                var uploadedFileReference = await import.UploadDocumentAsync(configuration, ftpStream, storageKey, ct);
 
                 var document = new MarketDocument
                 {
@@ -73,12 +67,5 @@ public class ImportMarketDocumentHandler(
         }
 
         return Result.Success<IReadOnlyList<long>>(documentIds);
-    }
-
-    private static Integration GetRequiredIntegration(
-        IList<Integration> integrations, int companyId, string identifier)
-    {
-        return integrations.FirstOrDefault(x => x.Name == identifier)
-                ?? throw new InvalidOperationException($"Integration {identifier} for company {companyId} not found");
     }
 }

@@ -18,6 +18,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<MarketDocument> MarketDocument => Set<MarketDocument>();
     public DbSet<Integration> SystemIntegration => Set<Integration>();
     public DbSet<IntegrationField> SystemIntegrationField => Set<IntegrationField>();
+    public DbSet<IntegrationImplementation> IntegrationImplementation => Set<IntegrationImplementation>();
+    public DbSet<Configuration> Configuration => Set<Configuration>();
+    public DbSet<ConfigurationField> ConfigurationField => Set<ConfigurationField>();
+    public DbSet<ConfigurationType> ConfigurationType => Set<ConfigurationType>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
