@@ -37,11 +37,6 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("TimeZoneId")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.HasKey("Id");
 
                     b.ToTable("Market");
@@ -341,6 +336,11 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<string>("TimeZoneId")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MarketId");
@@ -348,7 +348,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Company");
                 });
 
-            modelBuilder.Entity("Core.Shared.SystemIntegration", b =>
+            modelBuilder.Entity("Core.Shared.Configuration", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -357,6 +357,107 @@ namespace Infrastructure.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConfigurationTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("IntegrationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("ConfigurationTypeId");
+
+                    b.HasIndex("IntegrationId");
+
+                    b.ToTable("Configuration");
+                });
+
+            modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ConfigurationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfigurationId");
+
+                    b.ToTable("ConfigurationField");
+                });
+
+            modelBuilder.Entity("Core.Shared.ConfigurationType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ConfigurationType");
+                });
+
+            modelBuilder.Entity("Core.Shared.Integration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ConfigurationFieldId")
                         .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
@@ -370,10 +471,8 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Identifier")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                    b.Property<int>("IntegrationImplementationId")
+                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -389,12 +488,14 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CompanyId");
+                    b.HasIndex("ConfigurationFieldId");
+
+                    b.HasIndex("IntegrationImplementationId");
 
                     b.ToTable("SystemIntegration");
                 });
 
-            modelBuilder.Entity("Core.Shared.SystemIntegrationField", b =>
+            modelBuilder.Entity("Core.Shared.IntegrationField", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -409,10 +510,11 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Identifier")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                    b.Property<int>("IntegrationId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsSecret")
+                        .HasColumnType("bit");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -426,18 +528,35 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<int>("SystemIntegrationId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Value")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SystemIntegrationId");
+                    b.HasIndex("IntegrationId");
 
                     b.ToTable("SystemIntegrationField");
+                });
+
+            modelBuilder.Entity("Core.Shared.IntegrationImplementation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IntegrationImplementation");
                 });
 
             modelBuilder.Entity("PermissionRole", b =>
@@ -519,25 +638,62 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Market");
                 });
 
-            modelBuilder.Entity("Core.Shared.SystemIntegration", b =>
+            modelBuilder.Entity("Core.Shared.Configuration", b =>
                 {
                     b.HasOne("Core.Shared.Company", "Company")
-                        .WithMany("SystemIntegrations")
-                        .HasForeignKey("CompanyId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .WithMany("Configurations")
+                        .HasForeignKey("CompanyId");
 
-                    b.Navigation("Company");
-                });
-
-            modelBuilder.Entity("Core.Shared.SystemIntegrationField", b =>
-                {
-                    b.HasOne("Core.Shared.SystemIntegration", "SystemIntegration")
-                        .WithMany("SystemIntegrationFields")
-                        .HasForeignKey("SystemIntegrationId")
+                    b.HasOne("Core.Shared.ConfigurationType", "ConfigurationType")
+                        .WithMany("Configurations")
+                        .HasForeignKey("ConfigurationTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("SystemIntegration");
+                    b.HasOne("Core.Shared.Integration", null)
+                        .WithMany("Configurations")
+                        .HasForeignKey("IntegrationId");
+
+                    b.Navigation("Company");
+
+                    b.Navigation("ConfigurationType");
+                });
+
+            modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
+                {
+                    b.HasOne("Core.Shared.Configuration", "Configuration")
+                        .WithMany("ConfigurationFields")
+                        .HasForeignKey("ConfigurationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Configuration");
+                });
+
+            modelBuilder.Entity("Core.Shared.Integration", b =>
+                {
+                    b.HasOne("Core.Shared.ConfigurationField", null)
+                        .WithMany("Integrations")
+                        .HasForeignKey("ConfigurationFieldId");
+
+                    b.HasOne("Core.Shared.IntegrationImplementation", "IntegrationImplementation")
+                        .WithMany("Integrations")
+                        .HasForeignKey("IntegrationImplementationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("IntegrationImplementation");
+                });
+
+            modelBuilder.Entity("Core.Shared.IntegrationField", b =>
+                {
+                    b.HasOne("Core.Shared.Integration", "Integration")
+                        .WithMany("IntegrationFields")
+                        .HasForeignKey("IntegrationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Integration");
                 });
 
             modelBuilder.Entity("PermissionRole", b =>
@@ -582,12 +738,34 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Shared.Company", b =>
                 {
-                    b.Navigation("SystemIntegrations");
+                    b.Navigation("Configurations");
                 });
 
-            modelBuilder.Entity("Core.Shared.SystemIntegration", b =>
+            modelBuilder.Entity("Core.Shared.Configuration", b =>
                 {
-                    b.Navigation("SystemIntegrationFields");
+                    b.Navigation("ConfigurationFields");
+                });
+
+            modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
+                {
+                    b.Navigation("Integrations");
+                });
+
+            modelBuilder.Entity("Core.Shared.ConfigurationType", b =>
+                {
+                    b.Navigation("Configurations");
+                });
+
+            modelBuilder.Entity("Core.Shared.Integration", b =>
+                {
+                    b.Navigation("Configurations");
+
+                    b.Navigation("IntegrationFields");
+                });
+
+            modelBuilder.Entity("Core.Shared.IntegrationImplementation", b =>
+                {
+                    b.Navigation("Integrations");
                 });
 #pragma warning restore 612, 618
         }
