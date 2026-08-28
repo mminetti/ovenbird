@@ -56,11 +56,14 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()
-            .AddScoped<ISftpService, SshNetSftpService>()
+            .AddScoped<IFtpService, SshNetSftpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<IMarketImportStrategy, BigDataImportStrategy>()
             .AddScoped<MarketImportStrategyResolver>()
             .AddScoped<CurrentUserService>();
+
+        services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));
+        services.AddKeyedTransient<IFtpService, SshNetSftpService>(nameof(SshNetSftpService));
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 

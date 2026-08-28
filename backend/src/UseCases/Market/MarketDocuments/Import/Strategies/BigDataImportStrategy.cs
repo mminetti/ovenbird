@@ -1,18 +1,14 @@
 ﻿using Core.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 
 namespace UseCases.Market.MarketDocuments.Import.Strategies;
 
-public class BigDataImportStrategy(
-    ISftpService sftpService,
-    IFtpService ftpService,
-    IFileStorage fileStorage) : IMarketImportStrategy
+public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketImportStrategy
 {
     public const string Identifier = "BigData";
-
-    private const string FtpImplementation = "Ftp";
-    private const string FileStorageImplementation = "FileStorage";
-
+    private const string FtpImplementation = "FtpImplementation";
+    private const string FileStorageImplementation = "FileStorageImplementation";
     private const string HostFieldIdentifier = "Host";
     private const string PortFieldIdentifier = "Port";
     private const string UsernameFieldIdentifier = "Username";
@@ -27,47 +23,34 @@ public class BigDataImportStrategy(
     {
         var options = ResolveFtpOptions(configuration);
 
-        if (options.Type == "SFTP")
-        {
-            return sftpService.ListAsync(options, ct);
-        }
-        else
-        {
-            return ftpService.ListAsync(options, ct);
-        }
+        var ftpService = serviceProvider.GetRequiredKeyedService<IFtpService>(options.Implementation);
+
+        return ftpService.ListAsync(options, ct);
     }
 
     public Task<Stream> DownloadFileAsync(Configuration configuration, string remoteFilePath, CancellationToken ct)
     {
         var options = ResolveFtpOptions(configuration);
 
-        if (options.Type == "SFTP")
-        {
-            return sftpService.DownloadAsync(options, remoteFilePath, ct);
-        }
-        else
-        {
-            return ftpService.DownloadAsync(options, remoteFilePath, ct);
-        }
+        var ftpService = serviceProvider.GetRequiredKeyedService<IFtpService>(options.Implementation);
+
+        return ftpService.DownloadAsync(options, remoteFilePath, ct);
     }
 
     public Task UploadFileAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
     {
         var options = ResolveFtpOptions(configuration);
 
-        if (options.Type == "SFTP")
-        {
-            return sftpService.UploadAsync(options, content, remoteFilePath, ct);
-        }
-        else
-        {
-            return ftpService.UploadAsync(options, content, remoteFilePath, ct);
-        }
+        var ftpService = serviceProvider.GetRequiredKeyedService<IFtpService>(options.Implementation);
+
+        return ftpService.UploadAsync(options, content, remoteFilePath, ct);
     }
 
     public Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
     {
         var options = ResolveFileOptions(configuration);
+
+        var fileStorage = serviceProvider.GetRequiredKeyedService<IFileStorage>(options.Implementation);
 
         return fileStorage.UploadAsync(options, content, remoteFilePath, ct);
     }
@@ -84,6 +67,7 @@ public class BigDataImportStrategy(
             Password = connector.GetRequiredValue(PasswordFieldIdentifier),
             RemoteDirectory = connector.GetRequiredValue(RemoteDirectory),
             Type = connector.GetRequiredValue(FtpType),
+            Implementation = connector.GetRequiredValue(FtpType),
         };
     }
 

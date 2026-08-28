@@ -4,7 +4,7 @@ using UseCases.Interfaces.Files;
 
 namespace Infrastructure.Services.Files;
 
-public class SshNetSftpService : ISftpService
+public class SshNetSftpService : IFtpService
 {
     private static SftpClient CreateClient(FtpOptions options) =>
         new(options.Host, options.Port, options.Username, options.Password);

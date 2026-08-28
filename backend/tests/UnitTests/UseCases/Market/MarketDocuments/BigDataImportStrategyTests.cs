@@ -6,14 +6,14 @@ namespace UnitTests.UseCases.Market.MarketDocuments;
 
 public class BigDataImportStrategyTests
 {
-    private readonly ISftpService _sftpService = Substitute.For<ISftpService>();
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
     private readonly IFileStorage _fileStorage = Substitute.For<IFileStorage>();
+    private readonly IServiceProvider _serviceProvider = Substitute.For<IServiceProvider>();
     private readonly BigDataImportStrategy _strategy;
 
     public BigDataImportStrategyTests()
     {
-        _strategy = new BigDataImportStrategy(_sftpService, _ftpService, _fileStorage);
+        _strategy = new BigDataImportStrategy(_serviceProvider);
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public class BigDataImportStrategyTests
         var configuration = CreateConfiguration(
             CreateSftpIntegration("sftp.example.com", "2222", "user", "pass", "remote/dir"));
 
-        _sftpService.ListAsync(
+        _ftpService.ListAsync(
                 Arg.Is<FtpOptions>(o =>
                     o.Host == "sftp.example.com" && o.Port == 2222 && o.Username == "user" &&
                     o.Password == "pass" && o.RemoteDirectory == "remote/dir"),
@@ -40,12 +40,12 @@ public class BigDataImportStrategyTests
         var configuration = CreateConfiguration(
             CreateSftpIntegration("sftp.example.com", port: null, "user", "pass", "remote/dir"));
 
-        _sftpService.ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
+        _ftpService.ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
             .Returns([]);
 
         await _strategy.ListFilesAsync(configuration, CancellationToken.None);
 
-        await _sftpService.Received(1).ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>());
+        await _ftpService.Received(1).ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>());
     }
 
     [Fact]
