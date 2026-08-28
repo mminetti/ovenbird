@@ -33,21 +33,18 @@ public class Configuration : AuditableEntityBase<int>
         return value;
     }
 
-    public Integration? GetIntegration(string implementationName)
+    public Integration GetRequiredIntegration(string name)
     {
-        return Integrations
-            .FirstOrDefault(x => string.Equals(x.IntegrationImplementation.Name, implementationName, StringComparison.OrdinalIgnoreCase));
+        var integration = GetIntegration(name);
+
+        return integration ??
+            throw new InvalidOperationException(
+                $"Configuration '{Name}' is missing required '{name}' integration.");
     }
 
-    public Integration GetRequiredIntegration(string implementationName)
+    public Integration? GetIntegration(string name)
     {
-        var integration = GetIntegration(implementationName);
-
-        if (integration is null)
-        {
-            throw new InvalidOperationException($"Configuration '{Name}' is missing required '{implementationName}' integration.");
-        }
-
-        return integration;
+        return Integrations
+            .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 }

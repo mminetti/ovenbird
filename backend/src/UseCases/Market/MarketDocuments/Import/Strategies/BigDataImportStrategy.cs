@@ -1,4 +1,4 @@
-using Core.Shared;
+﻿using Core.Shared;
 using UseCases.Interfaces.Files;
 
 namespace UseCases.Market.MarketDocuments.Import.Strategies;

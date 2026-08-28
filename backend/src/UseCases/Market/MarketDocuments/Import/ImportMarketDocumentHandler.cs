@@ -1,4 +1,4 @@
-using Core.Constants;
+﻿using Core.Constants;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
@@ -14,19 +14,20 @@ public class ImportMarketDocumentHandler(
     MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
-    private readonly string _identifier = "edi.import";
+    public const string _handlerIdentifier = "edi.import.handler";
 
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
-        var configurations = await configurationReadRepository.ListAsync(new ConfigurationByNameSpec(_identifier), ct);
+        var configurations = await configurationReadRepository.ListAsync(
+            new ConfigurationByTypeNameSpec(ConfigurationTypes.EdiImport), ct);
 
         foreach (var configuration in configurations)
         {
             var company = configuration.Company
                 ?? throw new InvalidOperationException($"Configuration '{configuration.Name}' has no company.");
 
-            var import = strategyResolver.Resolve(configuration.ConfigurationType.Name);
+            var import = strategyResolver.Resolve(configuration.GetRequiredValue(_handlerIdentifier));
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.TimeZoneId);
 
             var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
