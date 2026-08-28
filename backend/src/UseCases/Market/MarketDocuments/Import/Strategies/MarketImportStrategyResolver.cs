@@ -5,9 +5,9 @@ public class MarketImportStrategyResolver(IEnumerable<IMarketImportStrategy> str
     public IMarketImportStrategy Resolve(string identifier)
     {
         var match = strategies.FirstOrDefault(s =>
-            string.Equals(s.MarketIdentifier, identifier, StringComparison.OrdinalIgnoreCase));
+            string.Equals(s.Identifier, identifier, StringComparison.OrdinalIgnoreCase));
 
-        return match ?? strategies.First(s =>
-            string.Equals(s.MarketIdentifier, BigDataImportStrategy.Identifier, StringComparison.OrdinalIgnoreCase));
+        return match ??
+            throw new InvalidOperationException($"Market Import Strategy couldn't resolve identifier '{identifier}'.");
     }
 }

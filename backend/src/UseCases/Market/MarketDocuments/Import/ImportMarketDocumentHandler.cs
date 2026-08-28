@@ -1,4 +1,5 @@
-﻿using Core.Constants;
+﻿using Core.Common.Extensions;
+using Core.Constants;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
@@ -14,7 +15,7 @@ public class ImportMarketDocumentHandler(
     MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
-    public const string _handlerIdentifier = "edi.import.handler";
+    private const string HandlerIdentifier = "edi.import.handler";
 
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
@@ -24,10 +25,9 @@ public class ImportMarketDocumentHandler(
 
         foreach (var configuration in configurations)
         {
-            var company = configuration.Company
-                ?? throw new InvalidOperationException($"Configuration '{configuration.Name}' has no company.");
+            var company = configuration.GetRequiredCompany();
 
-            var import = strategyResolver.Resolve(configuration.GetRequiredValue(_handlerIdentifier));
+            var import = strategyResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.TimeZoneId);
 
             var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
@@ -47,8 +47,7 @@ public class ImportMarketDocumentHandler(
 
                 using var ftpStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
 
-                var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
-                var storageKey = $"market-documents/{company.Name}/{now:yyyy/MM/dd}/{fileName}";
+                var storageKey = GetStorageKey(timeProvider.GetUtcNow(), timeZone, company.Name, fileName);
 
                 var uploadedFileReference = await import.UploadDocumentAsync(configuration, ftpStream, storageKey, ct);
 
@@ -68,5 +67,12 @@ public class ImportMarketDocumentHandler(
         }
 
         return Result.Success<IReadOnlyList<long>>(documentIds);
+    }
+
+    private static string GetStorageKey(DateTimeOffset utcNow, TimeZoneInfo timeZone, string companyName, string fileName)
+    {
+        var now = TimeZoneInfo.ConvertTime(utcNow, timeZone);
+        var rootFilePath = $"edi/import/{companyName}/{now:yyyy/MM/dd}".ToSlug();
+        return $"{rootFilePath}/{fileName}";
     }
 }

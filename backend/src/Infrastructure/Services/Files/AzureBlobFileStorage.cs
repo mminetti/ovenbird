@@ -5,14 +5,14 @@ namespace Infrastructure.Services.Files;
 
 public class AzureBlobFileStorage : IFileStorage
 {
-    private static BlobContainerClient GetClient(UseCases.Interfaces.Files.FileOptions options)
+    private static BlobContainerClient GetClient(FileStorageOptions options)
     {
         var serviceClient = new BlobServiceClient(options.ConnectionString);
         return serviceClient.GetBlobContainerClient(options.RootDirectory);
     }
 
     public async Task<string> UploadAsync(
-        UseCases.Interfaces.Files.FileOptions options, 
+        FileStorageOptions options, 
         Stream content, 
         string remotePath, 
         CancellationToken ct)
@@ -28,7 +28,7 @@ public class AzureBlobFileStorage : IFileStorage
     }
 
     public async Task<Stream> OpenReadAsync(
-        UseCases.Interfaces.Files.FileOptions options, 
+        FileStorageOptions options, 
         string remotePath, 
         CancellationToken ct)
     {

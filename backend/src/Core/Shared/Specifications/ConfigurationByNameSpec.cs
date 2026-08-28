@@ -10,5 +10,7 @@ public class ConfigurationByTypeNameSpec : Specification<Configuration>
             .Include(configuration => configuration.Connectors)
                 .ThenInclude(connector => connector.ConnectorImplementation)
             .Include(configuration => configuration.Connectors)
-                .ThenInclude(connector => connector.ConnectorFields);
+                .ThenInclude(connector => connector.ConnectorFields)
+            .Include(configuration => configuration.Connectors)
+                .ThenInclude(connector => connector.ConnectorType);
 }

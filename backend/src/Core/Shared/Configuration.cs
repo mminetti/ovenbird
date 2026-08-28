@@ -21,6 +21,11 @@ public class Configuration : AuditableEntityBase<int>
             ?.Value;
     }
 
+    public Company GetRequiredCompany()
+    {
+        return Company ?? throw new InvalidOperationException($"Configuration '{Name}' has no company.");
+    }
+
     public string GetRequiredValue(string name)
     {
         var value = GetValue(name);
@@ -33,18 +38,18 @@ public class Configuration : AuditableEntityBase<int>
         return value;
     }
 
-    public Connector GetRequiredConnector(string name)
+    public Connector GetRequiredConnector(string type)
     {
-        var integration = GetConnector(name);
+        var integration = GetConnector(type);
 
         return integration ??
             throw new InvalidOperationException(
-                $"Configuration '{Name}' is missing required '{name}' connector.");
+                $"Configuration '{Name}' is missing required '{type}' connector type.");
     }
 
-    public Connector? GetConnector(string name)
+    private Connector? GetConnector(string name)
     {
         return Connectors
-            .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
+            .FirstOrDefault(x => string.Equals(x.ConnectorType.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 }

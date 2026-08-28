@@ -1,6 +1,6 @@
 ﻿namespace UseCases.Interfaces.Files;
 
-public class FileOptions
+public class FileStorageOptions
 {
     public string ConnectionString { get; set; } = string.Empty;
     public string RootDirectory { get; set; } = string.Empty;
