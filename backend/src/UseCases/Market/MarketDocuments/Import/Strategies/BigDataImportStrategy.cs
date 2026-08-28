@@ -22,39 +22,43 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
 
     public Task<IReadOnlyList<string>> ListFilesAsync(Configuration configuration, CancellationToken ct)
     {
-        var (options, ftpService) = ResolveFtp(configuration);
+        var ftp = ResolveFtp(configuration);
 
-        return ftpService.ListAsync(options, ct);
+        return ftp.Service.ListAsync(ftp.Options, ct);
     }
 
     public Task<Stream> DownloadFileAsync(Configuration configuration, string remoteFilePath, CancellationToken ct)
     {
-        var (options, ftpService) = ResolveFtp(configuration);
+        var ftp = ResolveFtp(configuration);
 
-        return ftpService.DownloadAsync(options, remoteFilePath, ct);
+        return ftp.Service.DownloadAsync(ftp.Options, remoteFilePath, ct);
     }
 
     public Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
     {
-        var (options, fileStorage) = ResolveFileStorage(configuration);
+        var fileStorage = ResolveFileStorage(configuration);
 
-        return fileStorage.UploadAsync(options, content, remoteFilePath, ct);
+        return fileStorage.Service.UploadAsync(fileStorage.Options, content, remoteFilePath, ct);
     }
 
-    private (FtpOptions Options, IFtpService Service) ResolveFtp(Configuration configuration)
+    private record FtpContext(FtpOptions Options, IFtpService Service);
+
+    private record FileStorageContext(FileStorageOptions Options, IFileStorage Service);
+
+    private FtpContext ResolveFtp(Configuration configuration)
     {
         var options = ResolveFtpOptions(configuration);
         var service = ResolveService<IFtpService>(configuration.Name, options.Implementation);
 
-        return (options, service);
+        return new FtpContext(options, service);
     }
 
-    private (FileStorageOptions Options, IFileStorage Service) ResolveFileStorage(Configuration configuration)
+    private FileStorageContext ResolveFileStorage(Configuration configuration)
     {
         var options = ResolveFileOptions(configuration);
         var service = ResolveService<IFileStorage>(configuration.Name, options.Implementation);
 
-        return (options, service);
+        return new FileStorageContext(options, service);
     }
 
     private TService ResolveService<TService>(string configurationName, string implementation)
@@ -67,8 +71,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
         catch (InvalidOperationException ex)
         {
             throw new InvalidOperationException(
-                $"Configuration '{configurationName}' requested {typeof(TService).Name} implementation '{implementation}' which isn't registered.",
-                ex);
+                $"Configuration '{configurationName}' implementation '{implementation}' is not registered.", ex);
         }
     }
 
@@ -79,30 +82,12 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
         return new FtpOptions
         {
             Host = connector.GetRequiredValue(FtpHost),
-            Port = ResolvePort(connector),
+            Port = int.TryParse(connector.GetRequiredValue(FtpPort), out var port) ? port : DefaultFtpPort,
             Username = connector.GetRequiredValue(FtpUsername),
             Password = connector.GetRequiredValue(FtpPassword),
             RemoteDirectory = configuration.GetRequiredValue(FtpRemoteDirectory),
             Implementation = connector.ConnectorImplementation.Name,
         };
-    }
-
-    private static int ResolvePort(Connector connector)
-    {
-        var value = connector.GetValue(FtpPort);
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return DefaultFtpPort;
-        }
-
-        if (!int.TryParse(value, out var port))
-        {
-            throw new InvalidOperationException(
-                $"Connector '{connector.Name}' has an invalid '{FtpPort}' value '{value}'.");
-        }
-
-        return port;
     }
 
     private static FileStorageOptions ResolveFileOptions(Configuration configuration)
