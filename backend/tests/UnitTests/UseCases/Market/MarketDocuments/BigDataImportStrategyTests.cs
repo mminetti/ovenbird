@@ -1,4 +1,4 @@
-using Core.Shared;
+﻿using Core.Shared;
 using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 
@@ -77,33 +77,33 @@ public class BigDataImportStrategyTests
             () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
     }
 
-    private static Configuration CreateConfiguration(Integration ftpIntegration)
+    private static Configuration CreateConfiguration(Connector ftpIntegration)
     {
         return new Configuration
         {
             Id = 1,
             Name = "edi.import",
-            Integrations = [ftpIntegration],
+            Connectors = [ftpIntegration],
         };
     }
 
-    private static Integration CreateSftpIntegration(
+    private static Connector CreateSftpIntegration(
         string? host, string? port, string? username, string? password, string? remoteDirectory)
     {
-        var integration = new Integration
+        var integration = new Connector
         {
             Id = 1,
             Name = "Sftp",
-            IntegrationImplementation = new IntegrationImplementation { Id = 1, Name = "Ftp" },
+            ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = "Ftp" },
         };
 
-        var fields = new List<IntegrationField>();
+        var fields = new List<ConnectorField>();
 
         void AddField(string identifier, string? value)
         {
             if (value is not null)
             {
-                fields.Add(new IntegrationField { IntegrationId = integration.Id, Name = identifier, Value = value });
+                fields.Add(new ConnectorField { ConnectorId = integration.Id, Name = identifier, Value = value });
             }
         }
 
@@ -114,7 +114,7 @@ public class BigDataImportStrategyTests
         AddField("RemoteDirectory", remoteDirectory);
         AddField("FtpType", "SFTP");
 
-        integration.IntegrationFields = fields;
+        integration.ConnectorFields = fields;
 
         return integration;
     }

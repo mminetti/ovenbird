@@ -2,9 +2,9 @@
 
 namespace Infrastructure.Data.Config.Shared;
 
-public class IntegrationConfiguration : BaseEntityTypeConfiguration<Integration, int>
+public class ConnectorConfiguration : BaseEntityTypeConfiguration<Connector, int>
 {
-    public override void Configure(EntityTypeBuilder<Integration> builder)
+    public override void Configure(EntityTypeBuilder<Connector> builder)
     {
         base.Configure(builder);
 

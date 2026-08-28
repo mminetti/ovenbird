@@ -2,19 +2,19 @@
 
 namespace Core.Shared;
 
-public class Integration : AuditableEntityBase<int>
+public class Connector : AuditableEntityBase<int>
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
-    public int IntegrationImplementationId { get; set; }
+    public int ConnectorImplementationId { get; set; }
 
-    public IntegrationImplementation IntegrationImplementation { get; set; } = default!;
-    public ICollection<IntegrationField> IntegrationFields { get; set; } = [];
+    public ConnectorImplementation ConnectorImplementation { get; set; } = default!;
+    public ICollection<ConnectorField> ConnectorFields { get; set; } = [];
     public ICollection<Configuration> Configurations { get; set; } = [];
 
     public string? GetValue(string name)
     {
-        return IntegrationFields
+        return ConnectorFields
             .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase))
             ?.Value;
     }
@@ -25,7 +25,7 @@ public class Integration : AuditableEntityBase<int>
 
         if (string.IsNullOrWhiteSpace(value))
         {
-            throw new InvalidOperationException($"Integration '{Name}' is missing required '{name}' field.");
+            throw new InvalidOperationException($"Connector '{Name}' is missing required '{name}' field.");
         }
 
         return value;

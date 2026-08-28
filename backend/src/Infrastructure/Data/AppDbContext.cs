@@ -16,9 +16,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Core.Security.Module> Module => Set<Core.Security.Module>();
     public DbSet<Company> Company => Set<Company>();
     public DbSet<MarketDocument> MarketDocument => Set<MarketDocument>();
-    public DbSet<Integration> SystemIntegration => Set<Integration>();
-    public DbSet<IntegrationField> SystemIntegrationField => Set<IntegrationField>();
-    public DbSet<IntegrationImplementation> IntegrationImplementation => Set<IntegrationImplementation>();
+    public DbSet<Connector> Connector => Set<Connector>();
+    public DbSet<ConnectorField> ConnectorField => Set<ConnectorField>();
+    public DbSet<ConnectorImplementation> ConnectorImplementation => Set<ConnectorImplementation>();
     public DbSet<Configuration> Configuration => Set<Configuration>();
     public DbSet<ConfigurationField> ConfigurationField => Set<ConfigurationField>();
     public DbSet<ConfigurationType> ConfigurationType => Set<ConfigurationType>();

@@ -74,26 +74,26 @@ public class BigDataImportStrategy(
 
     private static FtpOptions ResolveFtpOptions(Configuration configuration)
     {
-        var integration = configuration.GetRequiredIntegration(FtpImplementation);
+        var connector = configuration.GetRequiredConnector(FtpImplementation);
 
         return new FtpOptions
         {
-            Host = integration.GetRequiredValue(HostFieldIdentifier),
-            Port = int.TryParse(integration.GetValue(PortFieldIdentifier), out var port) ? port : 22,
-            Username = integration.GetRequiredValue(UsernameFieldIdentifier),
-            Password = integration.GetRequiredValue(PasswordFieldIdentifier),
-            RemoteDirectory = integration.GetRequiredValue(RemoteDirectory),
-            Type = integration.GetRequiredValue(FtpType),
+            Host = connector.GetRequiredValue(HostFieldIdentifier),
+            Port = int.TryParse(connector.GetValue(PortFieldIdentifier), out var port) ? port : 22,
+            Username = connector.GetRequiredValue(UsernameFieldIdentifier),
+            Password = connector.GetRequiredValue(PasswordFieldIdentifier),
+            RemoteDirectory = connector.GetRequiredValue(RemoteDirectory),
+            Type = connector.GetRequiredValue(FtpType),
         };
     }
 
     private static Interfaces.Files.FileOptions ResolveFileOptions(Configuration configuration)
     {
-        var integration = configuration.GetRequiredIntegration(FileStorageImplementation);
+        var connector = configuration.GetRequiredConnector(FileStorageImplementation);
 
         return new Interfaces.Files.FileOptions
         {
-            RootDirectory = integration.GetRequiredValue(RootDirectory),
+            RootDirectory = connector.GetRequiredValue(RootDirectory),
         };
     }
 }

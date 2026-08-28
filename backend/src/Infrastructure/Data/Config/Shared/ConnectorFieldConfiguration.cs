@@ -2,9 +2,9 @@
 
 namespace Infrastructure.Data.Config.Shared;
 
-public class IntegrationFieldConfiguration : BaseEntityTypeConfiguration<IntegrationField, int>
+public class ConnectorFieldConfiguration : BaseEntityTypeConfiguration<ConnectorField, int>
 {
-    public override void Configure(EntityTypeBuilder<IntegrationField> builder)
+    public override void Configure(EntityTypeBuilder<ConnectorField> builder)
     {
         base.Configure(builder);
 
@@ -14,9 +14,9 @@ public class IntegrationFieldConfiguration : BaseEntityTypeConfiguration<Integra
         builder.Property(x => x.Value)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
-        builder.HasOne(x => x.Integration)
-            .WithMany(x => x.IntegrationFields)
-            .HasForeignKey(x => x.IntegrationId)
+        builder.HasOne(x => x.Connector)
+            .WithMany(x => x.ConnectorFields)
+            .HasForeignKey(x => x.ConnectorId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

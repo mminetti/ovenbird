@@ -1,4 +1,4 @@
-using Core.Shared;
+﻿using Core.Shared;
 
 namespace Infrastructure.Data.Config.Shared;
 
@@ -24,7 +24,7 @@ public class ConfigurationConfiguration : BaseEntityTypeConfiguration<Configurat
             .HasForeignKey(x => x.CompanyId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        builder.HasMany(x => x.Integrations)
+        builder.HasMany(x => x.Connectors)
             .WithMany(x => x.Configurations);
     }
 }

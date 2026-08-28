@@ -10,7 +10,7 @@ public class Configuration : AuditableEntityBase<int>
     public int? CompanyId { get; set; }
 
     public ICollection<ConfigurationField> ConfigurationFields { get; set; } = [];
-    public ICollection<Integration> Integrations { get; set; } = [];
+    public ICollection<Connector> Connectors { get; set; } = [];
     public ConfigurationType ConfigurationType { get; set; } = default!;
     public Company? Company { get; set; }
 
@@ -33,18 +33,18 @@ public class Configuration : AuditableEntityBase<int>
         return value;
     }
 
-    public Integration GetRequiredIntegration(string name)
+    public Connector GetRequiredConnector(string name)
     {
-        var integration = GetIntegration(name);
+        var integration = GetConnector(name);
 
         return integration ??
             throw new InvalidOperationException(
-                $"Configuration '{Name}' is missing required '{name}' integration.");
+                $"Configuration '{Name}' is missing required '{name}' connector.");
     }
 
-    public Integration? GetIntegration(string name)
+    public Connector? GetConnector(string name)
     {
-        return Integrations
+        return Connectors
             .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 }
