@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Aspire.Hosting;
 using Infrastructure.Services.Files;
 using UseCases.Interfaces.Files;
 
@@ -12,6 +13,15 @@ public class AzureBlobFileStorageTests
         var ct = TestContext.Current.CancellationToken;
 
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.AspireHost>(cancellationToken: ct);
+
+        // AppHost.cs pins "sqlserver" to a persistent container lifetime for fast local dev
+        // iteration. Force every container back to Session here so disposing the app actually
+        // stops it instead of leaking it for tests, which don't need it kept around.
+        foreach (var containerResource in appHost.Resources.OfType<ContainerResource>())
+        {
+            appHost.CreateResourceBuilder(containerResource).WithLifetime(ContainerLifetime.Session);
+        }
+
         await using var app = await appHost.BuildAsync(ct);
 
         await app.StartAsync(ct);
