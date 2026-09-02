@@ -8,6 +8,12 @@ var sqlServer = builder.AddSqlServer("sqlserver")
 // Add the database
 var db = sqlServer.AddDatabase("db");
 
+// Add Azure Storage, backed by the Azurite emulator locally
+var storage = builder.AddAzureStorage("storage")
+  .RunAsEmulator();
+
+storage.AddBlobs("blobs");
+
 // Add the web project with the database connection
 builder.AddProject<Projects.Web>("api")
     .WithReference(db)

@@ -1,4 +1,6 @@
-﻿using Core.Shared;
+﻿using Core.Constants;
+using Core.Shared;
+using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 
@@ -6,21 +8,25 @@ namespace UnitTests.UseCases.Market.MarketDocuments;
 
 public class BigDataImportStrategyTests
 {
+    private const string FtpImplementation = "TestFtpImplementation";
+
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
-    private readonly IFileStorage _fileStorage = Substitute.For<IFileStorage>();
-    private readonly IServiceProvider _serviceProvider = Substitute.For<IServiceProvider>();
     private readonly BigDataImportStrategy _strategy;
 
     public BigDataImportStrategyTests()
     {
-        _strategy = new BigDataImportStrategy(_serviceProvider);
+        var services = new ServiceCollection();
+        services.AddKeyedSingleton(FtpImplementation, _ftpService);
+
+        _strategy = new BigDataImportStrategy(services.BuildServiceProvider());
     }
 
     [Fact]
     public async Task ListFilesAsyncDelegatesToSftpServiceUsingIntegrationFields()
     {
         var configuration = CreateConfiguration(
-            CreateSftpIntegration("sftp.example.com", "2222", "user", "pass", "remote/dir"));
+            CreateSftpIntegration("sftp.example.com", "2222", "user", "pass"),
+            remoteDirectory: "remote/dir");
 
         _ftpService.ListAsync(
                 Arg.Is<FtpOptions>(o =>
@@ -38,7 +44,8 @@ public class BigDataImportStrategyTests
     public async Task ListFilesAsyncDefaultsPortWhenFieldMissing()
     {
         var configuration = CreateConfiguration(
-            CreateSftpIntegration("sftp.example.com", port: null, "user", "pass", "remote/dir"));
+            CreateSftpIntegration("sftp.example.com", port: null, "user", "pass"),
+            remoteDirectory: "remote/dir");
 
         _ftpService.ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
             .Returns([]);
@@ -52,7 +59,8 @@ public class BigDataImportStrategyTests
     public async Task ListFilesAsyncThrowsWhenRequiredFieldIsMissing()
     {
         var configuration = CreateConfiguration(
-            CreateSftpIntegration(host: null, "22", "user", "pass", "remote/dir"));
+            CreateSftpIntegration(host: null, "22", "user", "pass"),
+            remoteDirectory: "remote/dir");
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
@@ -62,7 +70,8 @@ public class BigDataImportStrategyTests
     public async Task ListFilesAsyncThrowsWhenRemoteDirectoryIsMissing()
     {
         var configuration = CreateConfiguration(
-            CreateSftpIntegration("sftp.example.com", "22", "user", "pass", remoteDirectory: null));
+            CreateSftpIntegration("sftp.example.com", "22", "user", "pass"),
+            remoteDirectory: null);
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
@@ -77,24 +86,33 @@ public class BigDataImportStrategyTests
             () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
     }
 
-    private static Configuration CreateConfiguration(Connector ftpIntegration)
+    private static Configuration CreateConfiguration(Connector ftpIntegration, string? remoteDirectory)
     {
+        var fields = new List<ConfigurationField>();
+
+        if (remoteDirectory is not null)
+        {
+            fields.Add(new ConfigurationField { ConfigurationId = 1, Name = "ftp.remote.directory", Value = remoteDirectory });
+        }
+
         return new Configuration
         {
             Id = 1,
             Name = "edi.import",
             Connectors = [ftpIntegration],
+            ConfigurationFields = fields,
         };
     }
 
     private static Connector CreateSftpIntegration(
-        string? host, string? port, string? username, string? password, string? remoteDirectory)
+        string? host, string? port, string? username, string? password)
     {
         var integration = new Connector
         {
             Id = 1,
             Name = "Sftp",
-            ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = "Ftp" },
+            ConnectorType = new ConnectorType { Id = 1, Name = ConnectorTypes.Ftp },
+            ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
         };
 
         var fields = new List<ConnectorField>();
@@ -107,12 +125,10 @@ public class BigDataImportStrategyTests
             }
         }
 
-        AddField("Host", host);
-        AddField("Port", port);
-        AddField("Username", username);
-        AddField("Password", password);
-        AddField("RemoteDirectory", remoteDirectory);
-        AddField("FtpType", "SFTP");
+        AddField("host", host);
+        AddField("port", port);
+        AddField("username", username);
+        AddField("password", password);
 
         integration.ConnectorFields = fields;
 

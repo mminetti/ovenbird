@@ -15,7 +15,7 @@ public class ImportMarketDocumentHandler(
     MarketImportStrategyResolver strategyResolver,
     TimeProvider timeProvider)
 {
-    private const string HandlerIdentifier = "edi.import.handler";
+    private const string HandlerIdentifier = "handler";
 
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {

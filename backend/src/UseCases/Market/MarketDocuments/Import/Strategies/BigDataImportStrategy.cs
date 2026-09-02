@@ -82,7 +82,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
         return new FtpOptions
         {
             Host = connector.GetRequiredValue(FtpHost),
-            Port = int.TryParse(connector.GetRequiredValue(FtpPort), out var port) ? port : DefaultFtpPort,
+            Port = int.TryParse(connector.GetValue(FtpPort), out var port) ? port : DefaultFtpPort,
             Username = connector.GetRequiredValue(FtpUsername),
             Password = connector.GetRequiredValue(FtpPassword),
             RemoteDirectory = configuration.GetRequiredValue(FtpRemoteDirectory),

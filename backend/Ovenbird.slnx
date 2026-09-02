@@ -22,6 +22,7 @@
     <Project Path="src/ServiceDefaults/ServiceDefaults.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/AspireTests/AspireTests.csproj" />
     <Project Path="tests/FunctionalTests/FunctionalTests.csproj">
       <BuildDependency Project="src/Web/Web.csproj" />
     </Project>
