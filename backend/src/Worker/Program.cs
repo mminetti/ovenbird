@@ -1,6 +1,7 @@
 ﻿using Infrastructure;
 using Infrastructure.Data;
 using Quartz;
+using UseCases.Market.MarketDocuments.Import.Strategies;
 using Wolverine;
 using Worker.Jobs.Market;
 
@@ -19,10 +20,8 @@ builder.UseWolverine(opts =>
 
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketImportStrategyResolver>();
 });
-
-builder.Services.Configure<MarketDocumentImportOptions>(
-    builder.Configuration.GetSection(MarketDocumentImportOptions.SectionName));
 
 var cronSchedule = builder.Configuration["MarketDocumentImport:CronSchedule"] ?? "0 0 2 * * ?";
 
@@ -33,6 +32,15 @@ builder.Services.AddQuartz(q =>
             .WithIdentity("MarketDocumentImportTrigger")
             .WithCronSchedule(cronSchedule),
         job => job.WithIdentity("MarketDocumentImportJob"));
+
+    //var queueKey = JobKey.Create(nameof(MarketDocumentImportJob));
+
+    //q.AddJob<MarketDocumentImportJob>(jobBuilder => jobBuilder.WithIdentity(queueKey))
+    //    .AddTrigger(trigger =>
+    //        trigger
+    //        .ForJob(queueKey)
+    //        .WithSimpleSchedule(x => x.WithIntervalInHours(1))
+    //    .StartNow());
 });
 
 builder.Services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
