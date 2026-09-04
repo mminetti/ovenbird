@@ -14,11 +14,13 @@ public class ConnectorConfiguration : BaseEntityTypeConfiguration<Connector, int
         builder.Property(x => x.Description)
             .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
 
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.ConnectorType)
             .WithMany(x => x.Connectors)
             .HasForeignKey(x => x.ConnectorTypeId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.ConnectorImplementation)
             .WithMany(x => x.Connectors)
             .HasForeignKey(x => x.ConnectorImplementationId)

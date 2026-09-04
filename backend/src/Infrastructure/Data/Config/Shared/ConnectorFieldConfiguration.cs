@@ -14,6 +14,7 @@ public class ConnectorFieldConfiguration : BaseEntityTypeConfiguration<Connector
         builder.Property(x => x.Value)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        // Cascade: child row has no lifecycle independent of its parent.
         builder.HasOne(x => x.Connector)
             .WithMany(x => x.ConnectorFields)
             .HasForeignKey(x => x.ConnectorId)

@@ -14,16 +14,19 @@ public class ConfigurationConfiguration : BaseEntityTypeConfiguration<Configurat
         builder.Property(x => x.Description)
             .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
 
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.ConfigurationType)
             .WithMany(x => x.Configurations)
             .HasForeignKey(x => x.ConfigurationTypeId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.Company)
             .WithMany(x => x.Configurations)
             .HasForeignKey(x => x.CompanyId)
             .OnDelete(DeleteBehavior.NoAction);
 
+        // Cascade: join table row only, never deletes either side.
         builder.HasMany(x => x.Connectors)
             .WithMany(x => x.Configurations)
             .UsingEntity<Dictionary<string, object>>(

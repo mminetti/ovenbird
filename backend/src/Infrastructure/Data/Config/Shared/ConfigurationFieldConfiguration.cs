@@ -14,6 +14,7 @@ public class ConfigurationFieldConfiguration : BaseEntityTypeConfiguration<Confi
         builder.Property(x => x.Value)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        // Cascade: child row has no lifecycle independent of its parent.
         builder.HasOne(x => x.Configuration)
             .WithMany(x => x.ConfigurationFields)
             .HasForeignKey(x => x.ConfigurationId)

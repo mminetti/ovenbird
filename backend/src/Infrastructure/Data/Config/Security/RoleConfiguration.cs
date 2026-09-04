@@ -11,6 +11,7 @@ public class RoleConfiguration : BaseEntityTypeConfiguration<Role, int>
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        // Cascade: join table row only, never deletes either side.
         builder.HasMany(x => x.Permissions)
             .WithMany(x => x.Roles)
             .UsingEntity<Dictionary<string, object>>(

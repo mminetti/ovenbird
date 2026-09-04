@@ -20,6 +20,7 @@ public class UserConfiguration : BaseEntityTypeConfiguration<User, int>
         builder.Property(x => x.Email)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        // Cascade: join table row only, never deletes either side.
         builder.HasMany(x => x.Roles)
             .WithMany(x => x.Users)
             .UsingEntity<Dictionary<string, object>>(

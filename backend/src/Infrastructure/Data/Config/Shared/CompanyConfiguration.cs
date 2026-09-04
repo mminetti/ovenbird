@@ -14,6 +14,7 @@ public class CompanyConfiguration : BaseEntityTypeConfiguration<Company, int>
         builder.Property(x => x.TimeZoneId)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.Market)
             .WithMany(x => x.Companies)
             .HasForeignKey(x => x.MarketId)

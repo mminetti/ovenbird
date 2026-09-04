@@ -13,5 +13,23 @@ public class MarketDocumentConfiguration : BaseEntityTypeConfiguration<MarketDoc
 
         builder.Property(x => x.Name)
             .HasMaxLength(500);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.Company)
+            .WithMany()
+            .HasForeignKey(x => x.CompanyId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.Direction)
+            .WithMany()
+            .HasForeignKey(x => x.DirectionId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.Status)
+            .WithMany()
+            .HasForeignKey(x => x.StatusId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
