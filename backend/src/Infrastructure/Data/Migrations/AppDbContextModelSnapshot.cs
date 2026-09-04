@@ -24,17 +24,17 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("ConfigurationConnector", b =>
                 {
-                    b.Property<int>("ConfigurationsId")
+                    b.Property<int>("ConfigurationId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ConnectorsId")
+                    b.Property<int>("ConnectorId")
                         .HasColumnType("int");
 
-                    b.HasKey("ConfigurationsId", "ConnectorsId");
+                    b.HasKey("ConfigurationId", "ConnectorId");
 
-                    b.HasIndex("ConnectorsId");
+                    b.HasIndex("ConnectorId");
 
-                    b.ToTable("ConfigurationConnector");
+                    b.ToTable("ConfigurationConnector", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.Market", b =>
@@ -54,7 +54,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Market");
+                    b.ToTable("Market", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocument", b =>
@@ -105,7 +105,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("MarketDocument");
+                    b.ToTable("MarketDocument", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocumentDirection", b =>
@@ -120,7 +120,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketDocumentDirection");
+                    b.ToTable("MarketDocumentDirection", (string)null);
 
                     b.HasData(
                         new
@@ -147,7 +147,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketDocumentStatus");
+                    b.ToTable("MarketDocumentStatus", (string)null);
 
                     b.HasData(
                         new
@@ -196,7 +196,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Module");
+                    b.ToTable("Module", (string)null);
                 });
 
             modelBuilder.Entity("Core.Security.Permission", b =>
@@ -216,8 +216,8 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -238,7 +238,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("Permission");
+                    b.ToTable("Permission", (string)null);
                 });
 
             modelBuilder.Entity("Core.Security.Role", b =>
@@ -270,7 +270,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role");
+                    b.ToTable("Role", (string)null);
                 });
 
             modelBuilder.Entity("Core.Security.User", b =>
@@ -295,8 +295,8 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<string>("ExternalIdentifier")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -318,7 +318,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("ExternalIdentifier")
                         .IsUnique();
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.Company", b =>
@@ -360,7 +360,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("MarketId");
 
-                    b.ToTable("Company");
+                    b.ToTable("Company", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.Configuration", b =>
@@ -385,8 +385,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -406,7 +406,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConfigurationTypeId");
 
-                    b.ToTable("Configuration");
+                    b.ToTable("Configuration", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
@@ -447,7 +447,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConfigurationId");
 
-                    b.ToTable("ConfigurationField");
+                    b.ToTable("ConfigurationField", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.ConfigurationType", b =>
@@ -465,7 +465,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConfigurationType");
+                    b.ToTable("ConfigurationType", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.Connector", b =>
@@ -490,8 +490,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -511,7 +511,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConnectorTypeId");
 
-                    b.ToTable("Connector");
+                    b.ToTable("Connector", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.ConnectorField", b =>
@@ -555,7 +555,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConnectorId");
 
-                    b.ToTable("ConnectorField");
+                    b.ToTable("ConnectorField", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.ConnectorImplementation", b =>
@@ -567,15 +567,17 @@ namespace Infrastructure.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConnectorImplementation");
+                    b.ToTable("ConnectorImplementation", (string)null);
                 });
 
             modelBuilder.Entity("Core.Shared.ConnectorType", b =>
@@ -587,43 +589,45 @@ namespace Infrastructure.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConnectorType");
+                    b.ToTable("ConnectorType", (string)null);
                 });
 
-            modelBuilder.Entity("PermissionRole", b =>
+            modelBuilder.Entity("RolePermission", b =>
                 {
-                    b.Property<int>("PermissionsId")
+                    b.Property<int>("PermissionId")
                         .HasColumnType("int");
 
-                    b.Property<int>("RolesId")
+                    b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-                    b.HasKey("PermissionsId", "RolesId");
+                    b.HasKey("PermissionId", "RoleId");
 
-                    b.HasIndex("RolesId");
+                    b.HasIndex("RoleId");
 
                     b.ToTable("RolePermission", (string)null);
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("UserRole", b =>
                 {
-                    b.Property<int>("RolesId")
+                    b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UsersId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("RolesId", "UsersId");
+                    b.HasKey("RoleId", "UserId");
 
-                    b.HasIndex("UsersId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserRole", (string)null);
                 });
@@ -632,13 +636,13 @@ namespace Infrastructure.Data.Migrations
                 {
                     b.HasOne("Core.Shared.Configuration", null)
                         .WithMany()
-                        .HasForeignKey("ConfigurationsId")
+                        .HasForeignKey("ConfigurationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Shared.Connector", null)
                         .WithMany()
-                        .HasForeignKey("ConnectorsId")
+                        .HasForeignKey("ConnectorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -726,13 +730,13 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Shared.ConnectorImplementation", "ConnectorImplementation")
                         .WithMany("Connectors")
                         .HasForeignKey("ConnectorImplementationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Shared.ConnectorType", "ConnectorType")
                         .WithMany("Connectors")
                         .HasForeignKey("ConnectorTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("ConnectorImplementation");
@@ -751,32 +755,32 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Connector");
                 });
 
-            modelBuilder.Entity("PermissionRole", b =>
+            modelBuilder.Entity("RolePermission", b =>
                 {
                     b.HasOne("Core.Security.Permission", null)
                         .WithMany()
-                        .HasForeignKey("PermissionsId")
+                        .HasForeignKey("PermissionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Security.Role", null)
                         .WithMany()
-                        .HasForeignKey("RolesId")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("UserRole", b =>
                 {
                     b.HasOne("Core.Security.Role", null)
                         .WithMany()
-                        .HasForeignKey("RolesId")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Security.User", null)
                         .WithMany()
-                        .HasForeignKey("UsersId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

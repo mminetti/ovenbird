@@ -19,7 +19,7 @@ namespace Infrastructure.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -27,17 +27,31 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "IntegrationImplementation",
+                name: "ConnectorImplementation",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IntegrationImplementation", x => x.Id);
+                    table.PrimaryKey("PK_ConnectorImplementation", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConnectorType",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConnectorType", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,7 +131,7 @@ namespace Infrastructure.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExternalIdentifier = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ExternalIdentifier = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -132,14 +146,15 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SystemIntegration",
+                name: "Connector",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    IntegrationImplementationId = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    ConnectorTypeId = table.Column<int>(type: "int", nullable: false),
+                    ConnectorImplementationId = table.Column<int>(type: "int", nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -147,13 +162,17 @@ namespace Infrastructure.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SystemIntegration", x => x.Id);
+                    table.PrimaryKey("PK_Connector", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SystemIntegration_IntegrationImplementation_IntegrationImplementationId",
-                        column: x => x.IntegrationImplementationId,
-                        principalTable: "IntegrationImplementation",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Connector_ConnectorImplementation_ConnectorImplementationId",
+                        column: x => x.ConnectorImplementationId,
+                        principalTable: "ConnectorImplementation",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Connector_ConnectorType_ConnectorTypeId",
+                        column: x => x.ConnectorTypeId,
+                        principalTable: "ConnectorType",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -188,7 +207,7 @@ namespace Infrastructure.Data.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ModuleId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -208,33 +227,33 @@ namespace Infrastructure.Data.Migrations
                 name: "UserRole",
                 columns: table => new
                 {
-                    RolesId = table.Column<int>(type: "int", nullable: false),
-                    UsersId = table.Column<int>(type: "int", nullable: false)
+                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserRole", x => new { x.RolesId, x.UsersId });
+                    table.PrimaryKey("PK_UserRole", x => new { x.RoleId, x.UserId });
                     table.ForeignKey(
-                        name: "FK_UserRole_Role_RolesId",
-                        column: x => x.RolesId,
+                        name: "FK_UserRole_Role_RoleId",
+                        column: x => x.RoleId,
                         principalTable: "Role",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserRole_User_UsersId",
-                        column: x => x.UsersId,
+                        name: "FK_UserRole_User_UserId",
+                        column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "SystemIntegrationField",
+                name: "ConnectorField",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IntegrationId = table.Column<int>(type: "int", nullable: false),
+                    ConnectorId = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Value = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     IsSecret = table.Column<bool>(type: "bit", nullable: false),
@@ -245,11 +264,11 @@ namespace Infrastructure.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SystemIntegrationField", x => x.Id);
+                    table.PrimaryKey("PK_ConnectorField", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SystemIntegrationField_SystemIntegration_IntegrationId",
-                        column: x => x.IntegrationId,
-                        principalTable: "SystemIntegration",
+                        name: "FK_ConnectorField_Connector_ConnectorId",
+                        column: x => x.ConnectorId,
+                        principalTable: "Connector",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -260,14 +279,14 @@ namespace Infrastructure.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     ConfigurationTypeId = table.Column<int>(type: "int", nullable: false),
                     CompanyId = table.Column<int>(type: "int", nullable: true),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -281,8 +300,7 @@ namespace Infrastructure.Data.Migrations
                         name: "FK_Configuration_ConfigurationType_ConfigurationTypeId",
                         column: x => x.ConfigurationTypeId,
                         principalTable: "ConfigurationType",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -328,22 +346,46 @@ namespace Infrastructure.Data.Migrations
                 name: "RolePermission",
                 columns: table => new
                 {
-                    PermissionsId = table.Column<int>(type: "int", nullable: false),
-                    RolesId = table.Column<int>(type: "int", nullable: false)
+                    PermissionId = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RolePermission", x => new { x.PermissionsId, x.RolesId });
+                    table.PrimaryKey("PK_RolePermission", x => new { x.PermissionId, x.RoleId });
                     table.ForeignKey(
-                        name: "FK_RolePermission_Permission_PermissionsId",
-                        column: x => x.PermissionsId,
+                        name: "FK_RolePermission_Permission_PermissionId",
+                        column: x => x.PermissionId,
                         principalTable: "Permission",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RolePermission_Role_RolesId",
-                        column: x => x.RolesId,
+                        name: "FK_RolePermission_Role_RoleId",
+                        column: x => x.RoleId,
                         principalTable: "Role",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ConfigurationConnector",
+                columns: table => new
+                {
+                    ConfigurationId = table.Column<int>(type: "int", nullable: false),
+                    ConnectorId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConfigurationConnector", x => new { x.ConfigurationId, x.ConnectorId });
+                    table.ForeignKey(
+                        name: "FK_ConfigurationConnector_Configuration_ConfigurationId",
+                        column: x => x.ConfigurationId,
+                        principalTable: "Configuration",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ConfigurationConnector_Connector_ConnectorId",
+                        column: x => x.ConnectorId,
+                        principalTable: "Connector",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -355,12 +397,12 @@ namespace Infrastructure.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ConfigurationId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -369,30 +411,6 @@ namespace Infrastructure.Data.Migrations
                         name: "FK_ConfigurationField_Configuration_ConfigurationId",
                         column: x => x.ConfigurationId,
                         principalTable: "Configuration",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ConfigurationIntegration",
-                columns: table => new
-                {
-                    ConfigurationsId = table.Column<int>(type: "int", nullable: false),
-                    IntegrationsId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ConfigurationIntegration", x => new { x.ConfigurationsId, x.IntegrationsId });
-                    table.ForeignKey(
-                        name: "FK_ConfigurationIntegration_Configuration_ConfigurationsId",
-                        column: x => x.ConfigurationsId,
-                        principalTable: "Configuration",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_ConfigurationIntegration_SystemIntegration_IntegrationsId",
-                        column: x => x.IntegrationsId,
-                        principalTable: "SystemIntegration",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -432,14 +450,29 @@ namespace Infrastructure.Data.Migrations
                 column: "ConfigurationTypeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ConfigurationConnector_ConnectorId",
+                table: "ConfigurationConnector",
+                column: "ConnectorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ConfigurationField_ConfigurationId",
                 table: "ConfigurationField",
                 column: "ConfigurationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ConfigurationIntegration_IntegrationsId",
-                table: "ConfigurationIntegration",
-                column: "IntegrationsId");
+                name: "IX_Connector_ConnectorImplementationId",
+                table: "Connector",
+                column: "ConnectorImplementationId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Connector_ConnectorTypeId",
+                table: "Connector",
+                column: "ConnectorTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConnectorField_ConnectorId",
+                table: "ConnectorField",
+                column: "ConnectorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MarketDocument_CompanyId",
@@ -462,19 +495,9 @@ namespace Infrastructure.Data.Migrations
                 column: "ModuleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RolePermission_RolesId",
+                name: "IX_RolePermission_RoleId",
                 table: "RolePermission",
-                column: "RolesId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SystemIntegration_IntegrationImplementationId",
-                table: "SystemIntegration",
-                column: "IntegrationImplementationId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SystemIntegrationField_IntegrationId",
-                table: "SystemIntegrationField",
-                column: "IntegrationId");
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_User_ExternalIdentifier",
@@ -483,19 +506,22 @@ namespace Infrastructure.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserRole_UsersId",
+                name: "IX_UserRole_UserId",
                 table: "UserRole",
-                column: "UsersId");
+                column: "UserId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ConfigurationConnector");
+
+            migrationBuilder.DropTable(
                 name: "ConfigurationField");
 
             migrationBuilder.DropTable(
-                name: "ConfigurationIntegration");
+                name: "ConnectorField");
 
             migrationBuilder.DropTable(
                 name: "MarketDocument");
@@ -504,13 +530,13 @@ namespace Infrastructure.Data.Migrations
                 name: "RolePermission");
 
             migrationBuilder.DropTable(
-                name: "SystemIntegrationField");
-
-            migrationBuilder.DropTable(
                 name: "UserRole");
 
             migrationBuilder.DropTable(
                 name: "Configuration");
+
+            migrationBuilder.DropTable(
+                name: "Connector");
 
             migrationBuilder.DropTable(
                 name: "MarketDocumentDirection");
@@ -520,9 +546,6 @@ namespace Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permission");
-
-            migrationBuilder.DropTable(
-                name: "SystemIntegration");
 
             migrationBuilder.DropTable(
                 name: "Role");
@@ -537,10 +560,13 @@ namespace Infrastructure.Data.Migrations
                 name: "ConfigurationType");
 
             migrationBuilder.DropTable(
-                name: "Module");
+                name: "ConnectorImplementation");
 
             migrationBuilder.DropTable(
-                name: "IntegrationImplementation");
+                name: "ConnectorType");
+
+            migrationBuilder.DropTable(
+                name: "Module");
 
             migrationBuilder.DropTable(
                 name: "Market");

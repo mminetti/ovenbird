@@ -144,6 +144,13 @@ csharp_style_prefer_primary_constructors = true:suggestion
 csharp_style_expression_bodied_lambdas = true:silent
 csharp_style_expression_bodied_local_functions = false:silent
 ###############################
+# EF Core Migrations          #
+###############################
+# EF-scaffolded files: exclude from style/analyzer rules like generated code
+[src/Infrastructure/Data/Migrations/*.cs]
+generated_code = true
+
+###############################
 # VB Coding Conventions       #
 ###############################
 [*.vb]

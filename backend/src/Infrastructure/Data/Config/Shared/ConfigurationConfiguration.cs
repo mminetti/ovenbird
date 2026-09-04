@@ -25,6 +25,15 @@ public class ConfigurationConfiguration : BaseEntityTypeConfiguration<Configurat
             .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasMany(x => x.Connectors)
-            .WithMany(x => x.Configurations);
+            .WithMany(x => x.Configurations)
+            .UsingEntity<Dictionary<string, object>>(
+                "ConfigurationConnector",
+                j => j.HasOne<Connector>().WithMany().HasForeignKey("ConnectorId"),
+                j => j.HasOne<Configuration>().WithMany().HasForeignKey("ConfigurationId"),
+                j =>
+                {
+                    j.ToTable("ConfigurationConnector");
+                    j.HasKey("ConfigurationId", "ConnectorId");
+                });
     }
 }

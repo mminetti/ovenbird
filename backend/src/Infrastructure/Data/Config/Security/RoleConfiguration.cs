@@ -13,6 +13,14 @@ public class RoleConfiguration : BaseEntityTypeConfiguration<Role, int>
 
         builder.HasMany(x => x.Permissions)
             .WithMany(x => x.Roles)
-            .UsingEntity(x => x.ToTable("RolePermission"));
+            .UsingEntity<Dictionary<string, object>>(
+                "RolePermission",
+                j => j.HasOne<Permission>().WithMany().HasForeignKey("PermissionId"),
+                j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
+                j =>
+                {
+                    j.ToTable("RolePermission");
+                    j.HasKey("PermissionId", "RoleId");
+                });
     }
 }

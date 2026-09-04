@@ -22,6 +22,14 @@ public class UserConfiguration : BaseEntityTypeConfiguration<User, int>
 
         builder.HasMany(x => x.Roles)
             .WithMany(x => x.Users)
-            .UsingEntity(x => x.ToTable("UserRole"));
+            .UsingEntity<Dictionary<string, object>>(
+                "UserRole",
+                j => j.HasOne<Role>().WithMany().HasForeignKey("RoleId"),
+                j => j.HasOne<User>().WithMany().HasForeignKey("UserId"),
+                j =>
+                {
+                    j.ToTable("UserRole");
+                    j.HasKey("RoleId", "UserId");
+                });
     }
 }

@@ -13,5 +13,15 @@ public class ConnectorConfiguration : BaseEntityTypeConfiguration<Connector, int
 
         builder.Property(x => x.Description)
             .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
+
+        builder.HasOne(x => x.ConnectorType)
+            .WithMany(x => x.Connectors)
+            .HasForeignKey(x => x.ConnectorTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        builder.HasOne(x => x.ConnectorImplementation)
+            .WithMany(x => x.Connectors)
+            .HasForeignKey(x => x.ConnectorImplementationId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }
