@@ -5,7 +5,7 @@ using UseCases.Security.Users.GetOrCreate;
 
 namespace Web.Configurations.Auth;
 
-public class CurrentUserClaimsTransformation(IMessageBus bus) : IClaimsTransformation
+public class CurrentUserClaimsTransformation(IMessageBus bus, IAuthStrategy authStrategy) : IClaimsTransformation
 {
     public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
     {
@@ -22,7 +22,7 @@ public class CurrentUserClaimsTransformation(IMessageBus bus) : IClaimsTransform
             return principal;
         }
 
-        var externalIdentifier = principal.GetExternalIdentifier();
+        var externalIdentifier = authStrategy.GetExternalIdentifier(principal);
 
         if (string.IsNullOrEmpty(externalIdentifier))
         {
@@ -30,7 +30,7 @@ public class CurrentUserClaimsTransformation(IMessageBus bus) : IClaimsTransform
         }
 
         var result = await bus.InvokeAsync<Result<CurrentUserInfo>>(
-            new GetOrCreateCurrentUserCommand(externalIdentifier, principal.GetName(), principal.GetEmail()));
+            new GetOrCreateCurrentUserCommand(externalIdentifier, authStrategy.GetName(principal), authStrategy.GetEmail(principal)));
 
         if (result.Status == ResultStatus.Unauthorized)
         {

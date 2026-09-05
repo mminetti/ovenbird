@@ -1,4 +1,5 @@
-﻿using Microsoft.Identity.Web;
+﻿using System.Security.Claims;
+using Microsoft.Identity.Web;
 using NSwag.Generation.AspNetCore;
 using NSwag.Generation.Processors.Security;
 using Scalar.AspNetCore;
@@ -58,4 +59,18 @@ public class AzureAdAuthStrategy : IAuthStrategy
                 .WithPkce(Pkce.Sha256);
         });
     }
+
+    public string? GetExternalIdentifier(ClaimsPrincipal principal) =>
+        principal.FindFirst(ClaimConstants.ObjectId)?.Value
+        ?? principal.FindFirst(ClaimConstants.Oid)?.Value;
+
+    public string GetName(ClaimsPrincipal principal) =>
+        principal.FindFirst(ClaimTypes.Name)?.Value
+        ?? principal.FindFirst(ClaimConstants.PreferredUserName)?.Value
+        ?? string.Empty;
+
+    public string GetEmail(ClaimsPrincipal principal) =>
+        principal.FindFirst(ClaimTypes.Email)?.Value
+        ?? principal.FindFirst(ClaimTypes.Upn)?.Value
+        ?? string.Empty;
 }

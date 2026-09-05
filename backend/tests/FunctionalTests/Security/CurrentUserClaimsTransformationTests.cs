@@ -28,11 +28,20 @@ public class CurrentUserClaimsTransformationTests
         return new ClaimsPrincipal(identity);
     }
 
+    private static IAuthStrategy StubAuthStrategy(string externalIdentifier = TestOid, string name = "Test User", string email = "test@example.com")
+    {
+        var strategy = Substitute.For<IAuthStrategy>();
+        strategy.GetExternalIdentifier(Arg.Any<ClaimsPrincipal>()).Returns(externalIdentifier);
+        strategy.GetName(Arg.Any<ClaimsPrincipal>()).Returns(name);
+        strategy.GetEmail(Arg.Any<ClaimsPrincipal>()).Returns(email);
+        return strategy;
+    }
+
     [Fact]
     public async Task WhenUnauthenticated_ReturnsPrincipalUnchangedAndDoesNotCallBus()
     {
         var bus = Substitute.For<IMessageBus>();
-        var transformation = new CurrentUserClaimsTransformation(bus);
+        var transformation = new CurrentUserClaimsTransformation(bus, StubAuthStrategy());
         var principal = UnauthenticatedPrincipal();
 
         var result = await transformation.TransformAsync(principal);
@@ -53,7 +62,7 @@ public class CurrentUserClaimsTransformationTests
         bus.InvokeAsync<Result<CurrentUserInfo>>(Arg.Any<GetOrCreateCurrentUserCommand>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success(userInfo));
 
-        var transformation = new CurrentUserClaimsTransformation(bus);
+        var transformation = new CurrentUserClaimsTransformation(bus, StubAuthStrategy());
         var principal = AuthenticatedPrincipal();
 
         var result = await transformation.TransformAsync(principal);
@@ -71,7 +80,7 @@ public class CurrentUserClaimsTransformationTests
         bus.InvokeAsync<Result<CurrentUserInfo>>(Arg.Any<GetOrCreateCurrentUserCommand>(), Arg.Any<CancellationToken>())
             .Returns(Result.Error("Failed to resolve user: connection refused"));
 
-        var transformation = new CurrentUserClaimsTransformation(bus);
+        var transformation = new CurrentUserClaimsTransformation(bus, StubAuthStrategy());
         var principal = AuthenticatedPrincipal();
 
         await Should.ThrowAsync<CurrentUserResolutionException>(() => transformation.TransformAsync(principal));
@@ -84,7 +93,7 @@ public class CurrentUserClaimsTransformationTests
         bus.InvokeAsync<Result<CurrentUserInfo>>(Arg.Any<GetOrCreateCurrentUserCommand>(), Arg.Any<CancellationToken>())
             .Returns(Result.Unauthorized());
 
-        var transformation = new CurrentUserClaimsTransformation(bus);
+        var transformation = new CurrentUserClaimsTransformation(bus, StubAuthStrategy());
         var principal = AuthenticatedPrincipal();
 
         await Should.ThrowAsync<CurrentUserUnauthorizedException>(() => transformation.TransformAsync(principal));
@@ -94,7 +103,7 @@ public class CurrentUserClaimsTransformationTests
     public async Task WhenAlreadyResolved_SkipsResolutionAndDoesNotCallBus()
     {
         var bus = Substitute.For<IMessageBus>();
-        var transformation = new CurrentUserClaimsTransformation(bus);
+        var transformation = new CurrentUserClaimsTransformation(bus, StubAuthStrategy());
         var principal = AuthenticatedPrincipal(extraClaims: [new Claim(AuthConstants.CurrentUserResolvedClaimType, "true")]);
 
         var result = await transformation.TransformAsync(principal);

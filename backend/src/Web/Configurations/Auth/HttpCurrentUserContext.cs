@@ -1,17 +1,16 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 
 namespace Web.Configurations.Auth;
 
-public class HttpCurrentUserContext(IHttpContextAccessor httpContextAccessor) : ICurrentUserContext
+public class HttpCurrentUserContext(IHttpContextAccessor httpContextAccessor, IAuthStrategy authStrategy) : ICurrentUserContext
 {
     private ClaimsPrincipal? User => httpContextAccessor.HttpContext?.User;
 
-    public string? ExternalIdentifier => User?.GetExternalIdentifier();
+    public bool IsAuthenticated => User?.Identity?.IsAuthenticated == true;
 
-    public string Name => User?.GetName() ?? string.Empty;
+    public string? ExternalIdentifier => IsAuthenticated ? authStrategy.GetExternalIdentifier(User!) : null;
 
-    public string Email => User?.GetEmail() ?? string.Empty;
+    public string Name => IsAuthenticated ? authStrategy.GetName(User!) : string.Empty;
 
-    public bool IsAuthenticated =>
-        User?.Identity?.IsAuthenticated == true;
+    public string Email => IsAuthenticated ? authStrategy.GetEmail(User!) : string.Empty;
 }

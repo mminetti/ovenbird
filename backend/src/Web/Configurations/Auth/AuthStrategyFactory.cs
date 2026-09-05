@@ -13,6 +13,7 @@ public static class AuthStrategyFactory
         return provider.Trim().ToLowerInvariant() switch
         {
             "azuread" => new AzureAdAuthStrategy(),
+            "auth0" => new Auth0AuthStrategy(configuration),
             "none" or "" => new NoAuthStrategy(),
             _ => throw new InvalidOperationException($"Unknown authentication provider '{provider}'.")
         };

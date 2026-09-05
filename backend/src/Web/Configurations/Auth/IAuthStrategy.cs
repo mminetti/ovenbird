@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using NSwag.Generation.AspNetCore;
 using Scalar.AspNetCore;
 
@@ -30,4 +31,13 @@ public interface IAuthStrategy
 
     /// <summary>Configures auth flow in the Scalar API reference UI.</summary>
     void ConfigureScalarAuth(ScalarOptions options, IConfiguration configuration);
+
+    /// <summary>Extracts the provider-specific stable external identifier for the authenticated principal.</summary>
+    string? GetExternalIdentifier(ClaimsPrincipal principal);
+
+    /// <summary>Extracts the display name for the authenticated principal.</summary>
+    string GetName(ClaimsPrincipal principal);
+
+    /// <summary>Extracts the email address for the authenticated principal.</summary>
+    string GetEmail(ClaimsPrincipal principal);
 }
