@@ -2,6 +2,7 @@
 using Core.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
+using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
@@ -11,6 +12,7 @@ public class BigDataImportStrategyTests
     private const string FtpImplementation = "TestFtpImplementation";
 
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
+    private readonly IConnectorFieldSecretResolver _secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
     private readonly BigDataImportStrategy _strategy;
 
     public BigDataImportStrategyTests()
@@ -18,7 +20,11 @@ public class BigDataImportStrategyTests
         var services = new ServiceCollection();
         services.AddKeyedSingleton(FtpImplementation, _ftpService);
 
-        _strategy = new BigDataImportStrategy(services.BuildServiceProvider());
+        _secretResolver
+            .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
+            .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
+
+        _strategy = new BigDataImportStrategy(services.BuildServiceProvider(), _secretResolver);
     }
 
     [Fact]
@@ -86,6 +92,27 @@ public class BigDataImportStrategyTests
             () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
     }
 
+    [Fact]
+    public async Task ListFilesAsyncResolvesSecretPasswordThroughResolver()
+    {
+        var configuration = CreateConfiguration(
+            CreateSftpIntegration("sftp.example.com", "22", "user", "vault-secret-name", passwordIsSecret: true),
+            remoteDirectory: "remote/dir");
+
+        _secretResolver
+            .ResolveAsync(
+                Arg.Is<ConnectorField>(f => f.Name == "password" && f.Value == "vault-secret-name"),
+                Arg.Any<CancellationToken>())
+            .Returns("resolved-password");
+
+        _ftpService.ListAsync(Arg.Any<FtpOptions>(), Arg.Any<CancellationToken>()).Returns([]);
+
+        await _strategy.ListFilesAsync(configuration, CancellationToken.None);
+
+        await _ftpService.Received(1).ListAsync(
+            Arg.Is<FtpOptions>(o => o.Password == "resolved-password"), Arg.Any<CancellationToken>());
+    }
+
     private static Configuration CreateConfiguration(Connector ftpIntegration, string? remoteDirectory)
     {
         var fields = new List<ConfigurationField>();
@@ -105,7 +132,7 @@ public class BigDataImportStrategyTests
     }
 
     private static Connector CreateSftpIntegration(
-        string? host, string? port, string? username, string? password)
+        string? host, string? port, string? username, string? password, bool passwordIsSecret = false)
     {
         var integration = new Connector
         {
@@ -117,18 +144,21 @@ public class BigDataImportStrategyTests
 
         var fields = new List<ConnectorField>();
 
-        void AddField(string identifier, string? value)
+        void AddField(string identifier, string? value, bool isSecret = false)
         {
             if (value is not null)
             {
-                fields.Add(new ConnectorField { ConnectorId = integration.Id, Name = identifier, Value = value });
+                fields.Add(new ConnectorField
+                {
+                    ConnectorId = integration.Id, Name = identifier, Value = value, IsSecret = isSecret,
+                });
             }
         }
 
         AddField("host", host);
         AddField("port", port);
         AddField("username", username);
-        AddField("password", password);
+        AddField("password", password, passwordIsSecret);
 
         integration.ConnectorFields = fields;
 

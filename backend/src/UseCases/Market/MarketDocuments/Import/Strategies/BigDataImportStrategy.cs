@@ -1,11 +1,13 @@
-﻿using Core.Constants;
+using Core.Constants;
 using Core.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
+using UseCases.Interfaces.Secrets;
 
 namespace UseCases.Market.MarketDocuments.Import.Strategies;
 
-public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketImportStrategy
+public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorFieldSecretResolver secretResolver)
+    : IMarketImportStrategy
 {
     private const int DefaultFtpPort = 22;
 
@@ -20,42 +22,42 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
 
     public string Identifier => "BigData";
 
-    public Task<IReadOnlyList<string>> ListFilesAsync(Configuration configuration, CancellationToken ct)
+    public async Task<IReadOnlyList<string>> ListFilesAsync(Configuration configuration, CancellationToken ct)
     {
-        var ftp = ResolveFtp(configuration);
+        var ftp = await ResolveFtp(configuration, ct);
 
-        return ftp.Service.ListAsync(ftp.Options, ct);
+        return await ftp.Service.ListAsync(ftp.Options, ct);
     }
 
-    public Task<Stream> DownloadFileAsync(Configuration configuration, string remoteFilePath, CancellationToken ct)
+    public async Task<Stream> DownloadFileAsync(Configuration configuration, string remoteFilePath, CancellationToken ct)
     {
-        var ftp = ResolveFtp(configuration);
+        var ftp = await ResolveFtp(configuration, ct);
 
-        return ftp.Service.DownloadAsync(ftp.Options, remoteFilePath, ct);
+        return await ftp.Service.DownloadAsync(ftp.Options, remoteFilePath, ct);
     }
 
-    public Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
+    public async Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
     {
-        var fileStorage = ResolveFileStorage(configuration);
+        var fileStorage = await ResolveFileStorage(configuration, ct);
 
-        return fileStorage.Service.UploadAsync(fileStorage.Options, content, remoteFilePath, ct);
+        return await fileStorage.Service.UploadAsync(fileStorage.Options, content, remoteFilePath, ct);
     }
 
     private record FtpContext(FtpOptions Options, IFtpService Service);
 
     private record FileStorageContext(FileStorageOptions Options, IFileStorage Service);
 
-    private FtpContext ResolveFtp(Configuration configuration)
+    private async Task<FtpContext> ResolveFtp(Configuration configuration, CancellationToken ct)
     {
-        var options = ResolveFtpOptions(configuration);
+        var options = await ResolveFtpOptions(configuration, ct);
         var service = ResolveService<IFtpService>(configuration.Name, options.Implementation);
 
         return new FtpContext(options, service);
     }
 
-    private FileStorageContext ResolveFileStorage(Configuration configuration)
+    private async Task<FileStorageContext> ResolveFileStorage(Configuration configuration, CancellationToken ct)
     {
-        var options = ResolveFileOptions(configuration);
+        var options = await ResolveFileOptions(configuration, ct);
         var service = ResolveService<IFileStorage>(configuration.Name, options.Implementation);
 
         return new FileStorageContext(options, service);
@@ -75,7 +77,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
         }
     }
 
-    private static FtpOptions ResolveFtpOptions(Configuration configuration)
+    private async Task<FtpOptions> ResolveFtpOptions(Configuration configuration, CancellationToken ct)
     {
         var connector = configuration.GetRequiredConnector(ConnectorTypes.Ftp);
 
@@ -84,20 +86,20 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider) : IMarketIm
             Host = connector.GetRequiredValue(FtpHost),
             Port = int.TryParse(connector.GetValue(FtpPort), out var port) ? port : DefaultFtpPort,
             Username = connector.GetRequiredValue(FtpUsername),
-            Password = connector.GetRequiredValue(FtpPassword),
+            Password = await connector.GetRequiredResolvedValueAsync(FtpPassword, secretResolver, ct),
             RemoteDirectory = configuration.GetRequiredValue(FtpRemoteDirectory),
             Implementation = connector.ConnectorImplementation.Name,
         };
     }
 
-    private static FileStorageOptions ResolveFileOptions(Configuration configuration)
+    private async Task<FileStorageOptions> ResolveFileOptions(Configuration configuration, CancellationToken ct)
     {
         var connector = configuration.GetRequiredConnector(ConnectorTypes.FileStorage);
 
         return new FileStorageOptions
         {
             RootDirectory = connector.GetRequiredValue(FileStorageRootDirectory),
-            ConnectionString = connector.GetRequiredValue(FileStorageConnectionString),
+            ConnectionString = await connector.GetRequiredResolvedValueAsync(FileStorageConnectionString, secretResolver, ct),
             Implementation = connector.ConnectorImplementation.Name,
         };
     }

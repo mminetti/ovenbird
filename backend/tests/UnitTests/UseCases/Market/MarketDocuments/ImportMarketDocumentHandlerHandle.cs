@@ -5,6 +5,7 @@ using Core.Shared;
 using Core.Shared.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
+using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
@@ -31,7 +32,13 @@ public class ImportMarketDocumentHandlerHandle
         services.AddKeyedSingleton<IFtpService>(FtpImplementation, _ftpService);
         services.AddKeyedSingleton<IFileStorage>(FileStorageImplementation, _fileStorage);
 
-        var resolver = new MarketImportStrategyResolver([new BigDataImportStrategy(services.BuildServiceProvider())]);
+        var secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
+        secretResolver
+            .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
+            .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
+
+        var resolver = new MarketImportStrategyResolver(
+            [new BigDataImportStrategy(services.BuildServiceProvider(), secretResolver)]);
 
         _handler = new ImportMarketDocumentHandler(
             _documentRepository,

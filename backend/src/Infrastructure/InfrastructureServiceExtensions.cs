@@ -1,10 +1,14 @@
-﻿using Core.Security.Interfaces;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Core.Security.Interfaces;
 using Core.Security.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Services.Files;
+using Infrastructure.Services.Secrets;
 using UseCases.Interfaces.Files;
+using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 using UseCases.Security.Modules.List;
 using UseCases.Security.Permissions.List;
@@ -69,6 +73,20 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedTransient<IFtpService, LocalFileSystemFtpService>(nameof(LocalFileSystemFtpService));
         services.AddKeyedTransient<IFileStorage, AzureBlobFileStorage>(nameof(AzureBlobFileStorage));
         services.AddKeyedTransient<IFileStorage, LocalFileSystemFileStorage>(nameof(LocalFileSystemFileStorage));
+
+        var keyVaultUri = config["KeyVault:Uri"];
+
+        if (!string.IsNullOrWhiteSpace(keyVaultUri))
+        {
+            services.AddSingleton(new SecretClient(new Uri(keyVaultUri), new DefaultAzureCredential()));
+        }
+        else
+        {
+            services.AddSingleton<SecretClient>(_ => null!);
+            logger.LogWarning("KeyVault:Uri is not configured; secret ConnectorFields will resolve from environment variables only.");
+        }
+
+        services.AddScoped<IConnectorFieldSecretResolver, KeyVaultConnectorFieldSecretResolver>();
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 
