@@ -57,13 +57,18 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()
             .AddScoped<IFtpService, SshNetSftpService>()
+            .AddScoped<IFtpService, LocalFileSystemFtpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
+            .AddScoped<IFileStorage, LocalFileSystemFileStorage>()
             .AddScoped<IMarketImportStrategy, BigDataImportStrategy>()
             .AddScoped<MarketImportStrategyResolver>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));
         services.AddKeyedTransient<IFtpService, SshNetSftpService>(nameof(SshNetSftpService));
+        services.AddKeyedTransient<IFtpService, LocalFileSystemFtpService>(nameof(LocalFileSystemFtpService));
+        services.AddKeyedTransient<IFileStorage, AzureBlobFileStorage>(nameof(AzureBlobFileStorage));
+        services.AddKeyedTransient<IFileStorage, LocalFileSystemFileStorage>(nameof(LocalFileSystemFileStorage));
 
         logger.LogInformation("{Project} services registered", "Infrastructure");
 
