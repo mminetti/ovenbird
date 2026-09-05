@@ -1,31 +1,32 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/ui',
-    '@vueuse/nuxt'
-  ],
+	modules: [
+		'@nuxt/eslint',
+		'@nuxt/ui',
+		'@vueuse/nuxt'
+	],
 
-  devtools: {
-    enabled: true
-  },
+	devtools: {
+		enabled: true
+	},
 
-  css: ['~/assets/css/main.css'],
+	css: ['~/assets/css/main.css'],
 
-  routeRules: {
-    '/api/**': {
-      cors: true
-    }
-  },
+	routeRules: {
+		'/api/**': {
+			cors: true
+		}
+	},
 
-  compatibilityDate: '2026-06-30',
+	compatibilityDate: '2026-06-30',
 
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
-  }
+	eslint: {
+		config: {
+			stylistic: {
+				indent: 'tab',
+				commaDangle: 'never',
+				braceStyle: '1tbs'
+			}
+		}
+	}
 })
