@@ -67,11 +67,16 @@ public class Auth0AuthStrategy(IConfiguration configuration) : IAuthStrategy
 
     public void ConfigureScalarAuth(ScalarOptions options, IConfiguration configuration)
     {
+        var audience = configuration["Auth0:Audience"] ?? string.Empty;
+
         options.AddAuthorizationCodeFlow("oauth2", flow =>
         {
             flow.WithClientId(configuration["Auth0:ClientId"] ?? string.Empty)
-                .WithSelectedScopes([configuration["Auth0:Audience"] ?? string.Empty])
-                .WithPkce(Pkce.Sha256);
+                .WithPkce(Pkce.Sha256)
+                // Auth0 only issues a JWT (vs. an opaque token) when the /authorize
+                // request carries this audience parameter — it is not a real OAuth2
+                // scope, so it must be sent as a query parameter, not via WithSelectedScopes.
+                .AddQueryParameter("audience", audience);
         });
     }
 
