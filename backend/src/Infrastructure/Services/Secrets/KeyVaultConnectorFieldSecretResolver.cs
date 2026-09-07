@@ -9,12 +9,6 @@ public class KeyVaultConnectorFieldSecretResolver(SecretClient? secretClient) : 
 {
     public async Task<string> ResolveAsync(ConnectorField field, CancellationToken ct)
     {
-        if (!field.IsSecret)
-        {
-            return field.Value ?? throw new InvalidOperationException(
-                $"Connector field '{field.Name}' has no value.");
-        }
-
         var secretName = field.Value;
 
         if (string.IsNullOrWhiteSpace(secretName))

@@ -83,10 +83,10 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
 
         return new FtpOptions
         {
-            Host = connector.GetRequiredValue(FtpHost),
+            Host = await connector.GetRequiredValueAsync(FtpHost, secretResolver, ct),
             Port = int.TryParse(connector.GetValue(FtpPort), out var port) ? port : DefaultFtpPort,
-            Username = connector.GetRequiredValue(FtpUsername),
-            Password = await connector.GetRequiredResolvedValueAsync(FtpPassword, secretResolver, ct),
+            Username = await connector.GetRequiredValueAsync(FtpUsername, secretResolver, ct),
+            Password = await connector.GetRequiredValueAsync(FtpPassword, secretResolver, ct),
             RemoteDirectory = configuration.GetRequiredValue(FtpRemoteDirectory),
             Implementation = connector.ConnectorImplementation.Name,
         };
@@ -98,8 +98,8 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
 
         return new FileStorageOptions
         {
-            RootDirectory = connector.GetRequiredValue(FileStorageRootDirectory),
-            ConnectionString = await connector.GetRequiredResolvedValueAsync(FileStorageConnectionString, secretResolver, ct),
+            RootDirectory = await connector.GetRequiredValueAsync(FileStorageRootDirectory, secretResolver, ct),
+            ConnectionString = await connector.GetRequiredValueAsync(FileStorageConnectionString, secretResolver, ct),
             Implementation = connector.ConnectorImplementation.Name,
         };
     }

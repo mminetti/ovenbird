@@ -15,20 +15,6 @@ public class KeyVaultConnectorFieldSecretResolverTests : IDisposable
     }
 
     [Fact]
-    public async Task ResolveAsyncReturnsValueUnchangedWhenNotSecret()
-    {
-        var secretClient = Substitute.For<SecretClient>();
-        var resolver = new KeyVaultConnectorFieldSecretResolver(secretClient);
-        var field = new ConnectorField { ConnectorId = 1, Name = "host", Value = "sftp.example.com", IsSecret = false };
-
-        var value = await resolver.ResolveAsync(field, CancellationToken.None);
-
-        value.ShouldBe("sftp.example.com");
-        await secretClient.DidNotReceive().GetSecretAsync(
-            Arg.Any<string>(), Arg.Any<string?>(), Arg.Any<SecretContentType?>(), Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
     public async Task ResolveAsyncReturnsValueFromKeyVaultWhenFound()
     {
         var secretClient = Substitute.For<SecretClient>();

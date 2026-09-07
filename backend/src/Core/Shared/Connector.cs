@@ -21,15 +21,9 @@ public class Connector : AuditableEntityBase<int>
             ?.Value;
     }
 
-    public string GetRequiredValue(string name)
+    public ConnectorField? GetField(string name)
     {
-        var value = GetValue(name);
-
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            throw new InvalidOperationException($"Connector '{Name}' is missing required '{name}' field.");
-        }
-
-        return value;
+        return ConnectorFields
+            .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 }
