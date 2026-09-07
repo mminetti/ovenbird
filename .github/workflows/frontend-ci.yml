@@ -64,4 +64,4 @@ jobs:
         with:
           app-name: ovenbird-app
           publish-profile: ${{ secrets.AZURE_WEB_APP_DEPLOY_TOKEN }}
-          package: .output
+          package: frontend/.output
