@@ -1,6 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
 	modules: [
+		'nuxt-auth-utils',
 		'@nuxt/eslint',
 		'@nuxt/ui',
 		'@vueuse/nuxt'
@@ -11,6 +12,12 @@ export default defineNuxtConfig({
 	},
 
 	css: ['~/assets/css/main.css'],
+
+	runtimeConfig: {
+		public: {
+			backendUrl: 'https://localhost:57679'
+		}
+	},
 
 	routeRules: {
 		'/api/**': {

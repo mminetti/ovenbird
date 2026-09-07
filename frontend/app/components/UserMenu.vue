@@ -11,18 +11,12 @@ const appConfig = useAppConfig()
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone', 'taupe', 'mauve', 'mist', 'olive']
 
-const user = ref({
-	name: 'Benjamin Canac',
-	avatar: {
-		src: 'https://github.com/benjamincanac.png',
-		alt: 'Benjamin Canac'
-	}
-})
+const { user, logout } = useAuth()
 
 const items = computed<DropdownMenuItem[][]>(() => ([[{
 	type: 'label',
-	label: user.value.name,
-	avatar: user.value.avatar
+	label: user.value?.name,
+	icon: 'i-lucide-user-circle'
 }], [{
 	label: 'Profile',
 	icon: 'i-lucide-user'
@@ -158,7 +152,10 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
 	target: '_blank'
 }], [{
 	label: 'Log out',
-	icon: 'i-lucide-log-out'
+	icon: 'i-lucide-log-out',
+	onSelect: () => {
+		logout()
+	}
 }]]))
 </script>
 
@@ -169,11 +166,9 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
 		:ui="{ content: collapsed ? 'w-48' : 'w-(--reka-dropdown-menu-trigger-width)' }"
 	>
 		<UButton
-			v-bind="{
-				...user,
-				label: collapsed ? undefined : user?.name,
-				trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down'
-			}"
+			icon="i-lucide-user-circle"
+			:label="collapsed ? undefined : user?.name"
+			:trailing-icon="collapsed ? undefined : 'i-lucide-chevrons-up-down'"
 			color="neutral"
 			variant="ghost"
 			block

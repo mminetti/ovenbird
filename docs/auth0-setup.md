@@ -32,7 +32,31 @@ flow).
 Skip this step if you only need machine-to-machine (client-credentials)
 tokens for testing — those don't need an interactive Application.
 
-## 3. Create a Post-Login Action to add name/email claims
+## 3. Create an Application for the frontend
+
+The `frontend` Nuxt app needs its own Application, separate from the one
+above — it uses a confidential Regular Web Application flow (server-side
+authorization code exchange with a client secret), not the SPA + PKCE flow
+Swagger/Scalar uses.
+
+Dashboard → **Applications → Create Application** → **Regular Web
+Application**.
+
+- Under **Settings**, set **Allowed Callback URLs** to
+  `http://localhost:3000/auth/auth0` (add the production URL, same path,
+  once deployed) and **Allowed Logout URLs** to
+  `http://localhost:3000/login`.
+- Note the **Client ID** and **Client Secret** — these become
+  `NUXT_OAUTH_AUTH0_CLIENT_ID` / `NUXT_OAUTH_AUTH0_CLIENT_SECRET` in
+  `frontend/.env`.
+- Under the API from step 1, confirm this Application isn't blocked from
+  requesting its audience (same note as step 2 above).
+
+The Post-Login Action from step 4 below fires for any interactive login
+across the tenant, so it covers this Application too — no separate Action
+needed.
+
+## 4. Create a Post-Login Action to add name/email claims
 
 Auth0 access tokens only carry `sub`, `aud`, `iss`, `iat`, `exp`, `azp`,
 `scope` by default — **not** name or email, even if the `profile`/`email`
@@ -64,7 +88,7 @@ machine-to-machine client-credentials grants. A client-credentials token's
 `sub` will look like `{client_id}@clients` and will never carry the
 namespaced name/email claims.
 
-## 4. Request tokens with the right audience
+## 5. Request tokens with the right audience
 
 Auth0 only issues a JWT access token (rather than an opaque string) when the
 token request includes an `audience` parameter matching the API identifier
@@ -87,7 +111,24 @@ dotnet user-secrets set "Auth0:ClaimsNamespace" "https://ovenbird.example.com/"
 In deployed environments, set the same keys via that environment's
 configuration/secret store — never commit real values to `appsettings.json`.
 
-## Verifying end-to-end (no frontend yet)
+## Configuring the frontend with these values
+
+In `frontend/.env` (copy from `.env.example`):
+
+```
+NUXT_SESSION_PASSWORD=<any random string, 32+ chars>
+NUXT_OAUTH_AUTH0_CLIENT_ID=<the frontend Application's Client ID, from step 3>
+NUXT_OAUTH_AUTH0_CLIENT_SECRET=<the frontend Application's Client Secret, from step 3>
+NUXT_OAUTH_AUTH0_DOMAIN=your-tenant.us.auth0.com
+NUXT_OAUTH_AUTH0_AUDIENCE=https://api.ovenbird.example.com
+NUXT_PUBLIC_BACKEND_URL=https://localhost:57679
+```
+
+`NUXT_OAUTH_AUTH0_DOMAIN` and `NUXT_OAUTH_AUTH0_AUDIENCE` must be the exact
+same values as the backend's `Auth0:Domain` / `Auth0:Audience` above — that's
+what makes the token the frontend obtains for the user acceptable to the API.
+
+## Verifying via curl (backend only, no frontend needed)
 
 1. Get a client-credentials token (safe, no real user needed) to prove
    signature/issuer/audience validation and the `sub`-based identifier path:
@@ -107,3 +148,18 @@ configuration/secret store — never commit real values to `appsettings.json`.
    "Authorize" button to complete a real interactive login, then re-check
    `/security/me` — `Name`/`Email` should now be populated from the Action's
    custom claims.
+
+## Verifying via the frontend
+
+1. `pnpm dev` in `frontend`, visit `http://localhost:3000` — expect a
+   redirect to `/login`.
+2. Click "Sign in with Auth0", complete Auth0's login page.
+3. First-ever login for that user: expect a redirect back to
+   `/login?error=inactive` (same `IsActive = false` behavior as step 2
+   above). Activate the user, then sign in again.
+4. After activation: land on `/`, with the real name from `/security/me`
+   shown in the user menu (bottom of the sidebar).
+5. Click "Log out" in the user menu — this should round-trip through
+   `{domain}/v2/logout` and land back on `/login`. Click "Sign in with
+   Auth0" again and confirm it actually prompts for credentials rather than
+   silently signing back in — that's the federated-logout redirect working.
