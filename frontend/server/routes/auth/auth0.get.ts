@@ -14,6 +14,8 @@ export default defineOAuthAuth0EventHandler({
 		const runtimeConfig = useRuntimeConfig(event)
 		const backendUrl = runtimeConfig.public.backendUrl as string
 
+		console.log(`[auth0] onSuccess: backendUrl=${backendUrl} hasAccessToken=${Boolean(tokens.access_token)}`)
+
 		// Deliberately not using the `user` argument here — it comes from Auth0's own
 		// /userinfo endpoint, which knows nothing about our domain's permissions and
 		// isn't guaranteed to carry the namespaced name/email claims either. Our own
@@ -23,8 +25,12 @@ export default defineOAuthAuth0EventHandler({
 			me = await $fetch<BackendMe>(`${backendUrl}/security/me`, {
 				headers: { Authorization: `Bearer ${tokens.access_token}` }
 			})
+			console.log(`[auth0] /security/me succeeded for ${me.email}`)
 		} catch (error: unknown) {
-			if ((error as { response?: { status?: number } })?.response?.status === 401) {
+			const status = (error as { response?: { status?: number } })?.response?.status
+			const body = (error as { data?: unknown })?.data
+			console.error(`[auth0] /security/me failed: status=${status} message=${(error as Error)?.message} body=${JSON.stringify(body)}`)
+			if (status === 401) {
 				// Expected on a brand-new user: the API JIT-creates the User row but
 				// defaults it to IsActive = false until an admin approves it.
 				return sendRedirect(event, '/login?error=inactive')
@@ -44,10 +50,11 @@ export default defineOAuthAuth0EventHandler({
 			}
 		})
 
+		console.log('[auth0] session set, redirecting to /')
 		return sendRedirect(event, '/')
 	},
 	onError(event, error) {
-		console.error('Auth0 OAuth error:', error)
+		console.error(`[auth0] OAuth error: ${error?.message ?? error}`, error)
 		return sendRedirect(event, '/login?error=oauth')
 	}
 })
