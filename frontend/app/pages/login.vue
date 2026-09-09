@@ -8,6 +8,7 @@ const errorMessage = computed(() => {
 	if (!errorParam) return null
 	if (errorParam === 'inactive') return 'Your account is pending activation by an administrator.'
 	if (errorParam === 'oauth') return 'Sign-in failed. Please try again.'
+	if (errorParam === 'backend') return 'We couldn\'t reach the server. Please try again in a moment.'
 	return 'An error occurred. Please try again.'
 })
 </script>

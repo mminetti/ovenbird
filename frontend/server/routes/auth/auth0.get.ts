@@ -35,7 +35,13 @@ export default defineOAuthAuth0EventHandler({
 				// defaults it to IsActive = false until an admin approves it.
 				return sendRedirect(event, '/login?error=inactive')
 			}
-			throw error
+			// Any other failure (backend down, DB unreachable, unexpected 500, network
+			// error) — surface it as a login error instead of letting it throw uncaught.
+			// An uncaught throw here doesn't render as a clean failure: Nitro logs it as
+			// an unhandled request error and falls back to rendering the path as a page,
+			// which the global auth middleware then bounces to a bare /login with no
+			// indication anything went wrong.
+			return sendRedirect(event, '/login?error=backend')
 		}
 
 		await setUserSession(event, {
