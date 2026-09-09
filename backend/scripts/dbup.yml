@@ -1,0 +1,11 @@
+dbUp:
+  version: 1
+  provider: sqlserver
+  connectionString: $DB_CONNECTION_STRING$
+  
+  scripts:
+    - folder: .
+  
+  journalTo:
+    schema: "dbo"
+    table: "_SchemaVersions"
