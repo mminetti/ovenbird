@@ -7,6 +7,7 @@ using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
+using UseCases.Common;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import.Strategies;
@@ -34,16 +35,19 @@ public static class InfrastructureServiceExtensions
         services.AddHybridCache();
         services.AddSingleton(TimeProvider.System);
 
+        services.AddScoped<IUser, SystemUser>();
         services.AddScoped<EventDispatchInterceptor>();
+        services.AddScoped<AuditableEntityInterceptor>();
         services.AddScoped<IDomainEventDispatcher, WolverineDomainEventDispatcher>();
 
         // Register write DbContext
         services.AddDbContext<AppDbContext>((provider, options) =>
         {
             var eventDispatchInterceptor = provider.GetRequiredService<EventDispatchInterceptor>();
+            var auditableEntityInterceptor = provider.GetRequiredService<AuditableEntityInterceptor>();
 
             options.UseSqlServer(connectionString);
-            options.AddInterceptors(eventDispatchInterceptor);
+            options.AddInterceptors(eventDispatchInterceptor, auditableEntityInterceptor);
         });
 
         // Register read DbContext

@@ -1,12 +1,14 @@
 ﻿using Core.Common;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using UseCases.Common;
 
 namespace Infrastructure.Data.Interceptors;
 
-public class AuditableEntityInterceptor(TimeProvider dateTime) : SaveChangesInterceptor
+public class AuditableEntityInterceptor(TimeProvider dateTime, IUser user) : SaveChangesInterceptor
 {
     private readonly TimeProvider _dateTime = dateTime;
+    private readonly IUser _user = user;
 
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
@@ -37,11 +39,11 @@ public class AuditableEntityInterceptor(TimeProvider dateTime) : SaveChangesInte
 
                 if (entry.State == EntityState.Added)
                 {
-                    entry.Entity.CreatedBy = null;
+                    entry.Entity.CreatedBy = _user.Id;
                     entry.Entity.CreatedAtUtc = utcNow;
                 }
 
-                entry.Entity.LastModifiedBy = null;
+                entry.Entity.LastModifiedBy = _user.Id;
                 entry.Entity.LastModifiedAtUtc = utcNow;
             }
         }

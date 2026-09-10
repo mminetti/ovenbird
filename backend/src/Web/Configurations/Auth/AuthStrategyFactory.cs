@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using UseCases.Common;
 
 namespace Web.Configurations.Auth;
 
@@ -31,6 +32,7 @@ public static class AuthStrategyFactory
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentUserContext, HttpCurrentUserContext>();
         services.AddScoped<IClaimsTransformation, CurrentUserClaimsTransformation>();
+        services.AddScoped<IUser, HttpUser>();
         strategy.ConfigureServices(services, configuration);
         return strategy;
     }
