@@ -23,6 +23,8 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
 
             s.Params["page"] = Endpoints.ParamPage;
             s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
+            s.Params["search"] = "Free-text search across name and email";
+            s.Params["order_by"] = "Sort by property name, optionally followed by 'desc' (e.g. 'name desc'). Defaults to id.";
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -41,7 +43,7 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
     public override async Task HandleAsync(ListUsersRequest request, CancellationToken ct)
     {
         var result = await _bus.InvokeAsync<Result<ItemPagedResult<UserDto>>>(
-            new ListUsersQuery(request.Page, request.PerPage), ct);
+            new ListUsersQuery(request.Page, request.PerPage, request.Search, request.OrderBy), ct);
 
         if (!result.IsSuccess)
         {

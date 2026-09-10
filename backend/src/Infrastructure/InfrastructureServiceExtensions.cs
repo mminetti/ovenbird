@@ -1,9 +1,11 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Core.Security;
 using Core.Security.Interfaces;
 using Core.Security.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
+using Infrastructure.Data.Queries.Common;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
@@ -58,6 +60,7 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
+            .AddSingleton<IQueryPropertyMapper<User>, UserQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListModulesQueryService, ListModulesQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()

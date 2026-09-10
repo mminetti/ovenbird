@@ -1,5 +1,9 @@
-﻿using UseCases.Common;
+using UseCases.Common;
 
 namespace UseCases.Security.Users.List;
 
-public record ListUsersQuery(int? Page = 1, int? PerPage = Constants.Pagination.DefaultPageSize);
+public record ListUsersQuery(
+    int? Page = 1,
+    int? PerPage = Constants.Pagination.DefaultPageSize,
+    string? Search = null,
+    string? OrderBy = null);

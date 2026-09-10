@@ -1,24 +1,18 @@
-﻿using UseCases.Common;
+﻿using System.Linq.Expressions;
+using Core.Security;
+using Infrastructure.Data.Queries.Common;
 using UseCases.Security.Users;
 using UseCases.Security.Users.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListUsersQueryService(ReadDbContext db) : IListUsersQueryService
+public class ListUsersQueryService(ReadDbContext db, IQueryPropertyMapper<User> propertyMapper)
+    : PagedQueryServiceBase<User, UserDto>(propertyMapper), IListUsersQueryService
 {
-    public async Task<ItemPagedResult<UserDto>> ListAsync(int page, int perPage, CancellationToken ct)
-    {
-        var items = await db.User
-            .OrderBy(u => u.Id)
-            .Skip((page - 1) * perPage)
-            .Take(perPage)
-            .Select(u => new UserDto(u.Id, u.Name, u.Email, u.IsActive))
-            .AsNoTracking()
-            .ToListAsync(ct);
+    protected override IQueryable<User> GetQuery() => db.User;
 
-        int totalCount = await db.User.CountAsync(ct);
-        int totalPages = (int)Math.Ceiling(totalCount / (double)perPage);
+    protected override Expression<Func<User, UserDto>> GetProjection() =>
+        u => new UserDto(u.Id, u.Name, u.Email, u.IsActive);
 
-        return new ItemPagedResult<UserDto>(items, page, perPage, totalCount, totalPages);
-    }
+    protected override string GetDefaultOrderBy() => nameof(User.Id);
 }

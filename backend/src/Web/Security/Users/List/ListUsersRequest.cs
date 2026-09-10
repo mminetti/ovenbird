@@ -6,8 +6,3 @@ public sealed class ListUsersRequest : PagedRequest
 {
     public const string Route = "/security/users";
 }
-
-public sealed class ListUsersValidator : PagedRequestValidator<ListUsersRequest>
-{
-
-}
