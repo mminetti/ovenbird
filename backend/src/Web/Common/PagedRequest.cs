@@ -9,7 +9,7 @@ public abstract class PagedRequest
     public int Page { get; init; } = 1;
 
     [BindFrom("per_page")]
-    public int PerPage { get; init; } = Constants.DEFAULT_PAGE_SIZE;
+    public int PerPage { get; init; } = Constants.Pagination.DefaultPageSize;
 }
 
 public abstract class PagedRequestValidator<T> : Validator<T> where T : PagedRequest
@@ -21,7 +21,7 @@ public abstract class PagedRequestValidator<T> : Validator<T> where T : PagedReq
             .WithMessage("page must be >= 1");
 
         RuleFor(x => x.PerPage)
-            .InclusiveBetween(1, Constants.MAX_PAGE_SIZE)
-            .WithMessage($"per_page must be between 1 and {Constants.MAX_PAGE_SIZE}");
+            .InclusiveBetween(1, Constants.Pagination.MaxPageSize)
+            .WithMessage($"per_page must be between 1 and {Constants.Pagination.MaxPageSize}");
     }
 }

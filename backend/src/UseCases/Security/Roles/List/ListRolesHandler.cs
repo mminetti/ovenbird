@@ -8,7 +8,7 @@ public class ListRolesHandler(IListRolesQueryService query)
     {
         var result = await query.ListAsync(
             request.Page ?? 1,
-            request.PerPage ?? Constants.DEFAULT_PAGE_SIZE,
+            request.PerPage ?? Constants.Pagination.DefaultPageSize,
             ct);
 
         return Result.Success(result);

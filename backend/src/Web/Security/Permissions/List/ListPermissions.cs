@@ -23,7 +23,7 @@ public class ListPermissions(IMessageBus bus)
             s.ExampleRequest = new ListPermissionsRequest { Page = 1, PerPage = 10 };
 
             s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.MAX_PAGE_SIZE, Constants.DEFAULT_PAGE_SIZE);
+            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;

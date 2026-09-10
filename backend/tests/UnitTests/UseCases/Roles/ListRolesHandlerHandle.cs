@@ -38,14 +38,14 @@ public class ListRolesHandlerHandle
     [Fact]
     public async Task UsesDefaultsWhenPageAndPerPageAreNull()
     {
-        var pagedResult = new ItemPagedResult<RoleDto>([], 1, Constants.DEFAULT_PAGE_SIZE, 0, 0);
+        var pagedResult = new ItemPagedResult<RoleDto>([], 1, Constants.Pagination.DefaultPageSize, 0, 0);
 
-        _query.ListAsync(1, Constants.DEFAULT_PAGE_SIZE, Arg.Any<CancellationToken>())
+        _query.ListAsync(1, Constants.Pagination.DefaultPageSize, Arg.Any<CancellationToken>())
             .Returns(pagedResult);
 
         var result = await _handler.Handle(new ListRolesQuery(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        await _query.Received(1).ListAsync(1, Constants.DEFAULT_PAGE_SIZE, Arg.Any<CancellationToken>());
+        await _query.Received(1).ListAsync(1, Constants.Pagination.DefaultPageSize, Arg.Any<CancellationToken>());
     }
 }

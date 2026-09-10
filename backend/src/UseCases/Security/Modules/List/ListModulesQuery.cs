@@ -2,4 +2,4 @@
 
 namespace UseCases.Security.Modules.List;
 
-public record ListModulesQuery(int? Page = 1, int? PerPage = Constants.DEFAULT_PAGE_SIZE);
+public record ListModulesQuery(int? Page = 1, int? PerPage = Constants.Pagination.DefaultPageSize);
