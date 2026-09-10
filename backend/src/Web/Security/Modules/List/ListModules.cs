@@ -13,7 +13,7 @@ public class ListModules(IMessageBus bus) : Endpoint<ListModulesRequest, ListMod
     public override void Configure()
     {
         Get(ListModulesRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.ModulesRead);
 
         Summary(s =>
         {

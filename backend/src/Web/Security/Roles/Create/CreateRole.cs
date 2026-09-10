@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Roles.Create;
 using Web.Extensions;
 using Web.Resources;
@@ -14,7 +15,7 @@ public class CreateRole(IMessageBus bus)
     public override void Configure()
     {
         Post(CreateRoleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.RolesWrite);
 
         Summary(s =>
         {

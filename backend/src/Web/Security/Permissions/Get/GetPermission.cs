@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.Get;
 using Web.Extensions;
@@ -15,7 +16,7 @@ public class GetPermission(IMessageBus bus)
     public override void Configure()
     {
         Get(GetPermissionRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.PermissionsRead);
 
         Summary(s =>
         {

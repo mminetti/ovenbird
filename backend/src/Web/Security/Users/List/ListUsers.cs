@@ -13,8 +13,7 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
     public override void Configure()
     {
         Get(ListUsersRequest.Route);
-        AllowAnonymous();
-        //Permissions("user.read");
+        Permissions(Constants.Permissions.UsersRead);
 
         Summary(s =>
         {

@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Roles.SetPermissions;
 using Web.Extensions;
 using Web.Resources;
@@ -13,7 +14,7 @@ public class SetRolePermissions(IMessageBus bus)
     public override void Configure()
     {
         Post(SetRolePermissionsRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.RolesManage);
 
         Summary(s =>
         {

@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Infrastructure.Data;
-using Testcontainers.MsSql;
+﻿using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Testcontainers.MsSql;
+using Web.Configurations.Auth;
 
 namespace FunctionalTests;
 
@@ -113,6 +114,14 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             })
             .ConfigureServices(services =>
             {
+                // Replace the real auth strategy with the test one so every request
+                // is authenticated as a fully-privileged principal without a real IdP.
+                var existing = services.SingleOrDefault(d => d.ServiceType == typeof(IAuthStrategy));
+                if (existing != null) services.Remove(existing);
+                var testStrategy = new TestAuthStrategy();
+                testStrategy.ConfigureServices(services, new ConfigurationBuilder().Build());
+                services.AddSingleton<IAuthStrategy>(testStrategy);
+
                 if (_dbContainer != null)
                 {
                     // Remove the app's ApplicationDbContext registration

@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Roles;
 using UseCases.Security.Roles.Get;
 using Web.Extensions;
@@ -16,7 +17,7 @@ public class GetRole(IMessageBus bus)
     public override void Configure()
     {
         Get(GetRoleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.RolesRead);
 
         Summary(s =>
         {

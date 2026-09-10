@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Roles.Delete;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class DeleteRole(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeleteRoleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.RolesDelete);
 
         Summary(s =>
         {

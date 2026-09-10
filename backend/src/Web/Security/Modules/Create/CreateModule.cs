@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Modules.Create;
 using Web.Extensions;
 using Web.Resources;
@@ -14,7 +15,7 @@ public class CreateModule(IMessageBus bus)
     public override void Configure()
     {
         Post(CreateModuleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.ModulesWrite);
 
         Summary(s =>
         {

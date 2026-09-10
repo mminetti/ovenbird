@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Users;
 using UseCases.Security.Users.Get;
 using Web.Extensions;
@@ -16,7 +17,7 @@ public class GetUser(IMessageBus bus)
     public override void Configure()
     {
         Get(GetUserRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.UsersRead);
 
         Summary(s =>
         {

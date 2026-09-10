@@ -13,7 +13,7 @@ public class ListRoles(IMessageBus bus) : Endpoint<ListRolesRequest, ListRolesRe
     public override void Configure()
     {
         Get(ListRolesRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.RolesRead);
 
         Summary(s =>
         {

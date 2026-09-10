@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Modules.Update;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class UpdateModule(IMessageBus bus)
     public override void Configure()
     {
         Put(UpdateModuleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.ModulesWrite);
 
         Summary(s =>
         {

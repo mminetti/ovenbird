@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Users.Update;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class UpdateUser(IMessageBus bus)
     public override void Configure()
     {
         Put(UpdateUserRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.UsersWrite);
 
         Summary(s =>
         {

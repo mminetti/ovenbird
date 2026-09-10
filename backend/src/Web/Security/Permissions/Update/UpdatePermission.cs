@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Permissions.Update;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class UpdatePermission(IMessageBus bus)
     public override void Configure()
     {
         Put(UpdatePermissionRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.PermissionsWrite);
 
         Summary(s =>
         {

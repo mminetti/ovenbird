@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Modules.Delete;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class DeleteModule(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeleteModuleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.ModulesDelete);
 
         Summary(s =>
         {

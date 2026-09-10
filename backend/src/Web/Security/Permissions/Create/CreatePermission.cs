@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Permissions.Create;
 using Web.Extensions;
 using Web.Resources;
@@ -14,7 +15,7 @@ public class CreatePermission(IMessageBus bus)
     public override void Configure()
     {
         Post(CreatePermissionRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.PermissionsWrite);
 
         Summary(s =>
         {

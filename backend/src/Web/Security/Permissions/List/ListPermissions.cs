@@ -14,7 +14,7 @@ public class ListPermissions(IMessageBus bus)
     public override void Configure()
     {
         Get(ListPermissionsRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.PermissionsRead);
 
         Summary(s =>
         {

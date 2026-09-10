@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Roles.Update;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class UpdateRole(IMessageBus bus)
     public override void Configure()
     {
         Put(UpdateRoleRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.RolesWrite);
 
         Summary(s =>
         {

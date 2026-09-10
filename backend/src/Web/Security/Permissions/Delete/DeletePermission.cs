@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Permissions.Delete;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class DeletePermission(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeletePermissionRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.PermissionsDelete);
 
         Summary(s =>
         {

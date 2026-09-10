@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common;
 using UseCases.Security.Users.Delete;
 using Web.Extensions;
 using Web.Resources;
@@ -12,7 +13,7 @@ public class DeleteUser(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeleteUserRequest.Route);
-        AllowAnonymous();
+        Permissions(Constants.Permissions.UsersDelete);
 
         Summary(s =>
         {
