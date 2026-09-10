@@ -12,16 +12,9 @@ const links = computed(() => [[{
 	onSelect: () => {
 		open.value = false
 	}
-}, ...(hasPermission('users.read')
-	? [{
-			label: 'Users',
-			icon: 'i-lucide-user-cog',
-			to: '/users',
-			onSelect: () => {
-				open.value = false
-			}
-		}]
-	: [])]] satisfies NavigationMenuItem[][])
+}, ...buildSecuredNavItems(hasPermission, () => {
+	open.value = false
+})]] satisfies NavigationMenuItem[][])
 </script>
 
 <template>

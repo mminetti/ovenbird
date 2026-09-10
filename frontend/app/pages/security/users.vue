@@ -4,6 +4,10 @@ import type { SecurityUsersResponse } from '~~/server/api/security/users'
 import type { SecurityUser } from '~/types'
 import type { SortDirection, TypedColumnConfig } from '~/utils/paginatedTableColumns'
 
+definePageMeta({
+	permission: 'users.read'
+})
+
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
 const deleteModal = useTemplateRef('deleteModal')
