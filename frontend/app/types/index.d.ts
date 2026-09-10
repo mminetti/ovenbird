@@ -58,3 +58,16 @@ export interface Range {
 	start: Date
 	end: Date
 }
+
+export interface SecurityRole {
+	id: number
+	name: string
+}
+
+export interface SecurityUser {
+	id: number
+	name: string
+	email: string
+	isActive: boolean
+	roles?: SecurityRole[]
+}

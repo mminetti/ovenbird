@@ -3,10 +3,11 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 
 const route = useRoute()
 const toast = useToast()
+const { hasPermission } = useAuth()
 
 const open = ref(false)
 
-const links = [[{
+const links = computed(() => [[{
 	label: 'Home',
 	icon: 'i-lucide-house',
 	to: '/',
@@ -28,7 +29,16 @@ const links = [[{
 	onSelect: () => {
 		open.value = false
 	}
-}, {
+}, ...(hasPermission('users.read')
+	? [{
+			label: 'Users',
+			icon: 'i-lucide-user-cog',
+			to: '/users',
+			onSelect: () => {
+				open.value = false
+			}
+		}]
+	: []), {
 	label: 'Settings',
 	to: '/settings',
 	icon: 'i-lucide-settings',
@@ -70,12 +80,12 @@ const links = [[{
 	icon: 'i-lucide-info',
 	to: 'https://github.com/nuxt-ui-templates/dashboard',
 	target: '_blank'
-}]] satisfies NavigationMenuItem[][]
+}]] satisfies NavigationMenuItem[][])
 
 const groups = computed(() => [{
 	id: 'links',
 	label: 'Go to',
-	items: links.flat()
+	items: links.value.flat()
 }, {
 	id: 'code',
 	label: 'Code',
