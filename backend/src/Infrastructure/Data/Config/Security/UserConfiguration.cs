@@ -9,7 +9,7 @@ public class UserConfiguration : BaseEntityTypeConfiguration<User, int>
         base.Configure(builder);
 
         builder.Property(x => x.ExternalIdentifier)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
+            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.HasIndex(x => x.ExternalIdentifier)
             .IsUnique();
