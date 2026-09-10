@@ -119,10 +119,10 @@ function handleRowSelect(_event: Event, row: { original: T }) {
 			:on-select="handleRowSelect"
 			:ui="{
 				base: 'table-auto border-separate border-spacing-0',
-				thead: '[&>tr]:bg-elevated/50 [&>tr]:after:content-none',
+				thead: '[&>tr]:after:content-none',
 				tbody: '[&>tr]:last:[&>td]:border-b-0',
 				tr: 'hover:bg-elevated/30 transition-colors duration-150 data-[selectable=true]:cursor-pointer',
-				th: 'px-3 py-1.5 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r last:w-12',
+				th: 'bg-elevated/50 px-3 py-1.5 first:rounded-l-lg last:rounded-r-lg border-y border-default first:border-l last:border-r last:w-12',
 				td: 'px-3 py-2 border-b border-default last:w-12',
 				separator: 'h-0'
 			}"
