@@ -13,7 +13,7 @@ public class DeleteUser(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeleteUserRequest.Route);
-        Permissions(Constants.Permissions.UsersDelete);
+        Permissions(Constants.Permissions.UsersWrite);
 
         Summary(s =>
         {

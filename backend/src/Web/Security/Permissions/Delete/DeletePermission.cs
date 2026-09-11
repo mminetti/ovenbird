@@ -13,7 +13,7 @@ public class DeletePermission(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeletePermissionRequest.Route);
-        Permissions(Constants.Permissions.PermissionsDelete);
+        Permissions(Constants.Permissions.PermissionsWrite);
 
         Summary(s =>
         {

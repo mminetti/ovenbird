@@ -13,7 +13,7 @@ public class DeleteRole(IMessageBus bus)
     public override void Configure()
     {
         Delete(DeleteRoleRequest.Route);
-        Permissions(Constants.Permissions.RolesDelete);
+        Permissions(Constants.Permissions.RolesWrite);
 
         Summary(s =>
         {

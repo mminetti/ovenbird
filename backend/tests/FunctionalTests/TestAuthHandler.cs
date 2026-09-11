@@ -39,14 +39,11 @@ sealed class TestAuthHandler(
 
     private static IEnumerable<string> AllPermissions() =>
     [
-        UseCases.Common.Constants.Permissions.UsersRead, 
+        UseCases.Common.Constants.Permissions.UsersRead,
         UseCases.Common.Constants.Permissions.UsersWrite,
-        UseCases.Common.Constants.Permissions.UsersDelete,
-        UseCases.Common.Constants.Permissions.RolesRead, 
+        UseCases.Common.Constants.Permissions.RolesRead,
         UseCases.Common.Constants.Permissions.RolesWrite,
-        UseCases.Common.Constants.Permissions.RolesDelete,
         UseCases.Common.Constants.Permissions.PermissionsRead,
         UseCases.Common.Constants.Permissions.PermissionsWrite,
-        UseCases.Common.Constants.Permissions.PermissionsDelete,
     ];
 }
