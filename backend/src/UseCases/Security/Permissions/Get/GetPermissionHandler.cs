@@ -14,6 +14,6 @@ public class GetPermissionHandler(IReadRepository<Permission> repository)
             return Result.NotFound();
         }
 
-        return Result.Success(new PermissionDto(entity.Id, entity.ModuleId, entity.Name, entity.Description));
+        return Result.Success(new PermissionDto(entity.Id, entity.Name, entity.Description));
     }
 }

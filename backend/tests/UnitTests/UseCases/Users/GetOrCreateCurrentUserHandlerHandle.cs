@@ -21,9 +21,8 @@ public class GetOrCreateCurrentUserHandlerHandle
     [Fact]
     public async Task WhenUserExists_ReturnsExistingUserWithPermissions()
     {
-        var module = new Module { Id = 1, Name = "Security" };
-        var permission1 = new Permission { Id = 1, Name = "Users:Read", Module = module };
-        var permission2 = new Permission { Id = 2, Name = "Modules:Read", Module = module };
+        var permission1 = new Permission { Id = 1, Name = "Users:Read" };
+        var permission2 = new Permission { Id = 2, Name = "Roles:Read" };
         var role = new Role { Id = 10, Name = "Admin", Permissions = [permission1, permission2] };
         var user = new User { Id = 5, ExternalIdentifier = "oid-123", Name = "Alice", Email = "alice@test.com", IsActive = true, Roles = [role] };
 
@@ -39,7 +38,7 @@ public class GetOrCreateCurrentUserHandlerHandle
         result.Name.ShouldBe("Alice");
         result.Email.ShouldBe("alice@test.com");
         result.Permissions.ShouldContain(p => p.Name == "Users:Read");
-        result.Permissions.ShouldContain(p => p.Name == "Modules:Read");
+        result.Permissions.ShouldContain(p => p.Name == "Roles:Read");
         result.Permissions.Count.ShouldBe(2);
     }
 

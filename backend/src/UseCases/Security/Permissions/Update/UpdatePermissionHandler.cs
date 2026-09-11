@@ -13,7 +13,6 @@ public class UpdatePermissionHandler(IRepository<Permission> repository)
             return Result.NotFound();
         }
 
-        permission.ModuleId = command.ModuleId;
         permission.Name = command.Name;
         permission.Description = command.Description;
 

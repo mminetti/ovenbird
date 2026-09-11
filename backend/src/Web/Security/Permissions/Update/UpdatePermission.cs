@@ -23,7 +23,6 @@ public class UpdatePermission(IMessageBus bus)
             {
                 PermissionId = 1,
                 Id = 1,
-                ModuleId = 1,
                 Name = "users.write",
                 Description = "Can write users"
             };
@@ -48,7 +47,7 @@ public class UpdatePermission(IMessageBus bus)
         ExecuteAsync(UpdatePermissionRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result>(
-            new UpdatePermissionCommand(request.PermissionId, request.ModuleId, request.Name, request.Description), ct);
+            new UpdatePermissionCommand(request.PermissionId, request.Name, request.Description), ct);
 
         return result.ToDeleteUpdateResult();
     }

@@ -15,9 +15,5 @@ public static partial class Constants
         public const string PermissionsRead = "permissions.read";
         public const string PermissionsWrite = "permissions.write";
         public const string PermissionsDelete = "permissions.delete";
-
-        public const string ModulesRead = "modules.read";
-        public const string ModulesWrite = "modules.write";
-        public const string ModulesDelete = "modules.delete";
     }
 }

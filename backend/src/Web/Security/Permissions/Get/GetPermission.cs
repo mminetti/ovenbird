@@ -53,5 +53,5 @@ public class GetPermission(IMessageBus bus)
 public sealed class GetPermissionByIdMapper : Mapper<GetPermissionRequest, PermissionRecord, PermissionDto>
 {
     public override PermissionRecord FromEntity(PermissionDto e) =>
-        new(e.Id, e.ModuleId, e.Name, e.Description);
+        new(e.Id, e.Name, e.Description);
 }

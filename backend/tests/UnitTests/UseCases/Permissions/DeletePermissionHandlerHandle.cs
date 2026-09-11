@@ -16,7 +16,7 @@ public class DeletePermissionHandlerHandle
     [Fact]
     public async Task ReturnsSuccessWhenPermissionExists()
     {
-        var permission = new Permission { Id = 1, ModuleId = 1, Name = "users.read", Description = "Can read users" };
+        var permission = new Permission { Id = 1, Name = "users.read", Description = "Can read users" };
 
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>())
             .Returns(permission);

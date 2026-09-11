@@ -1,3 +1,3 @@
 namespace UseCases.Security.Permissions;
 
-public record PermissionDto(int Id, int ModuleId, string Name, string Description);
+public record PermissionDto(int Id, string Name, string Description);

@@ -56,7 +56,7 @@ public class CurrentUserClaimsTransformationTests
     {
         var userInfo = new CurrentUserInfo(7, TestOid, "Test User", "test@example.com", true)
         {
-            Permissions = [new UserPermissionDto("Users:Read", "Security"), new UserPermissionDto("Modules:Read", "Security")]
+            Permissions = [new UserPermissionDto("Users:Read"), new UserPermissionDto("Roles:Read")]
         };
         var bus = Substitute.For<IMessageBus>();
         bus.InvokeAsync<Result<CurrentUserInfo>>(Arg.Any<GetOrCreateCurrentUserCommand>(), Arg.Any<CancellationToken>())
@@ -69,7 +69,7 @@ public class CurrentUserClaimsTransformationTests
 
         var permClaims = result.FindAll(AuthConstants.PermissionsClaimType).Select(c => c.Value).ToList();
         permClaims.ShouldContain("Users:Read");
-        permClaims.ShouldContain("Modules:Read");
+        permClaims.ShouldContain("Roles:Read");
         result.HasClaim(c => c.Type == AuthConstants.CurrentUserResolvedClaimType).ShouldBeTrue();
     }
 

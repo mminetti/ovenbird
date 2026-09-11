@@ -18,7 +18,7 @@ public class GetCurrentUserHandler(CurrentUserService currentUserService)
 
         return Result.Success(new CurrentUserProfileDto(userInfo.Name, userInfo.Email)
         {
-            Permissions = [.. userInfo.Permissions.Select(p => new UserPermissionDto(p.Name, p.ModuleName))]
+            Permissions = [.. userInfo.Permissions]
         });
     }
 }

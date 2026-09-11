@@ -23,7 +23,6 @@ public class CreatePermission(IMessageBus bus)
             s.Description = "Creates a new permission with the provided details.";
             s.ExampleRequest = new CreatePermissionRequest
             {
-                ModuleId = 1,
                 Name = "users.read",
                 Description = "Can read users"
             };
@@ -46,7 +45,7 @@ public class CreatePermission(IMessageBus bus)
         ExecuteAsync(CreatePermissionRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result<int>>(
-            new CreatePermissionCommand(request.ModuleId, request.Name, request.Description), ct);
+            new CreatePermissionCommand(request.Name, request.Description), ct);
 
         return result.ToCreatedResult(
             id => GetPermissionRequest.BuildRoute(id),

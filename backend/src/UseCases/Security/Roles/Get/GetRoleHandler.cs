@@ -16,7 +16,7 @@ public class GetRoleHandler(IReadRepository<Role> repository)
         }
 
         var permissions = entity.Permissions
-            .Select(p => new PermissionDto(p.Id, p.ModuleId, p.Name, p.Description))
+            .Select(p => new PermissionDto(p.Id, p.Name, p.Description))
             .ToList();
 
         return Result.Success(new RoleDto(entity.Id, entity.Name) { Permissions = permissions });

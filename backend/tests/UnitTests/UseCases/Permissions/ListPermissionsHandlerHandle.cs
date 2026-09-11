@@ -19,8 +19,8 @@ public class ListPermissionsHandlerHandle
     {
         var permissions = new List<PermissionDto>
         {
-            new(1, 1, "users.read", "Can read users"),
-            new(2, 1, "users.write", "Can write users"),
+            new(1, "users.read", "Can read users"),
+            new(2, "users.write", "Can write users"),
         };
         var pagedResult = new ItemPagedResult<PermissionDto>(permissions, 1, 10, 2, 1);
 

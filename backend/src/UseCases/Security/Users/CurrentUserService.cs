@@ -67,7 +67,7 @@ public class CurrentUserService(
         var permissions = user.Roles
             .SelectMany(r => r.Permissions)
             .DistinctBy(p => p.Id)
-            .Select(p => new UserPermissionDto(p.Name, p.Module.Name))
+            .Select(p => new UserPermissionDto(p.Name))
             .ToList();
 
         return new CurrentUserInfo(user.Id, user.ExternalIdentifier, user.Name, user.Email, user.IsActive) { Permissions = permissions };

@@ -1,7 +1,7 @@
 interface BackendMe {
 	name: string
 	email: string
-	permissions: Array<{ name: string, module: string }>
+	permissions: Array<{ name: string }>
 }
 
 export default defineOAuthAuth0EventHandler({

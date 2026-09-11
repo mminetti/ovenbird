@@ -1,6 +1,6 @@
 ﻿namespace UseCases.Security.Users;
 
-public record UserPermissionDto(string Name, string ModuleName);
+public record UserPermissionDto(string Name);
 
 public record CurrentUserProfileDto(string Name, string Email)
 {

@@ -12,7 +12,7 @@ public class ListPermissionsQueryService(ReadDbContext db) : IListPermissionsQue
             .OrderBy(p => p.Id)
             .Skip((page - 1) * perPage)
             .Take(perPage)
-            .Select(p => new PermissionDto(p.Id, p.ModuleId, p.Name, p.Description))
+            .Select(p => new PermissionDto(p.Id, p.Name, p.Description))
             .AsNoTracking()
             .ToListAsync(ct);
 

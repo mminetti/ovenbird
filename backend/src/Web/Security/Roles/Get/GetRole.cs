@@ -55,7 +55,7 @@ public sealed class GetRoleByIdMapper : Mapper<GetRoleRequest, RoleRecord, RoleD
     public override RoleRecord FromEntity(RoleDto e)
     {
         var permissions = e.Permissions
-            .Select(p => new PermissionRecord(p.Id, p.ModuleId, p.Name, p.Description))
+            .Select(p => new PermissionRecord(p.Id, p.Name, p.Description))
             .ToList();
 
         return new RoleRecord(e.Id, e.Name) { Permissions = permissions };

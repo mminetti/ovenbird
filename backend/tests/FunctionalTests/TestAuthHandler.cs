@@ -45,11 +45,8 @@ sealed class TestAuthHandler(
         UseCases.Common.Constants.Permissions.RolesRead, 
         UseCases.Common.Constants.Permissions.RolesWrite,
         UseCases.Common.Constants.Permissions.RolesDelete,
-        UseCases.Common.Constants.Permissions.PermissionsRead, 
+        UseCases.Common.Constants.Permissions.PermissionsRead,
         UseCases.Common.Constants.Permissions.PermissionsWrite,
         UseCases.Common.Constants.Permissions.PermissionsDelete,
-        UseCases.Common.Constants.Permissions.ModulesRead, 
-        UseCases.Common.Constants.Permissions.ModulesWrite,
-        UseCases.Common.Constants.Permissions.ModulesDelete,
     ];
 }

@@ -62,7 +62,7 @@ public sealed class ListPermissionsMapper
     public override ListPermissionsResponse FromEntity(ItemPagedResult<PermissionDto> e)
     {
         var items = e.Items
-            .Select(p => new PermissionRecord(p.Id, p.ModuleId, p.Name, p.Description))
+            .Select(p => new PermissionRecord(p.Id, p.Name, p.Description))
             .ToList();
 
         return new ListPermissionsResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

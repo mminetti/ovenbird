@@ -6,6 +6,5 @@ public class UserWithRolesAndPermissionsByExternalIdentifierSpec : Specification
         Query
             .Where(user => user.ExternalIdentifier == externalIdentifier)
             .Include(user => user.Roles)
-            .ThenInclude(role => role.Permissions)
-            .ThenInclude(permission => permission.Module);
+            .ThenInclude(role => role.Permissions);
 }

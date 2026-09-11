@@ -13,7 +13,6 @@ using UseCases.Common;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import.Strategies;
-using UseCases.Security.Modules.List;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
 using UseCases.Security.Users;
@@ -62,7 +61,6 @@ public static class InfrastructureServiceExtensions
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddSingleton<IQueryPropertyMapper<User>, UserQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
-            .AddScoped<IListModulesQueryService, ListModulesQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
