@@ -14,7 +14,7 @@ public class SetUserRoles(IMessageBus bus)
     public override void Configure()
     {
         Post(SetUserRolesRequest.Route);
-        Permissions(Constants.Permissions.UsersManage);
+        Permissions(Constants.Permissions.UsersWrite);
 
         Summary(s =>
         {

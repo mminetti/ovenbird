@@ -3,6 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 using Web.Configurations.Auth;
+using UseCases.Common;
 
 namespace FunctionalTests;
 
@@ -38,13 +39,17 @@ sealed class TestAuthHandler(
 
     private static IEnumerable<string> AllPermissions() =>
     [
-        UseCases.Common.Constants.Permissions.UsersRead, UseCases.Common.Constants.Permissions.UsersWrite,
-        UseCases.Common.Constants.Permissions.UsersDelete, UseCases.Common.Constants.Permissions.UsersManage,
-        UseCases.Common.Constants.Permissions.RolesRead, UseCases.Common.Constants.Permissions.RolesWrite,
-        UseCases.Common.Constants.Permissions.RolesDelete, UseCases.Common.Constants.Permissions.RolesManage,
-        UseCases.Common.Constants.Permissions.PermissionsRead, UseCases.Common.Constants.Permissions.PermissionsWrite,
+        UseCases.Common.Constants.Permissions.UsersRead, 
+        UseCases.Common.Constants.Permissions.UsersWrite,
+        UseCases.Common.Constants.Permissions.UsersDelete,
+        UseCases.Common.Constants.Permissions.RolesRead, 
+        UseCases.Common.Constants.Permissions.RolesWrite,
+        UseCases.Common.Constants.Permissions.RolesDelete,
+        UseCases.Common.Constants.Permissions.PermissionsRead, 
+        UseCases.Common.Constants.Permissions.PermissionsWrite,
         UseCases.Common.Constants.Permissions.PermissionsDelete,
-        UseCases.Common.Constants.Permissions.ModulesRead, UseCases.Common.Constants.Permissions.ModulesWrite,
+        UseCases.Common.Constants.Permissions.ModulesRead, 
+        UseCases.Common.Constants.Permissions.ModulesWrite,
         UseCases.Common.Constants.Permissions.ModulesDelete,
     ];
 }
