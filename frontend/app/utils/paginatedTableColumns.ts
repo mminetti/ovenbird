@@ -83,10 +83,13 @@ export function createTypedColumns<T, TSortColumn extends string>(
 		}
 
 		if (config.type === 'bool') {
-			column.cell = ({ row }) => h(UIcon, {
-				name: row.getValue(config.key) ? 'i-lucide-check-circle-2' : 'i-lucide-circle',
-				class: 'size-4'
-			})
+			column.cell = ({ row }) => {
+				const value = row.getValue(config.key)
+				return h(UIcon, {
+					name: value ? 'i-lucide-toggle-right' : 'i-lucide-toggle-left',
+					class: value ? 'size-5 text-success' : 'size-5 text-muted'
+				})
+			}
 		}
 
 		if (config.type === 'badge') {
