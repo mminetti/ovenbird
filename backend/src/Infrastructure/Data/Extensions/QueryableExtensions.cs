@@ -79,11 +79,27 @@ public static class QueryableExtensions
         return source.Where(lambda);
     }
 
-    private static Expression? BuildPropertyAccess(Expression parameter, string propertyName)
+    /// <summary>
+    /// Resolves a (possibly dotted, e.g. "Company.Name") property path into a member-access
+    /// expression, so entities can be sorted/searched on navigation properties.
+    /// </summary>
+    private static Expression? BuildPropertyAccess(Expression parameter, string propertyPath)
     {
-        var property = parameter.Type.GetProperty(propertyName,
-            BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+        Expression current = parameter;
 
-        return property is null ? null : Expression.MakeMemberAccess(parameter, property);
+        foreach (var segment in propertyPath.Split('.', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var property = current.Type.GetProperty(segment,
+                BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+            if (property is null)
+            {
+                return null;
+            }
+
+            current = Expression.MakeMemberAccess(current, property);
+        }
+
+        return current == parameter ? null : current;
     }
 }

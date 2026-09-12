@@ -24,7 +24,7 @@ public class ListPermissionsHandlerHandle
         };
         var pagedResult = new ItemPagedResult<PermissionDto>(permissions, 1, 10, 2, 1);
 
-        _query.ListAsync(1, 10, Arg.Any<CancellationToken>())
+        _query.ListAsync(1, 10, null, null, Arg.Any<CancellationToken>())
             .Returns(pagedResult);
 
         var result = await _handler.Handle(new ListPermissionsQuery(1, 10), CancellationToken.None);
@@ -40,12 +40,12 @@ public class ListPermissionsHandlerHandle
     {
         var pagedResult = new ItemPagedResult<PermissionDto>([], 1, Constants.Pagination.DefaultPageSize, 0, 0);
 
-        _query.ListAsync(1, Constants.Pagination.DefaultPageSize, Arg.Any<CancellationToken>())
+        _query.ListAsync(1, Constants.Pagination.DefaultPageSize, null, null, Arg.Any<CancellationToken>())
             .Returns(pagedResult);
 
         var result = await _handler.Handle(new ListPermissionsQuery(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        await _query.Received(1).ListAsync(1, Constants.Pagination.DefaultPageSize, Arg.Any<CancellationToken>());
+        await _query.Received(1).ListAsync(1, Constants.Pagination.DefaultPageSize, null, null, Arg.Any<CancellationToken>());
     }
 }

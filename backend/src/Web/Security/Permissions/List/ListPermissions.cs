@@ -24,6 +24,8 @@ public class ListPermissions(IMessageBus bus)
 
             s.Params["page"] = Endpoints.ParamPage;
             s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
+            s.Params["search"] = "Free-text search across name and description";
+            s.Params["order_by"] = "Sort by property name, optionally followed by 'desc' (e.g. 'name desc'). Defaults to id.";
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -42,7 +44,7 @@ public class ListPermissions(IMessageBus bus)
     public override async Task HandleAsync(ListPermissionsRequest request, CancellationToken ct)
     {
         var result = await _bus.InvokeAsync<Result<ItemPagedResult<PermissionDto>>>(
-            new ListPermissionsQuery(request.Page, request.PerPage), ct);
+            new ListPermissionsQuery(request.Page, request.PerPage, request.Search, request.OrderBy), ct);
 
         if (!result.IsSuccess)
         {

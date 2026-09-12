@@ -1,24 +1,18 @@
-﻿using UseCases.Common;
+using System.Linq.Expressions;
+using Core.Security;
+using Infrastructure.Data.Queries.Common;
 using UseCases.Security.Roles;
 using UseCases.Security.Roles.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListRolesQueryService(ReadDbContext db) : IListRolesQueryService
+public class ListRolesQueryService(ReadDbContext db, IQueryPropertyMapper<Role> propertyMapper)
+    : PagedQueryServiceBase<Role, RoleDto>(propertyMapper), IListRolesQueryService
 {
-    public async Task<ItemPagedResult<RoleDto>> ListAsync(int page, int perPage, CancellationToken ct)
-    {
-        var items = await db.Role
-            .OrderBy(r => r.Id)
-            .Skip((page - 1) * perPage)
-            .Take(perPage)
-            .Select(r => new RoleDto(r.Id, r.Name))
-            .AsNoTracking()
-            .ToListAsync(ct);
+    protected override IQueryable<Role> GetQuery() => db.Role;
 
-        int totalCount = await db.Role.CountAsync(ct);
-        int totalPages = (int)Math.Ceiling(totalCount / (double)perPage);
+    protected override Expression<Func<Role, RoleDto>> GetProjection() =>
+        r => new RoleDto(r.Id, r.Name);
 
-        return new ItemPagedResult<RoleDto>(items, page, perPage, totalCount, totalPages);
-    }
+    protected override string GetDefaultOrderBy() => nameof(Role.Id);
 }

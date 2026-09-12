@@ -1,4 +1,4 @@
-﻿using UseCases.Common;
+using UseCases.Common;
 
 namespace UseCases.Security.Permissions.List;
 
@@ -9,6 +9,8 @@ public class ListPermissionsHandler(IListPermissionsQueryService query)
         var result = await query.ListAsync(
             request.Page ?? 1,
             request.PerPage ?? Constants.Pagination.DefaultPageSize,
+            request.Search,
+            request.OrderBy,
             ct);
 
         return Result.Success(result);

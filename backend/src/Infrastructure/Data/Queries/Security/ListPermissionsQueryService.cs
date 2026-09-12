@@ -1,24 +1,18 @@
-﻿using UseCases.Common;
+using System.Linq.Expressions;
+using Core.Security;
+using Infrastructure.Data.Queries.Common;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.List;
 
 namespace Infrastructure.Data.Queries.Security;
 
-public class ListPermissionsQueryService(ReadDbContext db) : IListPermissionsQueryService
+public class ListPermissionsQueryService(ReadDbContext db, IQueryPropertyMapper<Permission> propertyMapper)
+    : PagedQueryServiceBase<Permission, PermissionDto>(propertyMapper), IListPermissionsQueryService
 {
-    public async Task<ItemPagedResult<PermissionDto>> ListAsync(int page, int perPage, CancellationToken ct)
-    {
-        var items = await db.Permission
-            .OrderBy(p => p.Id)
-            .Skip((page - 1) * perPage)
-            .Take(perPage)
-            .Select(p => new PermissionDto(p.Id, p.Name, p.Description))
-            .AsNoTracking()
-            .ToListAsync(ct);
+    protected override IQueryable<Permission> GetQuery() => db.Permission;
 
-        int totalCount = await db.Permission.CountAsync(ct);
-        int totalPages = (int)Math.Ceiling(totalCount / (double)perPage);
+    protected override Expression<Func<Permission, PermissionDto>> GetProjection() =>
+        p => new PermissionDto(p.Id, p.Name, p.Description);
 
-        return new ItemPagedResult<PermissionDto>(items, page, perPage, totalCount, totalPages);
-    }
+    protected override string GetDefaultOrderBy() => nameof(Permission.Id);
 }

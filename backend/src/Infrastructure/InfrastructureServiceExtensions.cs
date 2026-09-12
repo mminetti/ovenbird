@@ -60,6 +60,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>))
             .AddScoped(typeof(IReadRepository<>), typeof(EfReadRepository<>))
             .AddSingleton<IQueryPropertyMapper<User>, UserQueryPropertyMapper>()
+            .AddSingleton<IQueryPropertyMapper<Role>, RoleQueryPropertyMapper>()
+            .AddSingleton<IQueryPropertyMapper<Permission>, PermissionQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
