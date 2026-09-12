@@ -9,12 +9,12 @@ public class MarketDocumentImportJob(
     IMessageBus bus,
     ILogger<MarketDocumentImportJob> logger) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
     {
         logger.LogInformation("Starting MarketDocument import");
 
         var result = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
-            new ImportMarketDocumentCommand(), context.CancellationToken);
+            new ImportMarketDocumentCommand(), cancellationToken);
 
         if (!result.IsSuccess)
         {

@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="Quartz.Extensions.Hosting" />
+    <PackageReference Include="Quartz" />
     <PackageReference Include="WolverineFx.RuntimeCompilation" />
   </ItemGroup>
 
