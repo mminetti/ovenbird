@@ -23,8 +23,8 @@ public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersRe
 
             s.Params["page"] = Endpoints.ParamPage;
             s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
-            s.Params["search"] = "Free-text search across name and email";
-            s.Params["order_by"] = "Sort by property name, optionally followed by 'desc' (e.g. 'name desc'). Defaults to id.";
+            s.Params["search"] = string.Format(Endpoints.ParamSearch, "name and email");
+            s.Params["order_by"] = Endpoints.ParamOrderBy;
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;

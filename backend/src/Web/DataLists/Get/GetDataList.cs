@@ -1,4 +1,4 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.DataLists;
 using UseCases.DataLists.Get;
@@ -21,7 +21,7 @@ public class GetDataList(IMessageBus bus) : Endpoint<GetDataListRequest, Ok<GetD
             s.Summary = "Get a data list";
             s.Description = "Retrieves reference data for populating UI dropdowns. Returns Id-Name pairs for the specified type.";
 
-            s.Params["Type"] = "Type of data list: " + string.Join(", ", Enum.GetNames<DataListType>());
+            s.Params["Type"] = string.Format(Endpoints.ParamDataListType, string.Join(", ", Enum.GetNames<DataListType>()));
 
             s.Responses[200] = Endpoints.Response200Ok;
             s.Responses[400] = Endpoints.Response400BadRequest;

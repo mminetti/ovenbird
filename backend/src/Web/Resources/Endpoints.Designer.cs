@@ -79,6 +79,33 @@ namespace Web.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Free-text search across {0}.
+        /// </summary>
+        public static string ParamSearch {
+            get {
+                return ResourceManager.GetString("ParamSearch", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Sort by property name, optionally followed by &apos;desc&apos; (e.g. &apos;name desc&apos;). Defaults to id..
+        /// </summary>
+        public static string ParamOrderBy {
+            get {
+                return ResourceManager.GetString("ParamOrderBy", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type of data list: {0}.
+        /// </summary>
+        public static string ParamDataListType {
+            get {
+                return ResourceManager.GetString("ParamDataListType", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Ok - Resource found and returned successfully.
         /// </summary>
         public static string Response200Ok {

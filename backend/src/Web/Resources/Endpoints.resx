@@ -123,6 +123,15 @@
   <data name="ParamPerPage" xml:space="preserve">
     <value>Page size 1–{0} (default {1})</value>
   </data>
+  <data name="ParamSearch" xml:space="preserve">
+    <value>Free-text search across {0}</value>
+  </data>
+  <data name="ParamOrderBy" xml:space="preserve">
+    <value>Sort by property name, optionally followed by 'desc' (e.g. 'name desc'). Defaults to id.</value>
+  </data>
+  <data name="ParamDataListType" xml:space="preserve">
+    <value>Type of data list: {0}</value>
+  </data>
   <data name="Response200Ok" xml:space="preserve">
     <value>Ok - Resource found and returned successfully</value>
   </data>

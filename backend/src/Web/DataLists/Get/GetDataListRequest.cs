@@ -1,4 +1,4 @@
-using FluentValidation;
+﻿using FluentValidation;
 using UseCases.DataLists;
 
 namespace Web.DataLists.Get;
@@ -16,6 +16,6 @@ public sealed class GetDataListValidator : Validator<GetDataListRequest>
     {
         RuleFor(x => x.Type)
             .IsInEnum()
-            .WithMessage("Type must be one of: " + string.Join(", ", Enum.GetNames<DataListType>()));
+            .WithMessage($"Type must be one of: {string.Join(", ", Enum.GetNames<DataListType>())}");
     }
 }
