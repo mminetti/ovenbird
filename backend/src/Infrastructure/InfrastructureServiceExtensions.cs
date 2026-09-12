@@ -6,10 +6,12 @@ using Core.Security.Services;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Common;
+using Infrastructure.Data.Queries.DataLists;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
 using UseCases.Common;
+using UseCases.DataLists.Get;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import.Strategies;
@@ -65,6 +67,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
+            .AddScoped<IGetDataListQueryService, GetDataListQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()
             .AddScoped<IFtpService, SshNetSftpService>()
