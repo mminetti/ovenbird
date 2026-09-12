@@ -59,9 +59,16 @@ export interface Range {
 	end: Date
 }
 
+export interface SecurityPermission {
+	id: number
+	name: string
+	description: string
+}
+
 export interface SecurityRole {
 	id: number
 	name: string
+	permissions?: SecurityPermission[]
 }
 
 export interface SecurityUser {

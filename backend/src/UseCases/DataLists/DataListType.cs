@@ -11,5 +11,6 @@ public enum DataListType
     ConnectorTypes,
     ConnectorImplementations,
     ConfigurationTypes,
-    Roles
+    Roles,
+    Permissions
 }

@@ -21,9 +21,9 @@ export const NAV_SECTIONS: NavSection[] = [
 		label: 'Security',
 		icon: 'i-lucide-shield',
 		items: [
-			{ label: 'Users', icon: 'i-lucide-user-cog', to: '/security/users', permission: 'users.read' }
-			// { label: 'Roles', icon: 'i-lucide-shield-check', to: '/security/roles', permission: 'roles.read' },
-			// { label: 'Permissions', icon: 'i-lucide-key', to: '/security/permissions', permission: 'permissions.read' }
+			{ label: 'Users', icon: 'i-lucide-user-cog', to: '/security/users', permission: 'users.read' },
+			{ label: 'Roles', icon: 'i-lucide-shield-check', to: '/security/roles', permission: 'roles.read' },
+			{ label: 'Permissions', icon: 'i-lucide-key', to: '/security/permissions', permission: 'permissions.read' }
 		]
 	}
 ]

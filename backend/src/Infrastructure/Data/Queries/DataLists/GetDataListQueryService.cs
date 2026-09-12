@@ -59,6 +59,12 @@ public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryServic
                 .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
                 .ToListAsync(ct),
 
+            DataListType.Permissions => await db.Set<Permission>()
+                .AsNoTracking()
+                .OrderBy(x => x.Name)
+                .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
+                .ToListAsync(ct),
+
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown data list type")
         };
     }

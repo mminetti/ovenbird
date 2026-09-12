@@ -33,6 +33,10 @@ public class GetDataListQueryServiceGetListAsync : IDisposable
             new Role { Id = 1, Name = "Admin" },
             new Role { Id = 2, Name = "Editor" });
 
+        _db.Permission.AddRange(
+            new Permission { Id = 1, Name = "users.write", Description = "Can write users" },
+            new Permission { Id = 2, Name = "users.read", Description = "Can read users" });
+
         _db.SaveChanges();
 
         _service = new GetDataListQueryService(_db);
@@ -64,6 +68,15 @@ public class GetDataListQueryServiceGetListAsync : IDisposable
 
         result.Select(x => x.Id).ShouldBe(["1", "2"]);
         result.Select(x => x.Name).ShouldBe(["Admin", "Editor"]);
+    }
+
+    [Fact]
+    public async Task ReturnsPermissionsOrderedByName()
+    {
+        var result = await _service.GetListAsync(DataListType.Permissions, CancellationToken.None);
+
+        result.Select(x => x.Id).ShouldBe(["2", "1"]);
+        result.Select(x => x.Name).ShouldBe(["users.read", "users.write"]);
     }
 
     [Fact]
