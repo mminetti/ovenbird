@@ -31,11 +31,15 @@ builder.Services.AddFastEndpoints()
 
 var app = builder.Build();
 
-await app.UseAppMiddlewareAndSeedDatabase();
+app.UseAppMiddleware();
 
 app.MapDefaultEndpoints(); // Aspire health checks and metrics
 
-app.Run();
+await app.StartAsync();
+
+await app.MigrateAndSeedDatabaseAsync();
+
+await app.WaitForShutdownAsync();
 
 // Make the implicit Program.cs class public, so integration tests can reference the correct assembly for host building
 public partial class Program { }

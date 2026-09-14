@@ -7,7 +7,7 @@ namespace Web.Configurations;
 
 public static class MiddlewareConfig
 {
-    public static async Task<IApplicationBuilder> UseAppMiddlewareAndSeedDatabase(this WebApplication app)
+    public static IApplicationBuilder UseAppMiddleware(this WebApplication app)
     {
         if (app.Environment.IsDevelopment())
         {
@@ -56,7 +56,14 @@ public static class MiddlewareConfig
 
         app.UseHttpsRedirection(); // Note this will drop Authorization headers
 
-        // Run migrations and seed when explicitly requested via environment variable
+        return app;
+    }
+
+    // Must run after the host has started (e.g. after app.StartAsync()), not before -
+    // Wolverine's runtime is a hosted service and isn't available until the host starts,
+    // and seeding can raise domain events that get published through it.
+    public static async Task MigrateAndSeedDatabaseAsync(this WebApplication app)
+    {
         var shouldMigrate = app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
 
         if (shouldMigrate)
@@ -64,8 +71,6 @@ public static class MiddlewareConfig
             await MigrateDatabaseAsync(app);
             await SeedDatabaseAsync(app);
         }
-
-        return app;
     }
 
     static async Task MigrateDatabaseAsync(WebApplication app)

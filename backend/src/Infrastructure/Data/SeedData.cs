@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using Core.Security;
-using UseCases.Common;
+﻿using Core.Security;
 
 namespace Infrastructure.Data;
 
@@ -19,18 +17,13 @@ public static class SeedData
 
     public static async Task EnsureSecurityDataAsync(AppDbContext dbContext)
     {
-        if (await dbContext.Permission.AnyAsync()) return; // Security data has been seeded
+        if (await dbContext.Role.AnyAsync()) return; // Security data has been seeded
 
-        var permissions = typeof(Constants.Permissions)
-            .GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(f => f.FieldType == typeof(string))
-            .Select(f => new Permission { Name = (string)f.GetValue(null)! })
-            .ToList();
+        var permissions = await dbContext.Permission.ToListAsync();
 
         var adminRole = new Role { Name = AdminRoleName };
         adminRole.SetPermissions(permissions);
 
-        dbContext.Permission.AddRange(permissions);
         dbContext.Role.Add(adminRole);
 
         await dbContext.SaveChangesAsync();
