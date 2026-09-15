@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260904224523_DocumentMarketDocumentDeleteBehavior")]
-    partial class DocumentMarketDocumentDeleteBehavior
+    [Migration("20260915005056_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -170,27 +170,15 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Core.Security.Module", b =>
+            modelBuilder.Entity("Core.Security.Permission", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -199,10 +187,48 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Module");
+                    b.ToTable("Permission");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Allows viewing users.",
+                            Name = "users.read"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Allows creating, updating, and deleting users.",
+                            Name = "users.write"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Allows viewing roles.",
+                            Name = "roles.read"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Allows creating, updating, and deleting roles.",
+                            Name = "roles.write"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Allows viewing permissions.",
+                            Name = "permissions.read"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Allows creating, updating, and deleting permissions.",
+                            Name = "permissions.write"
+                        });
                 });
 
-            modelBuilder.Entity("Core.Security.Permission", b =>
+            modelBuilder.Entity("Core.Security.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -221,43 +247,6 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("ModuleId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ModuleId");
-
-                    b.ToTable("Permission");
-                });
-
-            modelBuilder.Entity("Core.Security.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -298,8 +287,8 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<string>("ExternalIdentifier")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -677,17 +666,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("Core.Security.Permission", b =>
-                {
-                    b.HasOne("Core.Security.Module", "Module")
-                        .WithMany("Permissions")
-                        .HasForeignKey("ModuleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Module");
-                });
-
             modelBuilder.Entity("Core.Shared.Company", b =>
                 {
                     b.HasOne("Core.Market.Market", "Market")
@@ -791,11 +769,6 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Market.Market", b =>
                 {
                     b.Navigation("Companies");
-                });
-
-            modelBuilder.Entity("Core.Security.Module", b =>
-                {
-                    b.Navigation("Permissions");
                 });
 
             modelBuilder.Entity("Core.Shared.Company", b =>

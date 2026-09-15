@@ -2,7 +2,7 @@
 
 namespace Core.Security;
 
-public class Permission : AuditableEntityBase<int>
+public class Permission : EntityBase<int>, IAggregateRoot
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

@@ -92,20 +92,16 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Module",
+                name: "Permission",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Module", x => x.Id);
+                    table.PrimaryKey("PK_Permission", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -115,6 +111,7 @@ namespace Infrastructure.Data.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
@@ -131,7 +128,7 @@ namespace Infrastructure.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ExternalIdentifier = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    ExternalIdentifier = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
@@ -200,27 +197,27 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Permission",
+                name: "RolePermission",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ModuleId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    LastModifiedAtUtc = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
-                    LastModifiedBy = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    PermissionId = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Permission", x => x.Id);
+                    table.PrimaryKey("PK_RolePermission", x => new { x.PermissionId, x.RoleId });
                     table.ForeignKey(
-                        name: "FK_Permission_Module_ModuleId",
-                        column: x => x.ModuleId,
-                        principalTable: "Module",
-                        principalColumn: "Id");
+                        name: "FK_RolePermission_Permission_PermissionId",
+                        column: x => x.PermissionId,
+                        principalTable: "Permission",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RolePermission_Role_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Role",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -326,44 +323,17 @@ namespace Infrastructure.Data.Migrations
                         name: "FK_MarketDocument_Company_CompanyId",
                         column: x => x.CompanyId,
                         principalTable: "Company",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MarketDocument_MarketDocumentDirection_DirectionId",
                         column: x => x.DirectionId,
                         principalTable: "MarketDocumentDirection",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_MarketDocument_MarketDocumentStatus_StatusId",
                         column: x => x.StatusId,
                         principalTable: "MarketDocumentStatus",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RolePermission",
-                columns: table => new
-                {
-                    PermissionId = table.Column<int>(type: "int", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RolePermission", x => new { x.PermissionId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_RolePermission_Permission_PermissionId",
-                        column: x => x.PermissionId,
-                        principalTable: "Permission",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RolePermission_Role_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "Role",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -434,6 +404,19 @@ namespace Infrastructure.Data.Migrations
                     { 3, "Error" }
                 });
 
+            migrationBuilder.InsertData(
+                table: "Permission",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Allows viewing users.", "users.read" },
+                    { 2, "Allows creating, updating, and deleting users.", "users.write" },
+                    { 3, "Allows viewing roles.", "roles.read" },
+                    { 4, "Allows creating, updating, and deleting roles.", "roles.write" },
+                    { 5, "Allows viewing permissions.", "permissions.read" },
+                    { 6, "Allows creating, updating, and deleting permissions.", "permissions.write" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Company_MarketId",
                 table: "Company",
@@ -488,11 +471,6 @@ namespace Infrastructure.Data.Migrations
                 name: "IX_MarketDocument_StatusId",
                 table: "MarketDocument",
                 column: "StatusId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Permission_ModuleId",
-                table: "Permission",
-                column: "ModuleId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermission_RoleId",
@@ -564,9 +542,6 @@ namespace Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ConnectorType");
-
-            migrationBuilder.DropTable(
-                name: "Module");
 
             migrationBuilder.DropTable(
                 name: "Market");
