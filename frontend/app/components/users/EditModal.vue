@@ -2,6 +2,7 @@
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { SecurityUser } from '~/types'
+import type { DataListItem, DataListResponse } from '~~/server/api/data-lists/[type]'
 
 const props = defineProps<{
 	userId: number | null
@@ -14,7 +15,8 @@ const emit = defineEmits<{
 const schema = z.object({
 	name: z.string().min(1, 'Name is required').max(200, 'Name is too long'),
 	email: z.string().min(1, 'Email is required').email('A valid email address is required').max(200, 'Email is too long'),
-	isActive: z.boolean()
+	isActive: z.boolean(),
+	roleIds: z.array(z.number())
 })
 
 type Schema = z.output<typeof schema>
@@ -22,22 +24,27 @@ type Schema = z.output<typeof schema>
 const open = ref(false)
 const loading = ref(true)
 const form = ref<{ submit: () => void }>()
-const user = ref<SecurityUser | null>(null)
+const allRoles = ref<DataListItem[]>([])
 const modalError = ref<ReturnType<typeof parseApiError> | null>(null)
 
 const state = reactive<Partial<Schema>>({
 	name: '',
 	email: '',
-	isActive: true
+	isActive: true,
+	roleIds: []
 })
 
 const slideoverTitle = computed(() => `Edit user ${state.name?.trim() || ''}`.trim())
 
+const roleItems = computed(() =>
+	allRoles.value.map(role => ({ label: role.name, value: Number(role.id) }))
+)
+
 function resetFormState() {
-	user.value = null
 	state.name = ''
 	state.email = ''
 	state.isActive = true
+	state.roleIds = []
 }
 
 async function loadUser() {
@@ -50,14 +57,16 @@ async function loadUser() {
 	loading.value = true
 
 	try {
-		const loadedUser = await $fetch<SecurityUser>('/api/security/users', {
-			query: { id: props.userId }
-		})
+		const [loadedUser, rolesResponse] = await Promise.all([
+			$fetch<SecurityUser>('/api/security/users', { query: { id: props.userId } }),
+			$fetch<DataListResponse>('/api/data-lists/Roles')
+		])
 
-		user.value = loadedUser
+		allRoles.value = rolesResponse.items
 		state.name = loadedUser.name
 		state.email = loadedUser.email
 		state.isActive = loadedUser.isActive
+		state.roleIds = loadedUser.roles?.map(role => role.id) || []
 	} finally {
 		loading.value = false
 	}
@@ -81,7 +90,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 	loading.value = true
 
 	try {
-		const updated = await $fetch<SecurityUser>('/api/security/users', {
+		await $fetch('/api/security/users', {
 			method: 'PATCH',
 			query: { id: props.userId },
 			body: {
@@ -89,6 +98,18 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 				email: event.data.email,
 				isActive: event.data.isActive
 			}
+		})
+
+		await $fetch('/api/security/users/roles', {
+			method: 'POST',
+			query: { id: props.userId },
+			body: {
+				roleIds: event.data.roleIds
+			}
+		})
+
+		const updated = await $fetch<SecurityUser>('/api/security/users', {
+			query: { id: props.userId }
 		})
 
 		open.value = false
@@ -135,18 +156,18 @@ defineExpose({
 					<USwitch v-model="state.isActive" :disabled="loading" />
 				</UFormField>
 
-				<div v-if="user?.roles?.length" class="space-y-1">
-					<span class="text-sm font-medium text-highlighted">Roles</span>
-					<div class="flex flex-wrap gap-1.5">
-						<UBadge
-							v-for="role in user.roles"
-							:key="role.id"
-							variant="subtle"
-							color="neutral"
-							:label="role.name"
-						/>
-					</div>
-				</div>
+				<UFormField label="Roles" name="roleIds">
+					<USelectMenu
+						v-model="state.roleIds"
+						:items="roleItems"
+						value-key="value"
+						label-key="label"
+						multiple
+						placeholder="Select roles"
+						class="w-full"
+						:disabled="loading"
+					/>
+				</UFormField>
 			</UForm>
 		</template>
 
