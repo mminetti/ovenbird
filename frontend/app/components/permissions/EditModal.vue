@@ -107,7 +107,9 @@ defineExpose({
 			<ModalApiError :error="modalError" class="mb-4" />
 			<UForm
 				ref="form"
+				:key="String(open)"
 				:schema="schema"
+				:validate-on="[]"
 				:state="state"
 				class="space-y-4"
 				@submit="onSubmit"
