@@ -16,6 +16,6 @@ export default defineEventHandler(async (event) => {
 	try {
 		return await callBackend<DataListResponse>(event, `/data-lists/${type}`)
 	} catch (error) {
-		await handleBackendError(error, event)
+		return handleBackendError(error, event)
 	}
 })

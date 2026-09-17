@@ -57,6 +57,6 @@ export default defineEventHandler(async (event) => {
 
 		return await callBackend<SecurityUsersResponse>(event, `/security/users?${params.toString()}`)
 	} catch (error) {
-		await handleBackendError(error, event)
+		return handleBackendError(error, event)
 	}
 })

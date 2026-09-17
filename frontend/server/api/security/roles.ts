@@ -53,6 +53,6 @@ export default defineEventHandler(async (event) => {
 
 		return await callBackend<SecurityRolesResponse>(event, `/security/roles?${params.toString()}`)
 	} catch (error) {
-		await handleBackendError(error, event)
+		return handleBackendError(error, event)
 	}
 })

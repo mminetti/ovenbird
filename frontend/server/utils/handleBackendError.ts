@@ -13,24 +13,25 @@ interface BackendErrorShape {
 	}
 }
 
-function getMessageFromPayload(payload: unknown) {
-	if (!payload || typeof payload !== 'object') {
-		return null
-	}
-
-	const candidate = payload as Record<string, unknown>
-	const message = candidate.detail ?? candidate.title ?? candidate.message ?? candidate.error
-
-	return typeof message === 'string' && message.trim()
-		? message.trim()
-		: null
-}
-
 /**
- * Handles errors from backend API calls, specifically checking for 401 responses
- * and clearing the user session in that case.
+ * Normalizes errors from backend API calls into H3 errors so every
+ * `server/api/**` route surfaces failures the same way.
+ *
+ * - A 401 from the backend means the session's access token is no longer
+ *   valid (expired, revoked, user deactivated) — the local session is
+ *   cleared so the next request re-authenticates instead of looping on a
+ *   dead token.
+ * - Any other 4xx/5xx is re-thrown with the backend's own status code and
+ *   message (extracted from its JSON payload) plus the raw payload as
+ *   `data`, so field-level validation errors reach the client.
+ * - Anything without a usable status code (backend unreachable, timed out,
+ *   DNS failure, etc.) is logged here — where we know which backend call
+ *   failed — and reported to the client as a generic 502 rather than
+ *   letting the raw network error bubble up unformatted.
+ *
+ * Always throws — never returns normally.
  */
-export async function handleBackendError(error: unknown, event: H3Event) {
+export async function handleBackendError(error: unknown, event: H3Event): Promise<never> {
 	const candidate = (error ?? {}) as BackendErrorShape
 	const statusCode = candidate.status ?? candidate.statusCode ?? candidate.response?.status
 	const payload = candidate.data ?? candidate.response?._data
@@ -49,10 +50,16 @@ export async function handleBackendError(error: unknown, event: H3Event) {
 	if (typeof statusCode === 'number' && statusCode >= 400) {
 		throw createError({
 			statusCode,
-			statusMessage: payloadMessage ?? fallbackMessage,
+			message: payloadMessage ?? fallbackMessage,
 			data: payload && typeof payload === 'object' ? payload : undefined
 		})
 	}
 
-	throw error
+	console.error('[handleBackendError] backend call failed with no usable status code', error)
+
+	throw createError({
+		statusCode: 502,
+		message: 'Unable to reach the server. Please try again.',
+		cause: error
+	})
 }

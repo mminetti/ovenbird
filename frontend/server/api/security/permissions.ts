@@ -55,6 +55,6 @@ export default defineEventHandler(async (event) => {
 
 		return await callBackend<SecurityPermissionsResponse>(event, `/security/permissions?${params.toString()}`)
 	} catch (error) {
-		await handleBackendError(error, event)
+		return handleBackendError(error, event)
 	}
 })

@@ -5,6 +5,7 @@ const emit = defineEmits<{
 
 const open = ref(false)
 const submitting = ref(false)
+const modalError = ref<ReturnType<typeof parseApiError> | null>(null)
 
 const props = withDefaults(defineProps<{
 	endpoint: string
@@ -22,12 +23,19 @@ const props = withDefaults(defineProps<{
 const modalTitle = computed(() => props.title ?? `Delete ${props.name}`)
 const modalDescription = computed(() => props.description ?? `Are you sure you want to delete "${props.name}"?`)
 
+watch(open, (isOpen) => {
+	if (!isOpen) {
+		modalError.value = null
+	}
+})
+
 async function onSubmit() {
 	if (!props.id || submitting.value) {
 		return
 	}
 
 	submitting.value = true
+	modalError.value = null
 
 	try {
 		await $fetch(props.endpoint, {
@@ -39,9 +47,9 @@ async function onSubmit() {
 
 		open.value = false
 		emit('deleted', props.id, props.name)
-	} catch {
-		// Error is shown via ApiErrorBanner. Close modal so error is visible.
-		open.value = false
+	} catch (error) {
+		// Keep the modal open so ModalApiError below is visible to the user.
+		modalError.value = parseApiError(error)
 	} finally {
 		submitting.value = false
 	}
@@ -63,6 +71,7 @@ defineExpose({
 		<slot />
 
 		<template #body>
+			<ModalApiError :error="modalError" class="mb-4" />
 			<div class="flex justify-end gap-2">
 				<UButton
 					label="Cancel"

@@ -14,6 +14,6 @@ export default defineEventHandler(async (event) => {
 			body: { roleId, permissionIds }
 		})
 	} catch (error) {
-		await handleBackendError(error, event)
+		return handleBackendError(error, event)
 	}
 })

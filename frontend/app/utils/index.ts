@@ -6,67 +6,6 @@ export function randomFrom<T>(array: T[]): T {
 	return array[Math.floor(Math.random() * array.length)]!
 }
 
-function getMessageFromPayload(payload: unknown) {
-	if (!payload || typeof payload !== 'object') {
-		return null
-	}
-
-	const candidate = payload as Record<string, unknown>
-	const message = candidate.detail ?? candidate.title ?? candidate.message ?? candidate.statusMessage ?? candidate.error
-
-	return typeof message === 'string' && message.trim()
-		? message.trim()
-		: null
-}
-
-function getValidationErrorsFromPayload(payload: unknown): Record<string, string[]> | null {
-	if (!payload || typeof payload !== 'object') {
-		return null
-	}
-
-	const candidate = payload as Record<string, unknown>
-	const rawErrors = (
-		(candidate.errors && typeof candidate.errors === 'object' && !Array.isArray(candidate.errors))
-			? candidate.errors
-			: (
-					candidate.data
-					&& typeof candidate.data === 'object'
-					&& !Array.isArray(candidate.data)
-					&& (candidate.data as Record<string, unknown>).errors
-					&& typeof (candidate.data as Record<string, unknown>).errors === 'object'
-					&& !Array.isArray((candidate.data as Record<string, unknown>).errors)
-						? (candidate.data as Record<string, unknown>).errors
-						: null
-				)
-	)
-
-	if (!rawErrors) {
-		return null
-	}
-
-	const errors = rawErrors as Record<string, unknown>
-	const result: Record<string, string[]> = {}
-
-	for (const [key, value] of Object.entries(errors)) {
-		if (typeof value === 'string' && value.trim()) {
-			result[key] = [value.trim()]
-			continue
-		}
-
-		if (Array.isArray(value)) {
-			const messages = value
-				.filter(v => typeof v === 'string' && v.trim())
-				.map(v => v.trim())
-
-			if (messages.length > 0) {
-				result[key] = messages
-			}
-		}
-	}
-
-	return Object.keys(result).length > 0 ? result : null
-}
-
 export function extractApiErrorMessage(error: unknown, fallback = 'Something went wrong while contacting the API.') {
 	if (typeof error === 'string' && error.trim()) {
 		return error.trim()
