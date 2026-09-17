@@ -8,4 +8,4 @@ dbUp:
   
   journalTo:
     schema: "dbo"
-    table: "_SchemaVersions"
+    table: "__SchemaVersions"

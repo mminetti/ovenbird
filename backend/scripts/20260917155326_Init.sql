@@ -11,7 +11,7 @@ GO
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [ConfigurationType] (
@@ -23,11 +23,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [ConnectorImplementation] (
-        [Id] int NOT NULL IDENTITY,
+        [Id] int NOT NULL,
         [Name] nvarchar(250) NOT NULL,
         [Description] nvarchar(1000) NULL,
         CONSTRAINT [PK_ConnectorImplementation] PRIMARY KEY ([Id])
@@ -36,11 +36,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [ConnectorType] (
-        [Id] int NOT NULL IDENTITY,
+        [Id] int NOT NULL,
         [Name] nvarchar(250) NOT NULL,
         [Description] nvarchar(1000) NULL,
         CONSTRAINT [PK_ConnectorType] PRIMARY KEY ([Id])
@@ -49,7 +49,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [Market] (
@@ -62,7 +62,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [MarketDocumentDirection] (
@@ -74,7 +74,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [MarketDocumentStatus] (
@@ -86,7 +86,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [Permission] (
@@ -99,7 +99,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [Role] (
@@ -116,7 +116,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [User] (
@@ -135,7 +135,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [Connector] (
@@ -156,7 +156,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [Company] (
@@ -175,7 +175,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [RolePermission] (
@@ -189,7 +189,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [UserRole] (
@@ -203,7 +203,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [ConnectorField] (
@@ -223,7 +223,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [Configuration] (
@@ -244,7 +244,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [MarketDocument] (
@@ -267,7 +267,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [ConfigurationConnector] (
@@ -281,7 +281,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE TABLE [ConfigurationField] (
@@ -300,7 +300,38 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'Name') AND [object_id] = OBJECT_ID(N'[ConnectorImplementation]'))
+        SET IDENTITY_INSERT [ConnectorImplementation] ON;
+    EXEC(N'INSERT INTO [ConnectorImplementation] ([Id], [Description], [Name])
+    VALUES (1, N''FTP connector implementation backed by FluentFTP.'', N''FluentFtpService''),
+    (2, N''SFTP connector implementation backed by SSH.NET.'', N''SshNetSftpService''),
+    (3, N''Local drop-folder stand-in for FTP/SFTP, for development use only.'', N''LocalFileSystemFtpService''),
+    (4, N''File storage connector implementation backed by Azure Blob Storage.'', N''AzureBlobFileStorage''),
+    (5, N''Local file system stand-in for file storage, for development use only.'', N''LocalFileSystemFileStorage'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'Name') AND [object_id] = OBJECT_ID(N'[ConnectorImplementation]'))
+        SET IDENTITY_INSERT [ConnectorImplementation] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917155326_Init'
+)
+BEGIN
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'Name') AND [object_id] = OBJECT_ID(N'[ConnectorType]'))
+        SET IDENTITY_INSERT [ConnectorType] ON;
+    EXEC(N'INSERT INTO [ConnectorType] ([Id], [Description], [Name])
+    VALUES (1, N''FTP/SFTP file transfer connector.'', N''ftp''),
+    (2, N''File storage connector.'', N''file.storage'')');
+    IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'Name') AND [object_id] = OBJECT_ID(N'[ConnectorType]'))
+        SET IDENTITY_INSERT [ConnectorType] OFF;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Name') AND [object_id] = OBJECT_ID(N'[MarketDocumentDirection]'))
@@ -314,7 +345,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Name') AND [object_id] = OBJECT_ID(N'[MarketDocumentStatus]'))
@@ -329,7 +360,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'Name') AND [object_id] = OBJECT_ID(N'[Permission]'))
@@ -340,14 +371,16 @@ BEGIN
     (3, N''Allows viewing roles.'', N''roles.read''),
     (4, N''Allows creating, updating, and deleting roles.'', N''roles.write''),
     (5, N''Allows viewing permissions.'', N''permissions.read''),
-    (6, N''Allows creating, updating, and deleting permissions.'', N''permissions.write'')');
+    (6, N''Allows creating, updating, and deleting permissions.'', N''permissions.write''),
+    (7, N''Allows viewing connectors.'', N''connectors.read''),
+    (8, N''Allows creating, updating, and deleting connectors.'', N''connectors.write'')');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'Id', N'Description', N'Name') AND [object_id] = OBJECT_ID(N'[Permission]'))
         SET IDENTITY_INSERT [Permission] OFF;
 END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_Company_MarketId] ON [Company] ([MarketId]);
@@ -355,7 +388,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_Configuration_CompanyId] ON [Configuration] ([CompanyId]);
@@ -363,7 +396,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_Configuration_ConfigurationTypeId] ON [Configuration] ([ConfigurationTypeId]);
@@ -371,7 +404,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_ConfigurationConnector_ConnectorId] ON [ConfigurationConnector] ([ConnectorId]);
@@ -379,7 +412,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_ConfigurationField_ConfigurationId] ON [ConfigurationField] ([ConfigurationId]);
@@ -387,7 +420,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_Connector_ConnectorImplementationId] ON [Connector] ([ConnectorImplementationId]);
@@ -395,7 +428,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_Connector_ConnectorTypeId] ON [Connector] ([ConnectorTypeId]);
@@ -403,7 +436,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_ConnectorField_ConnectorId] ON [ConnectorField] ([ConnectorId]);
@@ -411,7 +444,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_MarketDocument_CompanyId] ON [MarketDocument] ([CompanyId]);
@@ -419,7 +452,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_MarketDocument_DirectionId] ON [MarketDocument] ([DirectionId]);
@@ -427,7 +460,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_MarketDocument_StatusId] ON [MarketDocument] ([StatusId]);
@@ -435,7 +468,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_RolePermission_RoleId] ON [RolePermission] ([RoleId]);
@@ -443,7 +476,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE UNIQUE INDEX [IX_User_ExternalIdentifier] ON [User] ([ExternalIdentifier]);
@@ -451,7 +484,7 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     CREATE INDEX [IX_UserRole_UserId] ON [UserRole] ([UserId]);
@@ -459,11 +492,11 @@ END;
 
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
-    WHERE [MigrationId] = N'20260915005056_Init'
+    WHERE [MigrationId] = N'20260917155326_Init'
 )
 BEGIN
     INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
-    VALUES (N'20260915005056_Init', N'10.0.12');
+    VALUES (N'20260917155326_Init', N'10.0.12');
 END;
 
 COMMIT;

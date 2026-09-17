@@ -21,13 +21,6 @@ export interface Mail {
 	date: string
 }
 
-export interface Member {
-	name: string
-	username: string
-	role: 'member' | 'owner'
-	avatar: AvatarProps
-}
-
 export interface Stat {
 	title: string
 	icon: string
@@ -77,4 +70,22 @@ export interface SecurityUser {
 	email: string
 	isActive: boolean
 	roles?: SecurityRole[]
+}
+
+export interface ConnectorField {
+	id?: number
+	name: string
+	value?: string | null
+	isSecret: boolean
+}
+
+export interface Connector {
+	id: number
+	name: string
+	description?: string | null
+	connectorTypeId: number
+	connectorTypeName: string
+	connectorImplementationId: number
+	connectorImplementationName: string
+	fields: ConnectorField[]
 }

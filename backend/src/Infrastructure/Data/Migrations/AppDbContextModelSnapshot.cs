@@ -222,6 +222,18 @@ namespace Infrastructure.Data.Migrations
                             Id = 6,
                             Description = "Allows creating, updating, and deleting permissions.",
                             Name = "permissions.write"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Allows viewing connectors.",
+                            Name = "connectors.read"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Allows creating, updating, and deleting connectors.",
+                            Name = "connectors.write"
                         });
                 });
 
@@ -550,10 +562,7 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Shared.ConnectorImplementation", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -567,15 +576,44 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ConnectorImplementation");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "FTP connector implementation backed by FluentFTP.",
+                            Name = "FluentFtpService"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "SFTP connector implementation backed by SSH.NET.",
+                            Name = "SshNetSftpService"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Local drop-folder stand-in for FTP/SFTP, for development use only.",
+                            Name = "LocalFileSystemFtpService"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "File storage connector implementation backed by Azure Blob Storage.",
+                            Name = "AzureBlobFileStorage"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Local file system stand-in for file storage, for development use only.",
+                            Name = "LocalFileSystemFileStorage"
+                        });
                 });
 
             modelBuilder.Entity("Core.Shared.ConnectorType", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
@@ -589,6 +627,20 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ConnectorType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "FTP/SFTP file transfer connector.",
+                            Name = "ftp"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "File storage connector.",
+                            Name = "file.storage"
+                        });
                 });
 
             modelBuilder.Entity("RolePermission", b =>

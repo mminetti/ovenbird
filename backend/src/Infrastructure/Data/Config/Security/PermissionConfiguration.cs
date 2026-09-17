@@ -51,6 +51,18 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
                 Id = 6,
                 Name = Constants.Permissions.PermissionsWrite,
                 Description = "Allows creating, updating, and deleting permissions."
+            },
+            new Permission
+            {
+                Id = 7,
+                Name = Constants.Permissions.ConnectorsRead,
+                Description = "Allows viewing connectors."
+            },
+            new Permission
+            {
+                Id = 8,
+                Name = Constants.Permissions.ConnectorsWrite,
+                Description = "Allows creating, updating, and deleting connectors."
             }
         );
     }

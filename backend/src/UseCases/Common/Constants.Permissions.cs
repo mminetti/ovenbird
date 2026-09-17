@@ -10,5 +10,7 @@ public static partial class Constants
         public const string RolesWrite = "roles.write";
         public const string PermissionsRead = "permissions.read";
         public const string PermissionsWrite = "permissions.write";
+        public const string ConnectorsRead = "connectors.read";
+        public const string ConnectorsWrite = "connectors.write";
     }
 }

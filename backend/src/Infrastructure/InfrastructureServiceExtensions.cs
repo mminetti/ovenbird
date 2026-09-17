@@ -3,14 +3,17 @@ using Azure.Security.KeyVault.Secrets;
 using Core.Security;
 using Core.Security.Interfaces;
 using Core.Security.Services;
+using Core.Shared;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Common;
 using Infrastructure.Data.Queries.DataLists;
 using Infrastructure.Data.Queries.Security;
+using Infrastructure.Data.Queries.Shared;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
 using UseCases.Common;
+using UseCases.Connectors.List;
 using UseCases.DataLists.Get;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
@@ -64,9 +67,11 @@ public static class InfrastructureServiceExtensions
             .AddSingleton<IQueryPropertyMapper<User>, UserQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Role>, RoleQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Permission>, PermissionQueryPropertyMapper>()
+            .AddSingleton<IQueryPropertyMapper<Connector>, ConnectorQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
+            .AddScoped<IListConnectorsQueryService, ListConnectorsQueryService>()
             .AddScoped<IGetDataListQueryService, GetDataListQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()

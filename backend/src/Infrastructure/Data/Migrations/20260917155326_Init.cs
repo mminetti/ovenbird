@@ -30,8 +30,7 @@ namespace Infrastructure.Data.Migrations
                 name: "ConnectorImplementation",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
@@ -44,8 +43,7 @@ namespace Infrastructure.Data.Migrations
                 name: "ConnectorType",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true)
                 },
@@ -386,6 +384,27 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "ConnectorImplementation",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "FTP connector implementation backed by FluentFTP.", "FluentFtpService" },
+                    { 2, "SFTP connector implementation backed by SSH.NET.", "SshNetSftpService" },
+                    { 3, "Local drop-folder stand-in for FTP/SFTP, for development use only.", "LocalFileSystemFtpService" },
+                    { 4, "File storage connector implementation backed by Azure Blob Storage.", "AzureBlobFileStorage" },
+                    { 5, "Local file system stand-in for file storage, for development use only.", "LocalFileSystemFileStorage" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "ConnectorType",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "FTP/SFTP file transfer connector.", "ftp" },
+                    { 2, "File storage connector.", "file.storage" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "MarketDocumentDirection",
                 columns: new[] { "Id", "Name" },
                 values: new object[,]
@@ -414,7 +433,9 @@ namespace Infrastructure.Data.Migrations
                     { 3, "Allows viewing roles.", "roles.read" },
                     { 4, "Allows creating, updating, and deleting roles.", "roles.write" },
                     { 5, "Allows viewing permissions.", "permissions.read" },
-                    { 6, "Allows creating, updating, and deleting permissions.", "permissions.write" }
+                    { 6, "Allows creating, updating, and deleting permissions.", "permissions.write" },
+                    { 7, "Allows viewing connectors.", "connectors.read" },
+                    { 8, "Allows creating, updating, and deleting connectors.", "connectors.write" }
                 });
 
             migrationBuilder.CreateIndex(
