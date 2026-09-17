@@ -1,8 +1,6 @@
-﻿namespace Web.Security.Users.Me;
-
-public record MePermissionRecord(string Name);
+namespace Web.Security.Users.Me;
 
 public record MeRecord(string Name, string Email)
 {
-    public IReadOnlyList<MePermissionRecord> Permissions { get; init; } = [];
+    public IReadOnlyList<string> Permissions { get; init; } = [];
 }

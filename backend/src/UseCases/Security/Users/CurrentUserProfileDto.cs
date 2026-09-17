@@ -1,8 +1,6 @@
-﻿namespace UseCases.Security.Users;
-
-public record UserPermissionDto(string Name);
+namespace UseCases.Security.Users;
 
 public record CurrentUserProfileDto(string Name, string Email)
 {
-    public IReadOnlyList<UserPermissionDto> Permissions { get; init; } = [];
+    public IReadOnlyList<string> Permissions { get; init; } = [];
 }

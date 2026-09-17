@@ -56,7 +56,7 @@ public class CurrentUserClaimsTransformationTests
     {
         var userInfo = new CurrentUserInfo(7, TestOid, "Test User", "test@example.com", true)
         {
-            Permissions = [new UserPermissionDto("Users:Read"), new UserPermissionDto("Roles:Read")]
+            Permissions = ["Users:Read", "Roles:Read"]
         };
         var bus = Substitute.For<IMessageBus>();
         bus.InvokeAsync<Result<CurrentUserInfo>>(Arg.Any<GetOrCreateCurrentUserCommand>(), Arg.Any<CancellationToken>())

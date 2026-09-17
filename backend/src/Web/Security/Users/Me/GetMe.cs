@@ -71,10 +71,6 @@ public sealed class GetMeMapper : Mapper<EmptyRequest, MeRecord, CurrentUserProf
 {
     public override MeRecord FromEntity(CurrentUserProfileDto dto)
     {
-        var permissions = dto.Permissions
-            .Select(p => new MePermissionRecord(p.Name))
-            .ToList();
-
-        return new MeRecord(dto.Name, dto.Email) { Permissions = permissions };
+        return new MeRecord(dto.Name, dto.Email) { Permissions = dto.Permissions };
     }
 }

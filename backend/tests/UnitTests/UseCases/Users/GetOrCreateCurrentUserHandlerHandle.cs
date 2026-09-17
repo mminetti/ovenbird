@@ -37,8 +37,8 @@ public class GetOrCreateCurrentUserHandlerHandle
         result.ExternalIdentifier.ShouldBe("oid-123");
         result.Name.ShouldBe("Alice");
         result.Email.ShouldBe("alice@test.com");
-        result.Permissions.ShouldContain(p => p.Name == "Users:Read");
-        result.Permissions.ShouldContain(p => p.Name == "Roles:Read");
+        result.Permissions.ShouldContain("Users:Read");
+        result.Permissions.ShouldContain("Roles:Read");
         result.Permissions.Count.ShouldBe(2);
     }
 

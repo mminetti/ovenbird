@@ -1,7 +1,7 @@
 interface BackendMe {
 	name: string
 	email: string
-	permissions: Array<{ name: string }>
+	permissions: string[]
 }
 
 export default defineOAuthAuth0EventHandler({
@@ -49,7 +49,7 @@ export default defineOAuthAuth0EventHandler({
 				id: me.email,
 				name: me.name,
 				email: me.email,
-				permissions: me.permissions?.map(p => p.name) ?? []
+				permissions: me.permissions ?? []
 			},
 			secure: {
 				accessToken: tokens.access_token

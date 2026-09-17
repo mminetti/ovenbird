@@ -44,7 +44,7 @@ public class CurrentUserClaimsTransformation(IMessageBus bus, IAuthStrategy auth
 
         var identity = new ClaimsIdentity(principal.Identity);
         identity.AddClaim(new Claim(AuthConstants.CurrentUserResolvedClaimType, "true"));
-        identity.AddClaims(result.Value.Permissions.Select(p => new Claim(AuthConstants.PermissionsClaimType, p.Name)));
+        identity.AddClaims(result.Value.Permissions.Select(p => new Claim(AuthConstants.PermissionsClaimType, p)));
 
         return new ClaimsPrincipal(identity);
     }
