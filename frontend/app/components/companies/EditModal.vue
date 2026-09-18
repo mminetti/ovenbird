@@ -150,6 +150,8 @@ defineExpose({
 					<USelectMenu
 						v-model="state.timeZoneId"
 						:items="timeZoneItems"
+						value-key="value"
+						label-key="label"
 						placeholder="Select a time zone"
 						class="w-full"
 						:disabled="loading"
