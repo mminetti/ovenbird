@@ -1,4 +1,4 @@
-using Core.Shared;
+﻿using Core.Shared;
 using Infrastructure.Data.Queries.Common;
 
 namespace Infrastructure.Data.Queries.Shared;
@@ -12,15 +12,15 @@ public class ConnectorQueryPropertyMapper : IQueryPropertyMapper<Connector>
     {
         ["id"] = nameof(Connector.Id),
         ["name"] = nameof(Connector.Name),
-        ["connectorTypeName"] = $"{nameof(Connector.ConnectorType)}.{nameof(Core.Shared.ConnectorType.Name)}",
-        ["connectorImplementationName"] = $"{nameof(Connector.ConnectorImplementation)}.{nameof(Core.Shared.ConnectorImplementation.Name)}"
+        ["connectorTypeName"] = $"{nameof(Connector.ConnectorType)}.{nameof(ConnectorType.Name)}",
+        ["connectorImplementationName"] = $"{nameof(Connector.ConnectorImplementation)}.{nameof(ConnectorImplementation.Name)}"
     };
 
     private static readonly string[] _searchableProperties =
     [
         nameof(Connector.Name),
-        $"{nameof(Connector.ConnectorType)}.{nameof(Core.Shared.ConnectorType.Name)}",
-        $"{nameof(Connector.ConnectorImplementation)}.{nameof(Core.Shared.ConnectorImplementation.Name)}"
+        $"{nameof(Connector.ConnectorType)}.{nameof(ConnectorType.Name)}",
+        $"{nameof(Connector.ConnectorImplementation)}.{nameof(ConnectorImplementation.Name)}"
     ];
 
     public string? MapToEntityProperty(string dtoPropertyName) =>

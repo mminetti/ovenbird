@@ -1,4 +1,4 @@
-using Core.Common;
+﻿using Core.Common;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
@@ -110,7 +110,8 @@ public class ImportMarketDocumentHandlerHandle
         {
             Id = 1,
             Name = "Ftp",
-            ConnectorType = new ConnectorType { Id = 1, Name = Constants.ConnectorTypes.Ftp },
+            ConnectorTypeId = Constants.ConnectorTypes.Ftp,
+            ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
             ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
             ConnectorFields =
             [
@@ -125,7 +126,8 @@ public class ImportMarketDocumentHandlerHandle
         {
             Id = 2,
             Name = "FileStorage",
-            ConnectorType = new ConnectorType { Id = 2, Name = Constants.ConnectorTypes.FileStorage },
+            ConnectorTypeId = Constants.ConnectorTypes.FileStorage,
+            ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.FileStorage, Name = "File Storage" },
             ConnectorImplementation = new ConnectorImplementation { Id = 2, Name = FileStorageImplementation },
             ConnectorFields =
             [

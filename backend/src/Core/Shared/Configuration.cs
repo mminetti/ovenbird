@@ -38,18 +38,17 @@ public class Configuration : AuditableEntityBase<int>
         return value;
     }
 
-    public Connector GetRequiredConnector(string type)
+    public Connector GetRequiredConnector(int type)
     {
-        var integration = GetConnector(type);
+        var connector = GetConnector(type);
 
-        return integration ??
+        return connector ??
             throw new InvalidOperationException(
                 $"Configuration '{Name}' is missing required '{type}' connector type.");
     }
 
-    private Connector? GetConnector(string name)
+    private Connector? GetConnector(int typeId)
     {
-        return Connectors
-            .FirstOrDefault(x => string.Equals(x.ConnectorType.Name, name, StringComparison.OrdinalIgnoreCase));
+        return Connectors.FirstOrDefault(x => x.ConnectorTypeId == typeId);
     }
 }

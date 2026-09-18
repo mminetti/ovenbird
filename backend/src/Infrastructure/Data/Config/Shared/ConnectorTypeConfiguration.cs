@@ -1,4 +1,4 @@
-using Core.Common;
+﻿using Core.Common;
 using Core.Shared;
 
 namespace Infrastructure.Data.Config.Shared;
@@ -18,14 +18,14 @@ public class ConnectorTypeConfiguration : IEntityTypeConfiguration<ConnectorType
         builder.HasData(
             new ConnectorType
             {
-                Id = 1,
-                Name = Constants.ConnectorTypes.Ftp,
+                Id = Constants.ConnectorTypes.Ftp,
+                Name = "FTP",
                 Description = "FTP/SFTP file transfer connector."
             },
             new ConnectorType
             {
-                Id = 2,
-                Name = Constants.ConnectorTypes.FileStorage,
+                Id = Constants.ConnectorTypes.FileStorage,
+                Name = "File Storage",
                 Description = "File storage connector."
             }
         );

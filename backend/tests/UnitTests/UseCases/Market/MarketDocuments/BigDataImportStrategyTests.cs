@@ -138,7 +138,8 @@ public class BigDataImportStrategyTests
         {
             Id = 1,
             Name = "Sftp",
-            ConnectorType = new ConnectorType { Id = 1, Name = Constants.ConnectorTypes.Ftp },
+            ConnectorTypeId = Constants.ConnectorTypes.Ftp,
+            ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
             ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
         };
 
