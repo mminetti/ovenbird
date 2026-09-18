@@ -16,7 +16,6 @@ public class UpdateConnectorHandler(IRepository<Connector> repository)
 
         connector.Name = command.Name;
         connector.Description = command.Description;
-        connector.ConnectorTypeId = command.ConnectorTypeId;
         connector.ConnectorImplementationId = command.ConnectorImplementationId;
 
         connector.ConnectorFields.Clear();

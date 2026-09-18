@@ -25,7 +25,6 @@ public class UpdateConnector(IMessageBus bus)
                 ConnectorId = 1,
                 Id = 1,
                 Name = "Market data drop folder",
-                ConnectorTypeId = 1,
                 ConnectorImplementationId = 3,
                 Fields = [new ConnectorFieldRequest { Name = "host", Value = "localhost" }]
             };
@@ -54,7 +53,7 @@ public class UpdateConnector(IMessageBus bus)
             .ToList();
 
         var result = await bus.InvokeAsync<Result>(
-            new UpdateConnectorCommand(request.ConnectorId, request.Name, request.Description, request.ConnectorTypeId, request.ConnectorImplementationId, fields), ct);
+            new UpdateConnectorCommand(request.ConnectorId, request.Name, request.Description, request.ConnectorImplementationId, fields), ct);
 
         return result.ToDeleteUpdateResult();
     }

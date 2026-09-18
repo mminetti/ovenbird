@@ -3,6 +3,7 @@ import { handleBackendError } from '../../utils/handleBackendError'
 export interface DataListItem {
 	id: string
 	name: string
+	parentId?: string
 }
 
 export interface DataListResponse {

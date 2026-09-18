@@ -50,7 +50,7 @@ public sealed class GetDataListMapper : Mapper<GetDataListRequest, GetDataListRe
     public override GetDataListResponse FromEntity(DataListResponse e)
     {
         var items = e.Items
-            .Select(x => new ValuePairRecord(x.Id, x.Name))
+            .Select(x => new ValuePairRecord(x.Id, x.Name, x.ParentId))
             .ToList();
 
         return new GetDataListResponse(e.Type, items);

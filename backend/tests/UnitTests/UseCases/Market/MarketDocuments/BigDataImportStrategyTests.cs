@@ -138,9 +138,14 @@ public class BigDataImportStrategyTests
         {
             Id = 1,
             Name = "Sftp",
-            ConnectorTypeId = Constants.ConnectorTypes.Ftp,
-            ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
-            ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
+            ConnectorImplementation = new ConnectorImplementation
+            {
+                Id = 1,
+                Name = "Test FTP",
+                Identifier = FtpImplementation,
+                ConnectorTypeId = Constants.ConnectorTypes.Ftp,
+                ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
+            },
         };
 
         var fields = new List<ConnectorField>();

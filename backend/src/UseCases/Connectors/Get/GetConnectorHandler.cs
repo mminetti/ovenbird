@@ -22,8 +22,8 @@ public class GetConnectorHandler(IReadRepository<Connector> repository)
             entity.Id,
             entity.Name,
             entity.Description,
-            entity.ConnectorTypeId,
-            entity.ConnectorType.Name,
+            entity.ConnectorImplementation.ConnectorTypeId,
+            entity.ConnectorImplementation.ConnectorType.Name,
             entity.ConnectorImplementationId,
             entity.ConnectorImplementation.Name)
         {

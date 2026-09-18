@@ -1,13 +1,13 @@
-namespace Core.Common;
+﻿namespace Core.Common;
 
 public static partial class Constants
 {
     public static class ConnectorImplementations
     {
-        public const string FluentFtpService = "FluentFtpService";
-        public const string SshNetSftpService = "SshNetSftpService";
-        public const string LocalFileSystemFtpService = "LocalFileSystemFtpService";
-        public const string AzureBlobFileStorage = "AzureBlobFileStorage";
-        public const string LocalFileSystemFileStorage = "LocalFileSystemFileStorage";
+        public const int FluentFtpService = 1;
+        public const int SshNetSftpService = 2;
+        public const int LocalFileSystemFtpService = 3;
+        public const int AzureBlobFileStorage = 4;
+        public const int LocalFileSystemFileStorage = 5;
     }
 }

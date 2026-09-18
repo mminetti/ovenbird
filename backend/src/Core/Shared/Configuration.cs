@@ -49,6 +49,6 @@ public class Configuration : AuditableEntityBase<int>
 
     private Connector? GetConnector(int typeId)
     {
-        return Connectors.FirstOrDefault(x => x.ConnectorTypeId == typeId);
+        return Connectors.FirstOrDefault(x => x.ConnectorImplementation.ConnectorTypeId == typeId);
     }
 }

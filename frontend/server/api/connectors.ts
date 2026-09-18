@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		if (method === 'POST') {
-			const body = await readBody<{ name?: unknown, description?: unknown, connectorTypeId?: unknown, connectorImplementationId?: unknown, fields?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, description?: unknown, connectorImplementationId?: unknown, fields?: unknown }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
@@ -41,7 +41,6 @@ export default defineEventHandler(async (event) => {
 				body: {
 					name,
 					description,
-					connectorTypeId: Number(body?.connectorTypeId),
 					connectorImplementationId: Number(body?.connectorImplementationId),
 					fields: toFieldPayload(body?.fields)
 				}
@@ -51,7 +50,7 @@ export default defineEventHandler(async (event) => {
 		if (method === 'PATCH') {
 			const query = getQuery(event)
 			const connectorId = Number(query.id)
-			const body = await readBody<{ name?: unknown, description?: unknown, connectorTypeId?: unknown, connectorImplementationId?: unknown, fields?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, description?: unknown, connectorImplementationId?: unknown, fields?: unknown }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
@@ -61,7 +60,6 @@ export default defineEventHandler(async (event) => {
 					id: connectorId,
 					name,
 					description,
-					connectorTypeId: Number(body?.connectorTypeId),
 					connectorImplementationId: Number(body?.connectorImplementationId),
 					fields: toFieldPayload(body?.fields)
 				}

@@ -25,7 +25,6 @@ public class CreateConnector(IMessageBus bus)
             s.ExampleRequest = new CreateConnectorRequest
             {
                 Name = "Market data drop folder",
-                ConnectorTypeId = 1,
                 ConnectorImplementationId = 3,
                 Fields = [new ConnectorFieldRequest { Name = "host", Value = "localhost" }]
             };
@@ -52,7 +51,7 @@ public class CreateConnector(IMessageBus bus)
             .ToList();
 
         var result = await bus.InvokeAsync<Result<int>>(
-            new CreateConnectorCommand(request.Name, request.Description, request.ConnectorTypeId, request.ConnectorImplementationId, fields), ct);
+            new CreateConnectorCommand(request.Name, request.Description, request.ConnectorImplementationId, fields), ct);
 
         return result.ToCreatedResult(
             id => GetConnectorRequest.BuildRoute(id),

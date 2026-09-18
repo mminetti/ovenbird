@@ -44,7 +44,7 @@ public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryServic
             DataListType.ConnectorImplementations => await db.Set<ConnectorImplementation>()
                 .AsNoTracking()
                 .OrderBy(x => x.Name)
-                .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
+                .Select(x => new ValuePairDto(x.Id.ToString(), x.Name, x.ConnectorTypeId.ToString()))
                 .ToListAsync(ct),
 
             DataListType.ConfigurationTypes => await db.Set<ConfigurationType>()

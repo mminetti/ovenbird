@@ -87,7 +87,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
             Username = await connector.GetRequiredValueAsync(FtpUsername, secretResolver, ct),
             Password = await connector.GetRequiredValueAsync(FtpPassword, secretResolver, ct),
             RemoteDirectory = configuration.GetRequiredValue(FtpRemoteDirectory),
-            Implementation = connector.ConnectorImplementation.Name,
+            Implementation = connector.ConnectorImplementation.Identifier,
         };
     }
 
@@ -99,7 +99,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
         {
             RootDirectory = await connector.GetRequiredValueAsync(FileStorageRootDirectory, secretResolver, ct),
             ConnectionString = await connector.GetRequiredValueAsync(FileStorageConnectionString, secretResolver, ct),
-            Implementation = connector.ConnectorImplementation.Name,
+            Implementation = connector.ConnectorImplementation.Identifier,
         };
     }
 }

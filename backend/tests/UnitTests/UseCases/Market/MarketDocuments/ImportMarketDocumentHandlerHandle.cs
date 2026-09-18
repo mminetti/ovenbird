@@ -110,9 +110,14 @@ public class ImportMarketDocumentHandlerHandle
         {
             Id = 1,
             Name = "Ftp",
-            ConnectorTypeId = Constants.ConnectorTypes.Ftp,
-            ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
-            ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
+            ConnectorImplementation = new ConnectorImplementation
+            {
+                Id = 1,
+                Name = "Test FTP",
+                Identifier = FtpImplementation,
+                ConnectorTypeId = Constants.ConnectorTypes.Ftp,
+                ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
+            },
             ConnectorFields =
             [
                 new ConnectorField { ConnectorId = 1, Name = "host", Value = "sftp.example.com" },
@@ -126,9 +131,14 @@ public class ImportMarketDocumentHandlerHandle
         {
             Id = 2,
             Name = "FileStorage",
-            ConnectorTypeId = Constants.ConnectorTypes.FileStorage,
-            ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.FileStorage, Name = "File Storage" },
-            ConnectorImplementation = new ConnectorImplementation { Id = 2, Name = FileStorageImplementation },
+            ConnectorImplementation = new ConnectorImplementation
+            {
+                Id = 2,
+                Name = "Test File Storage",
+                Identifier = FileStorageImplementation,
+                ConnectorTypeId = Constants.ConnectorTypes.FileStorage,
+                ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.FileStorage, Name = "File Storage" },
+            },
             ConnectorFields =
             [
                 new ConnectorField { ConnectorId = 2, Name = "root.directory", Value = RootDirectory },

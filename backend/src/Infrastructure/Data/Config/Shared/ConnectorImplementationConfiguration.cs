@@ -1,5 +1,6 @@
 ﻿using Core.Common;
 using Core.Shared;
+using Infrastructure.Services.Files;
 
 namespace Infrastructure.Data.Config.Shared;
 
@@ -12,39 +13,58 @@ public class ConnectorImplementationConfiguration : IEntityTypeConfiguration<Con
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
+        builder.Property(x => x.Identifier)
+            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
+
         builder.Property(x => x.Description)
             .HasMaxLength(DataSchemaConstants.DEFAULT_DESCRIPTION_LENGTH);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.ConnectorType)
+            .WithMany(x => x.ConnectorImplementations)
+            .HasForeignKey(x => x.ConnectorTypeId)
+            .OnDelete(DeleteBehavior.NoAction);
 
         builder.HasData(
             new ConnectorImplementation
             {
-                Id = 1,
-                Name = Constants.ConnectorImplementations.FluentFtpService,
-                Description = "FTP connector implementation backed by FluentFTP."
+                Id = Constants.ConnectorImplementations.FluentFtpService,
+                Identifier = nameof(FluentFtpService),
+                Name = "Fluent FTP",
+                Description = "FTP connector implementation backed by FluentFTP.",
+                ConnectorTypeId = Constants.ConnectorTypes.Ftp
             },
             new ConnectorImplementation
             {
-                Id = 2,
-                Name = Constants.ConnectorImplementations.SshNetSftpService,
-                Description = "SFTP connector implementation backed by SSH.NET."
+                Id = Constants.ConnectorImplementations.SshNetSftpService,
+                Identifier = nameof(SshNetSftpService),
+                Name = "SSH.NET SFTP",
+                Description = "SFTP connector implementation backed by SSH.NET.",
+                ConnectorTypeId = Constants.ConnectorTypes.Ftp
             },
             new ConnectorImplementation
             {
-                Id = 3,
-                Name = Constants.ConnectorImplementations.LocalFileSystemFtpService,
-                Description = "Local drop-folder stand-in for FTP/SFTP, for development use only."
+                Id = Constants.ConnectorImplementations.LocalFileSystemFtpService,
+                Identifier = nameof(LocalFileSystemFtpService),
+                Name = "Local File System FTP",
+                Description = "Local drop-folder stand-in for FTP/SFTP, for development use only.",
+                ConnectorTypeId = Constants.ConnectorTypes.Ftp
             },
             new ConnectorImplementation
             {
-                Id = 4,
-                Name = Constants.ConnectorImplementations.AzureBlobFileStorage,
-                Description = "File storage connector implementation backed by Azure Blob Storage."
+                Id = Constants.ConnectorImplementations.AzureBlobFileStorage,
+                Identifier = nameof(AzureBlobFileStorage),
+                Name = "Azure Blob Storage",
+                Description = "File storage connector implementation backed by Azure Blob Storage.",
+                ConnectorTypeId = Constants.ConnectorTypes.FileStorage
             },
             new ConnectorImplementation
             {
-                Id = 5,
-                Name = Constants.ConnectorImplementations.LocalFileSystemFileStorage,
-                Description = "Local file system stand-in for file storage, for development use only."
+                Id = Constants.ConnectorImplementations.LocalFileSystemFileStorage,
+                Identifier = nameof(LocalFileSystemFileStorage),
+                Name = "Local File System Storage",
+                Description = "Local file system stand-in for file storage, for development use only.",
+                ConnectorTypeId = Constants.ConnectorTypes.FileStorage
             }
         );
     }

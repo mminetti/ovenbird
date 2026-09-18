@@ -12,14 +12,14 @@ public class ConnectorQueryPropertyMapper : IQueryPropertyMapper<Connector>
     {
         ["id"] = nameof(Connector.Id),
         ["name"] = nameof(Connector.Name),
-        ["connectorTypeName"] = $"{nameof(Connector.ConnectorType)}.{nameof(ConnectorType.Name)}",
+        ["connectorTypeName"] = $"{nameof(Connector.ConnectorImplementation)}.{nameof(ConnectorImplementation.ConnectorType)}.{nameof(ConnectorType.Name)}",
         ["connectorImplementationName"] = $"{nameof(Connector.ConnectorImplementation)}.{nameof(ConnectorImplementation.Name)}"
     };
 
     private static readonly string[] _searchableProperties =
     [
         nameof(Connector.Name),
-        $"{nameof(Connector.ConnectorType)}.{nameof(ConnectorType.Name)}",
+        $"{nameof(Connector.ConnectorImplementation)}.{nameof(ConnectorImplementation.ConnectorType)}.{nameof(ConnectorType.Name)}",
         $"{nameof(Connector.ConnectorImplementation)}.{nameof(ConnectorImplementation.Name)}"
     ];
 

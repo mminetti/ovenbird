@@ -45,8 +45,17 @@ const connectorTypeItems = computed(() =>
 )
 
 const connectorImplementationItems = computed(() =>
-	connectorImplementations.value.map(implementation => ({ label: implementation.name, value: Number(implementation.id) }))
+	connectorImplementations.value
+		.filter(implementation => implementation.parentId === String(state.connectorTypeId))
+		.map(implementation => ({ label: implementation.name, value: Number(implementation.id) }))
 )
+
+watch(() => state.connectorTypeId, () => {
+	const validIds = new Set(connectorImplementationItems.value.map(item => item.value))
+	if (state.connectorImplementationId !== undefined && !validIds.has(state.connectorImplementationId)) {
+		state.connectorImplementationId = undefined
+	}
+})
 
 function resetForm() {
 	state.name = ''
@@ -95,7 +104,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 			body: {
 				name: event.data.name,
 				description: event.data.description,
-				connectorTypeId: event.data.connectorTypeId,
 				connectorImplementationId: event.data.connectorImplementationId,
 				fields: event.data.fields
 			}
@@ -161,7 +169,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 						label-key="label"
 						placeholder="Select an implementation"
 						class="w-full"
-						:disabled="submitting || loadingLists"
+						:disabled="submitting || loadingLists || state.connectorTypeId === undefined"
 					/>
 				</UFormField>
 

@@ -10,7 +10,6 @@ public class CreateConnectorHandler(IRepository<Connector> repository)
         {
             Name = command.Name,
             Description = command.Description,
-            ConnectorTypeId = command.ConnectorTypeId,
             ConnectorImplementationId = command.ConnectorImplementationId,
             ConnectorFields = [.. command.Fields
                 .Select(f => new ConnectorField

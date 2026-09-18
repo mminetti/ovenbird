@@ -16,8 +16,8 @@ public class ListConnectorsQueryService(ReadDbContext db, IQueryPropertyMapper<C
             c.Id,
             c.Name,
             c.Description,
-            c.ConnectorTypeId,
-            c.ConnectorType.Name,
+            c.ConnectorImplementation.ConnectorTypeId,
+            c.ConnectorImplementation.ConnectorType.Name,
             c.ConnectorImplementationId,
             c.ConnectorImplementation.Name);
 
