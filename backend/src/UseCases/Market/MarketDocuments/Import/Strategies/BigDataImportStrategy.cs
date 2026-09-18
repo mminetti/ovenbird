@@ -1,4 +1,3 @@
-using Core.Constants;
 using Core.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
@@ -79,7 +78,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
 
     private async Task<FtpOptions> ResolveFtpOptions(Configuration configuration, CancellationToken ct)
     {
-        var connector = configuration.GetRequiredConnector(ConnectorTypes.Ftp);
+        var connector = configuration.GetRequiredConnector(Core.Common.Constants.ConnectorTypes.Ftp);
 
         return new FtpOptions
         {
@@ -94,7 +93,7 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
 
     private async Task<FileStorageOptions> ResolveFileOptions(Configuration configuration, CancellationToken ct)
     {
-        var connector = configuration.GetRequiredConnector(ConnectorTypes.FileStorage);
+        var connector = configuration.GetRequiredConnector(Core.Common.Constants.ConnectorTypes.FileStorage);
 
         return new FileStorageOptions
         {

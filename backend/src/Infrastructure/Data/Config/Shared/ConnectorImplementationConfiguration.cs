@@ -1,4 +1,4 @@
-﻿using Core.Constants;
+﻿using Core.Common;
 using Core.Shared;
 
 namespace Infrastructure.Data.Config.Shared;
@@ -19,31 +19,31 @@ public class ConnectorImplementationConfiguration : IEntityTypeConfiguration<Con
             new ConnectorImplementation
             {
                 Id = 1,
-                Name = ConnectorImplementations.FluentFtpService,
+                Name = Constants.ConnectorImplementations.FluentFtpService,
                 Description = "FTP connector implementation backed by FluentFTP."
             },
             new ConnectorImplementation
             {
                 Id = 2,
-                Name = ConnectorImplementations.SshNetSftpService,
+                Name = Constants.ConnectorImplementations.SshNetSftpService,
                 Description = "SFTP connector implementation backed by SSH.NET."
             },
             new ConnectorImplementation
             {
                 Id = 3,
-                Name = ConnectorImplementations.LocalFileSystemFtpService,
+                Name = Constants.ConnectorImplementations.LocalFileSystemFtpService,
                 Description = "Local drop-folder stand-in for FTP/SFTP, for development use only."
             },
             new ConnectorImplementation
             {
                 Id = 4,
-                Name = ConnectorImplementations.AzureBlobFileStorage,
+                Name = Constants.ConnectorImplementations.AzureBlobFileStorage,
                 Description = "File storage connector implementation backed by Azure Blob Storage."
             },
             new ConnectorImplementation
             {
                 Id = 5,
-                Name = ConnectorImplementations.LocalFileSystemFileStorage,
+                Name = Constants.ConnectorImplementations.LocalFileSystemFileStorage,
                 Description = "Local file system stand-in for file storage, for development use only."
             }
         );

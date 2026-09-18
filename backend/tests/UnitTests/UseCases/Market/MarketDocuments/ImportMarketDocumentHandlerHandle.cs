@@ -1,4 +1,4 @@
-using Core.Constants;
+using Core.Common;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
@@ -92,8 +92,8 @@ public class ImportMarketDocumentHandlerHandle
         created.ShouldNotBeNull();
         created!.Name.ShouldBe("newfile.csv");
         created.CompanyId.ShouldBe(company.Id);
-        created.DirectionId.ShouldBe(MarketDocumentDirections.Inbound);
-        created.StatusId.ShouldBe(MarketDocumentStatuses.New);
+        created.DirectionId.ShouldBe(Constants.MarketDocumentDirections.Inbound);
+        created.StatusId.ShouldBe(Constants.MarketDocumentStatuses.New);
         created.File.ShouldStartWith($"{RootDirectory}/");
 
         var fileStorageOptions = new FileStorageOptions { RootDirectory = RootDirectory };
@@ -110,7 +110,7 @@ public class ImportMarketDocumentHandlerHandle
         {
             Id = 1,
             Name = "Ftp",
-            ConnectorType = new ConnectorType { Id = 1, Name = ConnectorTypes.Ftp },
+            ConnectorType = new ConnectorType { Id = 1, Name = Constants.ConnectorTypes.Ftp },
             ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
             ConnectorFields =
             [
@@ -125,7 +125,7 @@ public class ImportMarketDocumentHandlerHandle
         {
             Id = 2,
             Name = "FileStorage",
-            ConnectorType = new ConnectorType { Id = 2, Name = ConnectorTypes.FileStorage },
+            ConnectorType = new ConnectorType { Id = 2, Name = Constants.ConnectorTypes.FileStorage },
             ConnectorImplementation = new ConnectorImplementation { Id = 2, Name = FileStorageImplementation },
             ConnectorFields =
             [

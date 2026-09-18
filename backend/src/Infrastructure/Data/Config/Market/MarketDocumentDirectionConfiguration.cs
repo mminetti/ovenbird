@@ -1,4 +1,4 @@
-﻿using Core.Constants;
+﻿using Core.Common;
 using Core.Market;
 
 namespace Infrastructure.Data.Config.Market;
@@ -13,7 +13,7 @@ public class MarketDocumentDirectionConfiguration : IEntityTypeConfiguration<Mar
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.HasData(
-            new MarketDocumentDirection { Id = MarketDocumentDirections.Inbound, Name = nameof(MarketDocumentDirections.Inbound)},
-            new MarketDocumentDirection { Id = MarketDocumentDirections.Outbound, Name = nameof(MarketDocumentDirections.Outbound)});
+            new MarketDocumentDirection { Id = Constants.MarketDocumentDirections.Inbound, Name = nameof(Constants.MarketDocumentDirections.Inbound)},
+            new MarketDocumentDirection { Id = Constants.MarketDocumentDirections.Outbound, Name = nameof(Constants.MarketDocumentDirections.Outbound)});
     }
 }

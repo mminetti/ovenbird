@@ -1,4 +1,4 @@
-﻿using Core.Constants;
+﻿using Core.Common;
 using Core.Market;
 
 namespace Infrastructure.Data.Config.Market;
@@ -13,8 +13,8 @@ public class MarketDocumentStatusConfiguration : IEntityTypeConfiguration<Market
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.HasData(
-            new MarketDocumentStatus { Id = MarketDocumentStatuses.New, Name = nameof(MarketDocumentStatuses.New) },
-            new MarketDocumentStatus { Id = MarketDocumentStatuses.Done, Name = nameof(MarketDocumentStatuses.Done) },
-            new MarketDocumentStatus { Id = MarketDocumentStatuses.Error, Name = nameof(MarketDocumentStatuses.Error) });
+            new MarketDocumentStatus { Id = Constants.MarketDocumentStatuses.New, Name = nameof(Constants.MarketDocumentStatuses.New) },
+            new MarketDocumentStatus { Id = Constants.MarketDocumentStatuses.Done, Name = nameof(Constants.MarketDocumentStatuses.Done) },
+            new MarketDocumentStatus { Id = Constants.MarketDocumentStatuses.Error, Name = nameof(Constants.MarketDocumentStatuses.Error) });
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Core.Common.Extensions;
-using Core.Constants;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Shared;
@@ -21,7 +20,7 @@ public class ImportMarketDocumentHandler(
     {
         var documentIds = new List<long>();
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeNameSpec(ConfigurationTypes.EdiImport), ct);
+            new ConfigurationByTypeNameSpec(Core.Common.Constants.ConfigurationTypes.EdiImport), ct);
 
         foreach (var configuration in configurations)
         {
@@ -60,8 +59,8 @@ public class ImportMarketDocumentHandler(
                             Name = fileName,
                             File = uploadedFileReference,
                             CompanyId = company.Id,
-                            DirectionId = MarketDocumentDirections.Inbound,
-                            StatusId = MarketDocumentStatuses.New
+                            DirectionId = Core.Common.Constants.MarketDocumentDirections.Inbound,
+                            StatusId = Core.Common.Constants.MarketDocumentStatuses.New
                         };
 
                         var created = await documentRepository.AddAsync(document, ct);

@@ -1,4 +1,4 @@
-﻿using Core.Constants;
+﻿using Core.Common;
 using Core.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
@@ -138,7 +138,7 @@ public class BigDataImportStrategyTests
         {
             Id = 1,
             Name = "Sftp",
-            ConnectorType = new ConnectorType { Id = 1, Name = ConnectorTypes.Ftp },
+            ConnectorType = new ConnectorType { Id = 1, Name = Constants.ConnectorTypes.Ftp },
             ConnectorImplementation = new ConnectorImplementation { Id = 1, Name = FtpImplementation },
         };
 
