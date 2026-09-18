@@ -149,7 +149,7 @@ defineExpose({
 </script>
 
 <template>
-	<USlideover v-model:open="open" :title="slideoverTitle">
+	<USlideover v-model:open="open" :title="slideoverTitle" :ui="{ content: 'max-w-2xl' }">
 		<template #body>
 			<ModalLoadingBar :loading="loading" />
 
@@ -171,29 +171,31 @@ defineExpose({
 					<UTextarea v-model="state.description" class="w-full" :disabled="loading" />
 				</UFormField>
 
-				<UFormField label="Type" name="connectorTypeId">
-					<USelectMenu
-						v-model="state.connectorTypeId"
-						:items="connectorTypeItems"
-						value-key="value"
-						label-key="label"
-						placeholder="Select a type"
-						class="w-full"
-						:disabled="loading"
-					/>
-				</UFormField>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<UFormField label="Type" name="connectorTypeId">
+						<USelectMenu
+							v-model="state.connectorTypeId"
+							:items="connectorTypeItems"
+							value-key="value"
+							label-key="label"
+							placeholder="Select a type"
+							class="w-full"
+							:disabled="loading"
+						/>
+					</UFormField>
 
-				<UFormField label="Implementation" name="connectorImplementationId">
-					<USelectMenu
-						v-model="state.connectorImplementationId"
-						:items="connectorImplementationItems"
-						value-key="value"
-						label-key="label"
-						placeholder="Select an implementation"
-						class="w-full"
-						:disabled="loading || state.connectorTypeId === undefined"
-					/>
-				</UFormField>
+					<UFormField label="Implementation" name="connectorImplementationId">
+						<USelectMenu
+							v-model="state.connectorImplementationId"
+							:items="connectorImplementationItems"
+							value-key="value"
+							label-key="label"
+							placeholder="Select an implementation"
+							class="w-full"
+							:disabled="loading || state.connectorTypeId === undefined"
+						/>
+					</UFormField>
+				</div>
 
 				<UFormField label="Fields" name="fields">
 					<ConnectorsFieldsEditor v-model="state.fields" :disabled="loading" />

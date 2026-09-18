@@ -120,7 +120,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-	<USlideover v-model:open="open" title="New connector">
+	<USlideover v-model:open="open" title="New connector" :ui="{ content: 'max-w-2xl' }">
 		<UButton label="New connector" icon="i-lucide-plus" class="ml-auto shrink-0" />
 
 		<template #body>
@@ -149,29 +149,31 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 					<UTextarea v-model="state.description" class="w-full" :disabled="submitting" />
 				</UFormField>
 
-				<UFormField label="Type" name="connectorTypeId">
-					<USelectMenu
-						v-model="state.connectorTypeId"
-						:items="connectorTypeItems"
-						value-key="value"
-						label-key="label"
-						placeholder="Select a type"
-						class="w-full"
-						:disabled="submitting || loadingLists"
-					/>
-				</UFormField>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<UFormField label="Type" name="connectorTypeId">
+						<USelectMenu
+							v-model="state.connectorTypeId"
+							:items="connectorTypeItems"
+							value-key="value"
+							label-key="label"
+							placeholder="Select a type"
+							class="w-full"
+							:disabled="submitting || loadingLists"
+						/>
+					</UFormField>
 
-				<UFormField label="Implementation" name="connectorImplementationId">
-					<USelectMenu
-						v-model="state.connectorImplementationId"
-						:items="connectorImplementationItems"
-						value-key="value"
-						label-key="label"
-						placeholder="Select an implementation"
-						class="w-full"
-						:disabled="submitting || loadingLists || state.connectorTypeId === undefined"
-					/>
-				</UFormField>
+					<UFormField label="Implementation" name="connectorImplementationId">
+						<USelectMenu
+							v-model="state.connectorImplementationId"
+							:items="connectorImplementationItems"
+							value-key="value"
+							label-key="label"
+							placeholder="Select an implementation"
+							class="w-full"
+							:disabled="submitting || loadingLists || state.connectorTypeId === undefined"
+						/>
+					</UFormField>
+				</div>
 
 				<UFormField label="Fields" name="fields">
 					<ConnectorsFieldsEditor v-model="state.fields" :disabled="submitting" />
