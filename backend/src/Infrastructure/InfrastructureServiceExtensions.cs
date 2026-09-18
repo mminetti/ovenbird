@@ -13,6 +13,7 @@ using Infrastructure.Data.Queries.Shared;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
 using UseCases.Common;
+using UseCases.Companies.List;
 using UseCases.Connectors.List;
 using UseCases.DataLists.Get;
 using UseCases.Interfaces.Files;
@@ -68,10 +69,12 @@ public static class InfrastructureServiceExtensions
             .AddSingleton<IQueryPropertyMapper<Role>, RoleQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Permission>, PermissionQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Connector>, ConnectorQueryPropertyMapper>()
+            .AddSingleton<IQueryPropertyMapper<Company>, CompanyQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IListConnectorsQueryService, ListConnectorsQueryService>()
+            .AddScoped<IListCompaniesQueryService, ListCompaniesQueryService>()
             .AddScoped<IGetDataListQueryService, GetDataListQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()

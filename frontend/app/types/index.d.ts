@@ -89,3 +89,11 @@ export interface Connector {
 	connectorImplementationName: string
 	fields: ConnectorField[]
 }
+
+export interface Company {
+	id: number
+	name: string
+	marketId: number
+	marketName: string
+	timeZoneId: string
+}
