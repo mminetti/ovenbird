@@ -1,8 +1,9 @@
-﻿using Core.Shared;
+using Core.Common;
+using Core.Shared;
 
 namespace Core.Market;
 
-public class Market : EntityBase<int>
+public class Market : AuditableEntityBase<int>
 {
     public string Name { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;

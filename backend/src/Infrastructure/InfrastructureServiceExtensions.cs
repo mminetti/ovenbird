@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Core.Market;
 using Core.Security;
 using Core.Security.Interfaces;
 using Core.Security.Services;
@@ -19,6 +20,7 @@ using UseCases.DataLists.Get;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import.Strategies;
+using UseCases.Markets.List;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
 using UseCases.Security.Users;
@@ -70,11 +72,13 @@ public static class InfrastructureServiceExtensions
             .AddSingleton<IQueryPropertyMapper<Permission>, PermissionQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Connector>, ConnectorQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Company>, CompanyQueryPropertyMapper>()
+            .AddSingleton<IQueryPropertyMapper<Market>, MarketQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IListConnectorsQueryService, ListConnectorsQueryService>()
             .AddScoped<IListCompaniesQueryService, ListCompaniesQueryService>()
+            .AddScoped<IListMarketsQueryService, ListMarketsQueryService>()
             .AddScoped<IGetDataListQueryService, GetDataListQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()

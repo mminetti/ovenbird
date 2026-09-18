@@ -97,3 +97,9 @@ export interface Company {
 	marketName: string
 	timeZoneId: string
 }
+
+export interface Market {
+	id: number
+	name: string
+	identifier: string
+}

@@ -1,10 +1,10 @@
-﻿namespace Infrastructure.Data.Config.Market;
+namespace Infrastructure.Data.Config.Market;
 
-internal class MarketConfiguration : IEntityTypeConfiguration<Core.Market.Market>
+internal class MarketConfiguration : BaseEntityTypeConfiguration<Core.Market.Market, int>
 {
-    public void Configure(EntityTypeBuilder<Core.Market.Market> builder)
+    public override void Configure(EntityTypeBuilder<Core.Market.Market> builder)
     {
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        base.Configure(builder);
 
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
