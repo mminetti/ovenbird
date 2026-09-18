@@ -1,10 +1,10 @@
 ﻿namespace Core.Shared.Specifications;
 
-public class ConfigurationByTypeNameSpec : Specification<Configuration>
+public class ConfigurationByTypeSpec : Specification<Configuration>
 {
-    public ConfigurationByTypeNameSpec(string name) =>
+    public ConfigurationByTypeSpec(int typeId) =>
         Query
-            .Where(configuration => configuration.ConfigurationType.Name == name)
+            .Where(configuration => configuration.ConfigurationTypeId == typeId)
             .Include(configuration => configuration.Company)
             .Include(configuration => configuration.ConfigurationType)
             .Include(configuration => configuration.Connectors)

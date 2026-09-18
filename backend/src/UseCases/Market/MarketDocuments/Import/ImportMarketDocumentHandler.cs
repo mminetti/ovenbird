@@ -20,7 +20,7 @@ public class ImportMarketDocumentHandler(
     {
         var documentIds = new List<long>();
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeNameSpec(Core.Common.Constants.ConfigurationTypes.EdiImport), ct);
+            new ConfigurationByTypeSpec(Core.Common.Constants.ConfigurationTypes.EdiImport), ct);
 
         foreach (var configuration in configurations)
         {

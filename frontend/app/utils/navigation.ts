@@ -7,30 +7,42 @@ export interface NavEntry {
 	permission?: string
 }
 
-export interface NavSection {
+export interface NavGroup {
 	label: string
 	icon: string
 	items: NavEntry[]
 }
 
+export interface NavSection {
+	label: string
+	icon: string
+	groups: NavGroup[]
+}
+
 // Each `permission` string mirrors a backend Constants.Permissions entry
 // (see backend/src/UseCases/Common/Constants.Permissions.cs). Add one entry
-// per section as its page ships — no other wiring needed.
+// per group as its page ships — no other wiring needed.
 export const NAV_SECTIONS: NavSection[] = [
 	{
-		label: 'Security',
-		icon: 'i-lucide-shield',
-		items: [
-			{ label: 'Users', icon: 'i-lucide-user-cog', to: '/security/users', permission: 'users.read' },
-			{ label: 'Roles', icon: 'i-lucide-shield-check', to: '/security/roles', permission: 'roles.read' },
-			{ label: 'Permissions', icon: 'i-lucide-key', to: '/security/permissions', permission: 'permissions.read' }
-		]
-	},
-	{
-		label: 'Integrations',
-		icon: 'i-lucide-plug',
-		items: [
-			{ label: 'Connectors', icon: 'i-lucide-plug', to: '/connectors', permission: 'connectors.read' }
+		label: 'Settings',
+		icon: 'i-lucide-settings',
+		groups: [
+			{
+				label: 'Configurations',
+				icon: 'i-lucide-settings-2',
+				items: [
+					{ label: 'Connectors', icon: 'i-lucide-plug', to: '/settings/configurations/connectors', permission: 'connectors.read' }
+				]
+			},
+			{
+				label: 'Security',
+				icon: 'i-lucide-shield',
+				items: [
+					{ label: 'Users', icon: 'i-lucide-user-cog', to: '/settings/security/users', permission: 'users.read' },
+					{ label: 'Roles', icon: 'i-lucide-shield-check', to: '/settings/security/roles', permission: 'roles.read' },
+					{ label: 'Permissions', icon: 'i-lucide-key', to: '/settings/security/permissions', permission: 'permissions.read' }
+				]
+			}
 		]
 	}
 ]
@@ -41,9 +53,30 @@ export function buildSecuredNavItems(
 ): NavigationMenuItem[] {
 	return NAV_SECTIONS
 		.map((section) => {
-			const items = section.items.filter(item => !item.permission || hasPermission(item.permission))
+			const groups = section.groups
+				.map((group) => {
+					const items = group.items.filter(item => !item.permission || hasPermission(item.permission))
 
-			if (items.length === 0) {
+					if (items.length === 0) {
+						return null
+					}
+
+					return {
+						label: group.label,
+						icon: group.icon,
+						defaultOpen: true,
+						type: 'trigger' as const,
+						children: items.map(item => ({
+							label: item.label,
+							icon: item.icon,
+							to: item.to,
+							onSelect
+						}))
+					}
+				})
+				.filter((group): group is NonNullable<typeof group> => group !== null)
+
+			if (groups.length === 0) {
 				return null
 			}
 
@@ -52,12 +85,7 @@ export function buildSecuredNavItems(
 				icon: section.icon,
 				defaultOpen: true,
 				type: 'trigger' as const,
-				children: items.map(item => ({
-					label: item.label,
-					icon: item.icon,
-					to: item.to,
-					onSelect
-				}))
+				children: groups
 			}
 		})
 		.filter((section): section is NonNullable<typeof section> => section !== null)

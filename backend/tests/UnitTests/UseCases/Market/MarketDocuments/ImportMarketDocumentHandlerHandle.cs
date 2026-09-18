@@ -60,7 +60,7 @@ public class ImportMarketDocumentHandlerHandle
         var configuration = CreateConfiguration(company);
 
         _configurationReadRepository
-            .ListAsync(Arg.Any<ConfigurationByTypeNameSpec>(), Arg.Any<CancellationToken>())
+            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
             .Returns([configuration]);
 
         var existingDocument = new MarketDocument { Id = 99, Name = "existingfile.csv", CompanyId = company.Id };
