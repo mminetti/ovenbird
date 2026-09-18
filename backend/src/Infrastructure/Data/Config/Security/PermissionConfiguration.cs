@@ -87,6 +87,18 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
                 Id = 12,
                 Name = Constants.Permissions.MarketsWrite,
                 Description = "Allows creating, updating, and deleting markets."
+            },
+            new Permission
+            {
+                Id = 13,
+                Name = Constants.Permissions.ConfigurationsRead,
+                Description = "Allows viewing configurations."
+            },
+            new Permission
+            {
+                Id = 14,
+                Name = Constants.Permissions.ConfigurationsWrite,
+                Description = "Allows creating, updating, and deleting configurations."
             }
         );
     }

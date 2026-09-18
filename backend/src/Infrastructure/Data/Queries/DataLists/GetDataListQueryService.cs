@@ -53,6 +53,18 @@ public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryServic
                 .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
                 .ToListAsync(ct),
 
+            DataListType.Companies => await db.Set<Company>()
+                .AsNoTracking()
+                .OrderBy(x => x.Name)
+                .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
+                .ToListAsync(ct),
+
+            DataListType.Connectors => await db.Set<Connector>()
+                .AsNoTracking()
+                .OrderBy(x => x.Name)
+                .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
+                .ToListAsync(ct),
+
             DataListType.Roles => await db.Set<Role>()
                 .AsNoTracking()
                 .OrderBy(x => x.Name)

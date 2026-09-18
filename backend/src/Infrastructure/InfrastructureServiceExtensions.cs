@@ -15,6 +15,7 @@ using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
 using UseCases.Common;
 using UseCases.Companies.List;
+using UseCases.Configurations.List;
 using UseCases.Connectors.List;
 using UseCases.DataLists.Get;
 using UseCases.Interfaces.Files;
@@ -73,12 +74,14 @@ public static class InfrastructureServiceExtensions
             .AddSingleton<IQueryPropertyMapper<Connector>, ConnectorQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Company>, CompanyQueryPropertyMapper>()
             .AddSingleton<IQueryPropertyMapper<Market>, MarketQueryPropertyMapper>()
+            .AddSingleton<IQueryPropertyMapper<Configuration>, ConfigurationQueryPropertyMapper>()
             .AddScoped<IListUsersQueryService, ListUsersQueryService>()
             .AddScoped<IListRolesQueryService, ListRolesQueryService>()
             .AddScoped<IListPermissionsQueryService, ListPermissionsQueryService>()
             .AddScoped<IListConnectorsQueryService, ListConnectorsQueryService>()
             .AddScoped<IListCompaniesQueryService, ListCompaniesQueryService>()
             .AddScoped<IListMarketsQueryService, ListMarketsQueryService>()
+            .AddScoped<IListConfigurationsQueryService, ListConfigurationsQueryService>()
             .AddScoped<IGetDataListQueryService, GetDataListQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()

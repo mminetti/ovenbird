@@ -103,3 +103,26 @@ export interface Market {
 	name: string
 	identifier: string
 }
+
+export interface ConfigurationField {
+	id?: number
+	name: string
+	value?: string | null
+}
+
+export interface ConfigurationConnector {
+	id: number
+	name: string
+}
+
+export interface Configuration {
+	id: number
+	name: string
+	description?: string | null
+	configurationTypeId: number
+	configurationTypeName: string
+	companyId?: number | null
+	companyName?: string | null
+	fields: ConfigurationField[]
+	connectors: ConfigurationConnector[]
+}

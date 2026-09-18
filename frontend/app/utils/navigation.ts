@@ -31,9 +31,10 @@ export const NAV_SECTIONS: NavSection[] = [
 				label: 'Configurations',
 				icon: 'i-lucide-settings-2',
 				items: [
-					{ label: 'Connectors', icon: 'i-lucide-plug', to: '/settings/configurations/connectors', permission: 'connectors.read' },
 					{ label: 'Companies', icon: 'i-lucide-building-2', to: '/settings/configurations/companies', permission: 'companies.read' },
-					{ label: 'Markets', icon: 'i-lucide-landmark', to: '/settings/configurations/markets', permission: 'markets.read' }
+					{ label: 'Markets', icon: 'i-lucide-landmark', to: '/settings/configurations/markets', permission: 'markets.read' },
+					{ label: 'Connectors', icon: 'i-lucide-plug', to: '/settings/configurations/connectors', permission: 'connectors.read' },
+					{ label: 'Configurations', icon: 'i-lucide-sliders-horizontal', to: '/settings/configurations/configurations', permission: 'configurations.read' }
 				]
 			},
 			{

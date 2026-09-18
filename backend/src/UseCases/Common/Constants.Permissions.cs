@@ -16,5 +16,7 @@ public static partial class Constants
         public const string CompaniesWrite = "companies.write";
         public const string MarketsRead = "markets.read";
         public const string MarketsWrite = "markets.write";
+        public const string ConfigurationsRead = "configurations.read";
+        public const string ConfigurationsWrite = "configurations.write";
     }
 }
