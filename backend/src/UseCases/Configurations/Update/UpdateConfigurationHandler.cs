@@ -5,7 +5,7 @@ namespace UseCases.Configurations.Update;
 
 public class UpdateConfigurationHandler(
     IRepository<Configuration> repository,
-    IReadRepository<Connector> connectorRepository)
+    IRepository<Connector> connectorRepository)
 {
     public async Task<Result> Handle(UpdateConfigurationCommand command, CancellationToken ct)
     {

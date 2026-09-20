@@ -5,7 +5,7 @@ namespace UseCases.Configurations.Create;
 
 public class CreateConfigurationHandler(
     IRepository<Configuration> repository,
-    IReadRepository<Connector> connectorRepository)
+    IRepository<Connector> connectorRepository)
 {
     public async Task<Result<int>> Handle(CreateConfigurationCommand command, CancellationToken ct)
     {
