@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
-			return await callBackend(event, '/configurations', {
+			return await callBackend(event, '/settings/configurations', {
 				method: 'POST',
 				body: {
 					name,
@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
-			return await callBackend(event, `/configurations/${configurationId}`, {
+			return await callBackend(event, `/settings/configurations/${configurationId}`, {
 				method: 'PUT',
 				body: {
 					id: configurationId,
@@ -80,7 +80,7 @@ export default defineEventHandler(async (event) => {
 			const query = getQuery(event)
 			const configurationId = Number(query.id)
 
-			return await callBackend(event, `/configurations/${configurationId}`, {
+			return await callBackend(event, `/settings/configurations/${configurationId}`, {
 				method: 'DELETE'
 			})
 		}
@@ -89,12 +89,12 @@ export default defineEventHandler(async (event) => {
 
 		if (query.id) {
 			const configurationId = Number(query.id)
-			return await callBackend<Configuration>(event, `/configurations/${configurationId}`)
+			return await callBackend<Configuration>(event, `/settings/configurations/${configurationId}`)
 		}
 
 		const params = getListQueryParams(query)
 
-		return await callBackend<ConfigurationsResponse>(event, `/configurations?${params.toString()}`)
+		return await callBackend<ConfigurationsResponse>(event, `/settings/configurations?${params.toString()}`)
 	} catch (error) {
 		return handleBackendError(error, event)
 	}

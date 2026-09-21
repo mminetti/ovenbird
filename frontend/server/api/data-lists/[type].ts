@@ -15,7 +15,7 @@ export default defineEventHandler(async (event) => {
 	const type = getRouterParam(event, 'type')
 
 	try {
-		return await callBackend<DataListResponse>(event, `/data-lists/${type}`)
+		return await callBackend<DataListResponse>(event, `/settings/data-lists/${type}`)
 	} catch (error) {
 		return handleBackendError(error, event)
 	}

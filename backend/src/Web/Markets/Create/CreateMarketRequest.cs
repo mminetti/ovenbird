@@ -4,7 +4,7 @@ namespace Web.Markets.Create;
 
 public class CreateMarketRequest
 {
-    public const string Route = "/markets";
+    public const string Route = "/settings/markets";
 
     public string Name { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;

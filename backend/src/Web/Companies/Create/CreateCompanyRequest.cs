@@ -4,7 +4,7 @@ namespace Web.Companies.Create;
 
 public class CreateCompanyRequest
 {
-    public const string Route = "/companies";
+    public const string Route = "/settings/companies";
 
     public string Name { get; set; } = string.Empty;
     public int MarketId { get; set; }

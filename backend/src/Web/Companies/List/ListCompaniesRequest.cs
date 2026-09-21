@@ -4,7 +4,7 @@ namespace Web.Companies.List;
 
 public sealed class ListCompaniesRequest : PagedRequest
 {
-    public const string Route = "/companies";
+    public const string Route = "/settings/companies";
 }
 
 public sealed class ListCompaniesValidator : PagedRequestValidator<ListCompaniesRequest>

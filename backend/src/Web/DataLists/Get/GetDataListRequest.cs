@@ -5,7 +5,7 @@ namespace Web.DataLists.Get;
 
 public sealed class GetDataListRequest
 {
-    public const string Route = "/data-lists/{Type}";
+    public const string Route = "/settings/data-lists/{Type}";
 
     public DataListType Type { get; set; }
 }

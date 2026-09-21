@@ -4,7 +4,7 @@ namespace Web.Markets.Update;
 
 public class UpdateMarketRequest
 {
-    public const string Route = "/markets/{MarketId:int}";
+    public const string Route = "/settings/markets/{MarketId:int}";
     public static string BuildRoute(int marketId) => Route.Replace("{MarketId:int}", marketId.ToString());
 
     public int MarketId { get; set; }

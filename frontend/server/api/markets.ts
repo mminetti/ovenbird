@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
 			const identifier = typeof body?.identifier === 'string' ? body.identifier.trim() : ''
 
-			return await callBackend(event, '/markets', {
+			return await callBackend(event, '/settings/markets', {
 				method: 'POST',
 				body: {
 					name,
@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
 			const identifier = typeof body?.identifier === 'string' ? body.identifier.trim() : undefined
 
-			return await callBackend(event, `/markets/${marketId}`, {
+			return await callBackend(event, `/settings/markets/${marketId}`, {
 				method: 'PUT',
 				body: {
 					id: marketId,
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
 			const query = getQuery(event)
 			const marketId = Number(query.id)
 
-			return await callBackend(event, `/markets/${marketId}`, {
+			return await callBackend(event, `/settings/markets/${marketId}`, {
 				method: 'DELETE'
 			})
 		}
@@ -55,12 +55,12 @@ export default defineEventHandler(async (event) => {
 
 		if (query.id) {
 			const marketId = Number(query.id)
-			return await callBackend<Market>(event, `/markets/${marketId}`)
+			return await callBackend<Market>(event, `/settings/markets/${marketId}`)
 		}
 
 		const params = getListQueryParams(query)
 
-		return await callBackend<MarketsResponse>(event, `/markets?${params.toString()}`)
+		return await callBackend<MarketsResponse>(event, `/settings/markets?${params.toString()}`)
 	} catch (error) {
 		return handleBackendError(error, event)
 	}

@@ -4,7 +4,7 @@ namespace Web.Companies.Update;
 
 public class UpdateCompanyRequest
 {
-    public const string Route = "/companies/{CompanyId:int}";
+    public const string Route = "/settings/companies/{CompanyId:int}";
     public static string BuildRoute(int companyId) => Route.Replace("{CompanyId:int}", companyId.ToString());
 
     public int CompanyId { get; set; }

@@ -4,7 +4,7 @@ namespace Web.Configurations.Create;
 
 public class CreateConfigurationRequest
 {
-    public const string Route = "/configurations";
+    public const string Route = "/settings/configurations";
 
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
