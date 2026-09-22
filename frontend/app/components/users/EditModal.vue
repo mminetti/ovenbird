@@ -67,6 +67,8 @@ async function loadUser() {
 		state.email = loadedUser.email
 		state.isActive = loadedUser.isActive
 		state.roleIds = loadedUser.roles?.map(role => role.id) || []
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

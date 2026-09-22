@@ -42,11 +42,13 @@ const query = computed(() => {
 	}
 })
 
-const { data, pending, refresh } = await useFetch<SecurityPermissionsResponse>('/api/security/permissions', {
+const { data, pending, refresh, error } = await useFetch<SecurityPermissionsResponse>('/api/security/permissions', {
 	query,
 	lazy: true,
 	server: false
 })
+
+useApiErrorToast(error)
 
 async function handleDeleted(id: number, name?: string | null) {
 	await refresh()

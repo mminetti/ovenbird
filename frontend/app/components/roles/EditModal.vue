@@ -59,6 +59,8 @@ async function loadRole() {
 		allPermissions.value = permissionsResponse.items
 		state.name = role.name
 		state.permissionIds = role.permissions?.map(permission => permission.id) || []
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

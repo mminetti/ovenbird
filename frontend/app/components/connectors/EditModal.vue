@@ -98,6 +98,8 @@ async function loadConnector() {
 			value: field.value ?? undefined,
 			isSecret: field.isSecret
 		}))
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

@@ -66,6 +66,8 @@ async function loadCompany() {
 		state.name = company.name
 		state.marketId = company.marketId
 		state.timeZoneId = company.timeZoneId
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

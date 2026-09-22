@@ -42,11 +42,13 @@ const query = computed(() => {
 	}
 })
 
-const { data, pending, refresh } = await useFetch<ConfigurationsResponse>('/api/configurations', {
+const { data, pending, refresh, error } = await useFetch<ConfigurationsResponse>('/api/configurations', {
 	query,
 	lazy: true,
 	server: false
 })
+
+useApiErrorToast(error)
 
 async function handleDeleted(id: number, name?: string | null) {
 	await refresh()

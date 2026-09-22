@@ -98,6 +98,8 @@ async function loadConfiguration() {
 			name: field.name,
 			value: field.value ?? undefined
 		}))
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

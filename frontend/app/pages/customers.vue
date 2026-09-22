@@ -21,9 +21,11 @@ const columnFilters = ref([{
 const columnVisibility = ref()
 const rowSelection = ref({ 1: true })
 
-const { data, status } = await useFetch<User[]>('/api/customers', {
+const { data, status, error } = await useFetch<User[]>('/api/customers', {
 	lazy: true
 })
+
+useApiErrorToast(error)
 
 function getRowItems(row: Row<User>) {
 	return [

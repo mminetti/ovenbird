@@ -47,6 +47,8 @@ async function loadLookups() {
 	try {
 		const marketsResponse = await $fetch<DataListResponse>('/api/data-lists/Markets')
 		markets.value = marketsResponse.items
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loadingLists.value = false
 	}

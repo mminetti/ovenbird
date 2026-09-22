@@ -51,6 +51,8 @@ async function loadPermission() {
 
 		state.name = permission.name
 		state.description = permission.description
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

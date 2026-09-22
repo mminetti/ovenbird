@@ -76,6 +76,8 @@ async function loadLookups() {
 
 		connectorTypes.value = typesResponse.items
 		connectorImplementations.value = implementationsResponse.items
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loadingLists.value = false
 	}

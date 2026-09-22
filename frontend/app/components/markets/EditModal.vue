@@ -49,6 +49,8 @@ async function loadMarket() {
 
 		state.name = market.name
 		state.identifier = market.identifier
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	} finally {
 		loading.value = false
 	}

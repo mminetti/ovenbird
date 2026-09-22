@@ -42,11 +42,13 @@ const query = computed(() => {
 	}
 })
 
-const { data, pending, refresh } = await useFetch<SecurityRolesResponse>('/api/security/roles', {
+const { data, pending, refresh, error } = await useFetch<SecurityRolesResponse>('/api/security/roles', {
 	query,
 	lazy: true,
 	server: false
 })
+
+useApiErrorToast(error)
 
 async function handleDeleted(id: number, name?: string | null) {
 	await refresh()
