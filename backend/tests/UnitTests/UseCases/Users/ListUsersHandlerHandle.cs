@@ -19,8 +19,8 @@ public class ListUsersHandlerHandle
     {
         var users = new List<UserDto>
         {
-            new(1, "Alice", "alice@example.com", true),
-            new(2, "Bob", "bob@example.com", false),
+            new(1, "Alice", "alice@example.com", true, DateTimeOffset.UtcNow, "seed"),
+            new(2, "Bob", "bob@example.com", false, DateTimeOffset.UtcNow, "seed"),
         };
         var pagedResult = new ItemPagedResult<UserDto>(users, 1, 10, 2, 1);
 
