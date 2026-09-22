@@ -14,7 +14,7 @@ const deleteModal = useTemplateRef('deleteModal')
 const editModal = useTemplateRef('editModal')
 const toast = useToast()
 
-type SortColumn = 'id' | 'name' | 'email' | 'isActive'
+type SortColumn = 'id' | 'name' | 'email' | 'externalIdentifier' | 'isActive'
 
 const page = ref(1)
 const pageSize = ref(10)
@@ -113,6 +113,11 @@ const columnConfig: TypedColumnConfig<SecurityUser, SortColumn>[] = [
 	{
 		key: 'email',
 		label: 'Email',
+		type: 'string'
+	},
+	{
+		key: 'externalIdentifier',
+		label: 'External Identifier',
 		type: 'string'
 	},
 	{

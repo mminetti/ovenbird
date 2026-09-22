@@ -34,6 +34,7 @@ const state = reactive<Partial<Schema>>({
 	roleIds: []
 })
 
+const externalIdentifier = ref('')
 const lastModifiedAtUtc = ref<string | null>(null)
 const lastModifiedBy = ref<string | null>(null)
 
@@ -59,6 +60,7 @@ function resetFormState() {
 	state.email = ''
 	state.isActive = true
 	state.roleIds = []
+	externalIdentifier.value = ''
 	lastModifiedAtUtc.value = null
 	lastModifiedBy.value = null
 }
@@ -83,6 +85,7 @@ async function loadUser() {
 		state.email = loadedUser.email
 		state.isActive = loadedUser.isActive
 		state.roleIds = loadedUser.roles?.map(role => role.id) || []
+		externalIdentifier.value = loadedUser.externalIdentifier
 		lastModifiedAtUtc.value = loadedUser.lastModifiedAtUtc
 		lastModifiedBy.value = loadedUser.lastModifiedBy
 	} catch (error) {
@@ -174,6 +177,14 @@ defineExpose({
 						:disabled="loading"
 					/>
 				</UFormField>
+				<UFormField label="External Identifier">
+					<UInput
+						:model-value="externalIdentifier"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
 				<UFormField label="Active" name="isActive">
 					<USwitch v-model="state.isActive" :disabled="loading" />
 				</UFormField>
@@ -192,10 +203,20 @@ defineExpose({
 				</UFormField>
 
 				<UFormField label="Updated By">
-					<UInput :model-value="lastModifiedBy ?? undefined" class="w-full" disabled />
+					<UInput
+						:model-value="lastModifiedBy ?? undefined"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
 				</UFormField>
 				<UFormField label="Updated At">
-					<UInput :model-value="formattedLastModifiedAtUtc" class="w-full" disabled />
+					<UInput
+						:model-value="formattedLastModifiedAtUtc"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
 				</UFormField>
 			</UForm>
 		</template>

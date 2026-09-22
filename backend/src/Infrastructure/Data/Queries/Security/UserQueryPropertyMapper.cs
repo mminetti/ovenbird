@@ -13,6 +13,7 @@ public class UserQueryPropertyMapper : IQueryPropertyMapper<User>
         ["id"] = nameof(User.Id),
         ["name"] = nameof(User.Name),
         ["email"] = nameof(User.Email),
+        ["externalidentifier"] = nameof(User.ExternalIdentifier),
         ["isactive"] = nameof(User.IsActive)
     };
 

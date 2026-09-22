@@ -68,6 +68,7 @@ export interface SecurityUser {
 	id: number
 	name: string
 	email: string
+	externalIdentifier: string
 	isActive: boolean
 	lastModifiedAtUtc: string
 	lastModifiedBy: string | null
