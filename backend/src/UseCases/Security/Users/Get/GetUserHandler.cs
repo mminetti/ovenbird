@@ -19,6 +19,6 @@ public class GetUserHandler(IReadRepository<User> repository)
             .Select(r => new RoleDto(r.Id, r.Name))
             .ToList();
 
-        return Result.Success(new UserDto(entity.Id, entity.Name, entity.Email, entity.IsActive) { Roles = roles });
+        return Result.Success(new UserDto(entity.Id, entity.Name, entity.Email, entity.IsActive, entity.LastModifiedAtUtc, entity.LastModifiedBy) { Roles = roles });
     }
 }

@@ -58,6 +58,6 @@ public sealed class GetUserByIdMapper : Mapper<GetUserRequest, UserRecord, UserD
             .Select(r => new RoleRecord(r.Id, r.Name))
             .ToList();
 
-        return new UserRecord(e.Id, e.Name, e.Email, e.IsActive) { Roles = roles };
+        return new UserRecord(e.Id, e.Name, e.Email, e.IsActive, e.LastModifiedAtUtc, e.LastModifiedBy) { Roles = roles };
     }
 }

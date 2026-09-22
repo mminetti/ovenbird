@@ -12,7 +12,7 @@ public class ListUsersQueryService(ReadDbContext db, IQueryPropertyMapper<User> 
     protected override IQueryable<User> GetQuery() => db.User;
 
     protected override Expression<Func<User, UserDto>> GetProjection() =>
-        u => new UserDto(u.Id, u.Name, u.Email, u.IsActive);
+        u => new UserDto(u.Id, u.Name, u.Email, u.IsActive, u.LastModifiedAtUtc, u.LastModifiedBy);
 
     protected override string GetDefaultOrderBy() => nameof(User.Id);
 }

@@ -69,6 +69,8 @@ export interface SecurityUser {
 	name: string
 	email: string
 	isActive: boolean
+	lastModifiedAtUtc: string
+	lastModifiedBy: string | null
 	roles?: SecurityRole[]
 }
 

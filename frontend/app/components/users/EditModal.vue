@@ -34,7 +34,21 @@ const state = reactive<Partial<Schema>>({
 	roleIds: []
 })
 
+const lastModifiedAtUtc = ref<string | null>(null)
+const lastModifiedBy = ref<string | null>(null)
+
 const slideoverTitle = computed(() => `Edit user ${state.name?.trim() || ''}`.trim())
+
+const formattedLastModifiedAtUtc = computed(() => {
+	if (!lastModifiedAtUtc.value) {
+		return ''
+	}
+
+	return new Intl.DateTimeFormat('en-US', {
+		dateStyle: 'medium',
+		timeStyle: 'short'
+	}).format(new Date(lastModifiedAtUtc.value))
+})
 
 const roleItems = computed(() =>
 	allRoles.value.map(role => ({ label: role.name, value: Number(role.id) }))
@@ -45,6 +59,8 @@ function resetFormState() {
 	state.email = ''
 	state.isActive = true
 	state.roleIds = []
+	lastModifiedAtUtc.value = null
+	lastModifiedBy.value = null
 }
 
 async function loadUser() {
@@ -67,6 +83,8 @@ async function loadUser() {
 		state.email = loadedUser.email
 		state.isActive = loadedUser.isActive
 		state.roleIds = loadedUser.roles?.map(role => role.id) || []
+		lastModifiedAtUtc.value = loadedUser.lastModifiedAtUtc
+		lastModifiedBy.value = loadedUser.lastModifiedBy
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -171,6 +189,13 @@ defineExpose({
 						class="w-full"
 						:disabled="loading"
 					/>
+				</UFormField>
+
+				<UFormField label="Updated By">
+					<UInput :model-value="lastModifiedBy ?? undefined" class="w-full" disabled />
+				</UFormField>
+				<UFormField label="Updated At">
+					<UInput :model-value="formattedLastModifiedAtUtc" class="w-full" disabled />
 				</UFormField>
 			</UForm>
 		</template>
