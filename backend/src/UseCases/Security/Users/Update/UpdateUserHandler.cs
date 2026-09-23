@@ -1,4 +1,4 @@
-using Core.Security;
+﻿using Core.Security;
 using Core.Security.Events;
 using Core.Security.Specifications;
 
@@ -6,7 +6,7 @@ namespace UseCases.Security.Users.Update;
 
 public class UpdateUserHandler(
     IRepository<User> repository,
-    IReadRepository<Role> roleRepository,
+    IRepository<Role> roleRepository,
     IMessageBus bus)
 {
     private const string Add = "add";

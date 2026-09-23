@@ -1,9 +1,9 @@
-using Core.Security;
+﻿using Core.Security;
 using Core.Security.Specifications;
 
 namespace UseCases.Security.Users.Create;
 
-public class CreateUserHandler(IRepository<User> repository, IReadRepository<Role> roleRepository)
+public class CreateUserHandler(IRepository<User> repository, IRepository<Role> roleRepository)
 {
     public async Task<Result<int>> Handle(CreateUserCommand command, CancellationToken ct)
     {
