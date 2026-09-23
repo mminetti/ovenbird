@@ -1,4 +1,4 @@
-using Core.Security;
+﻿using Core.Security;
 using Core.Security.Specifications;
 using NSubstitute;
 using UseCases.Security.Users.Update;
@@ -9,7 +9,7 @@ namespace UnitTests.UseCases.Users;
 public class UpdateUserHandlerHandle
 {
     private readonly IRepository<User> _repository = Substitute.For<IRepository<User>>();
-    private readonly IReadRepository<Role> _roleRepository = Substitute.For<IReadRepository<Role>>();
+    private readonly IRepository<Role> _roleRepository = Substitute.For<IRepository<Role>>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly UpdateUserHandler _handler;
 
