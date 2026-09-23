@@ -10,7 +10,6 @@ definePageMeta({
 
 const UButton = resolveComponent('UButton')
 const UDropdownMenu = resolveComponent('UDropdownMenu')
-const deleteModal = useTemplateRef('deleteModal')
 const editModal = useTemplateRef('editModal')
 const toast = useToast()
 
@@ -22,7 +21,6 @@ const sort = ref<{ column: SortColumn, direction: SortDirection }>({ column: 'id
 const search = ref('')
 const debouncedSearch = ref('')
 const selectedPermissionId = ref<number | null>(null)
-const selectedPermissionName = ref<string | null>(null)
 
 watch(pageSize, () => {
 	page.value = 1
@@ -49,31 +47,6 @@ const { data, pending, refresh, error } = await useFetch<SecurityPermissionsResp
 })
 
 useApiErrorToast(error)
-
-async function handleDeleted(id: number, name?: string | null) {
-	await refresh()
-
-	selectedPermissionId.value = null
-	selectedPermissionName.value = null
-
-	const displayName = name || `Permission #${id}`
-
-	toast.add({
-		title: 'Permission deleted',
-		description: `${displayName} has been deleted.`,
-		color: 'success'
-	})
-}
-
-async function handleCreated(name: string) {
-	await refresh()
-
-	toast.add({
-		title: 'Permission created',
-		description: `${name} has been added.`,
-		color: 'success'
-	})
-}
 
 async function handleUpdated(permission: SecurityPermission) {
 	await refresh()
@@ -140,16 +113,6 @@ const columnConfig: TypedColumnConfig<SecurityPermission, SortColumn>[] = [
 							onSelect() {
 								openPermissionDetails(permission)
 							}
-						},
-						{
-							label: 'Delete',
-							icon: 'i-lucide-trash',
-							color: 'error',
-							onSelect() {
-								selectedPermissionId.value = permission.id
-								selectedPermissionName.value = permission.name
-								deleteModal.value?.openModal()
-							}
 						}
 					]
 				]
@@ -178,10 +141,6 @@ useHead({
 				<template #leading>
 					<UDashboardSidebarCollapse />
 				</template>
-
-				<template #right>
-					<PermissionsAddModal @created="handleCreated" />
-				</template>
 			</UDashboardNavbar>
 		</template>
 
@@ -208,13 +167,6 @@ useHead({
 				@select="openPermissionDetails"
 			/>
 
-			<DeleteModal
-				:id="selectedPermissionId"
-				ref="deleteModal"
-				:name="selectedPermissionName"
-				endpoint="/api/security/permissions"
-				@deleted="handleDeleted"
-			/>
 			<PermissionsEditModal
 				ref="editModal"
 				:permission-id="selectedPermissionId"

@@ -188,10 +188,6 @@ useHead({
 				<template #leading>
 					<UDashboardSidebarCollapse />
 				</template>
-
-				<template #right>
-					<UsersAddModal @created="handleCreated" />
-				</template>
 			</UDashboardNavbar>
 		</template>
 
@@ -202,6 +198,7 @@ useHead({
 					placeholder="Search..."
 					@update:debounced-value="debouncedSearch = $event"
 				/>
+				<UsersAddModal @created="handleCreated" />
 			</div>
 
 			<PaginatedTable
