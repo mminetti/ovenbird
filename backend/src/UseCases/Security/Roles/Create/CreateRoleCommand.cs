@@ -1,3 +1,3 @@
 namespace UseCases.Security.Roles.Create;
 
-public record CreateRoleCommand(string Name);
+public record CreateRoleCommand(string Name, IReadOnlyList<int> PermissionIds);

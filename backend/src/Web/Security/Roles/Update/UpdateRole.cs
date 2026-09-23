@@ -19,7 +19,17 @@ public class UpdateRole(IMessageBus bus)
         {
             s.Summary = "Update a role";
             s.Description = "Updates an existing role with the provided details.";
-            s.ExampleRequest = new UpdateRoleRequest { RoleId = 1, Id = 1, Name = "Admin Updated" };
+            s.ExampleRequest = new UpdateRoleRequest
+            {
+                RoleId = 1,
+                Id = 1,
+                Name = "Admin Updated",
+                Permissions =
+                [
+                    new UpdateRolePermissionRequest { PermissionId = 2, Operation = "add" },
+                    new UpdateRolePermissionRequest { PermissionId = 3, Operation = "remove" }
+                ]
+            };
 
             s.Responses[204] = Endpoints.Response200OkUpdated;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -40,8 +50,12 @@ public class UpdateRole(IMessageBus bus)
     public override async Task<Results<NoContent, NotFound, ProblemHttpResult>>
         ExecuteAsync(UpdateRoleRequest request, CancellationToken ct)
     {
+        var permissions = request.Permissions
+            .Select(p => new RolePermissionOperationDto(p.PermissionId, p.Operation))
+            .ToList();
+
         var result = await bus.InvokeAsync<Result>(
-            new UpdateRoleCommand(request.RoleId, request.Name), ct);
+            new UpdateRoleCommand(request.RoleId, request.Name, permissions), ct);
 
         return result.ToDeleteUpdateResult();
     }

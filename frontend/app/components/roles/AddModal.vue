@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { DataListItem, DataListResponse } from '~~/server/api/data-lists/[type]'
 
 const emit = defineEmits<{
 	created: [name: string]
 }>()
 
 const schema = z.object({
-	name: z.string().min(1, 'Name is required').max(200, 'Name is too long')
+	name: z.string().min(1, 'Name is required').max(200, 'Name is too long'),
+	permissionIds: z.array(z.number())
 })
 
 type Schema = z.output<typeof schema>
@@ -15,22 +17,37 @@ type Schema = z.output<typeof schema>
 const open = ref(false)
 const submitting = ref(false)
 const form = ref<{ submit: () => void }>()
+const allPermissions = ref<DataListItem[]>([])
 const modalError = ref<ReturnType<typeof parseApiError> | null>(null)
 
 const state = reactive<Partial<Schema>>({
-	name: ''
+	name: '',
+	permissionIds: []
 })
 
 const slideoverTitle = computed(() => `New role ${state.name?.trim() || ''}`.trim())
 
+const permissionItems = computed(() =>
+	allPermissions.value.map(permission => ({ label: permission.name, value: Number(permission.id) }))
+)
+
 function resetForm() {
 	state.name = ''
+	state.permissionIds = []
 }
 
-watch(open, (isOpen) => {
+watch(open, async (isOpen) => {
 	if (!isOpen) {
 		resetForm()
 		modalError.value = null
+		return
+	}
+
+	try {
+		const permissionsResponse = await $fetch<DataListResponse>('/api/data-lists/Permissions')
+		allPermissions.value = permissionsResponse.items
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	}
 })
 
@@ -45,7 +62,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 		await $fetch('/api/security/roles', {
 			method: 'POST',
 			body: {
-				name: event.data.name
+				name: event.data.name,
+				permissionIds: event.data.permissionIds
 			}
 		})
 
@@ -78,6 +96,17 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 			>
 				<UFormField label="Name" placeholder="" name="name">
 					<UInput v-model="state.name" class="w-full" autofocus />
+				</UFormField>
+				<UFormField label="Permissions" name="permissionIds">
+					<USelectMenu
+						v-model="state.permissionIds"
+						:items="permissionItems"
+						value-key="value"
+						label-key="label"
+						multiple
+						placeholder="Select permissions"
+						class="w-full"
+					/>
 				</UFormField>
 			</UForm>
 		</template>

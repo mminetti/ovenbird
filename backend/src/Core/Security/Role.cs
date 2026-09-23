@@ -11,6 +11,34 @@ public class Role : AuditableEntityBase<int>
     public ICollection<User> Users { get; set; } = [];
     public ICollection<Permission> Permissions { get; set; } = [];
 
+    public Role AddPermission(Permission permission)
+    {
+        if (Permissions.Any(p => p.Id == permission.Id))
+        {
+            return this;
+        }
+
+        Permissions.Add(permission);
+        RegisterDomainEvent(new RolePermissionsUpdatedEvent(this));
+
+        return this;
+    }
+
+    public Role RemovePermission(int permissionId)
+    {
+        var permission = Permissions.FirstOrDefault(p => p.Id == permissionId);
+
+        if (permission is null)
+        {
+            return this;
+        }
+
+        Permissions.Remove(permission);
+        RegisterDomainEvent(new RolePermissionsUpdatedEvent(this));
+
+        return this;
+    }
+
     public Role SetPermissions(IEnumerable<Permission> permissions)
     {
         var permissionsList = permissions.ToList();

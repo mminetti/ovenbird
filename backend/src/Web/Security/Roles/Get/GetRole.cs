@@ -58,6 +58,6 @@ public sealed class GetRoleByIdMapper : Mapper<GetRoleRequest, RoleRecord, RoleD
             .Select(p => new PermissionRecord(p.Id, p.Name, p.Description))
             .ToList();
 
-        return new RoleRecord(e.Id, e.Name) { Permissions = permissions };
+        return new RoleRecord(e.Id, e.Name, e.LastModifiedAtUtc, e.LastModifiedBy) { Permissions = permissions };
     }
 }

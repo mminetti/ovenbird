@@ -61,6 +61,8 @@ export interface SecurityPermission {
 export interface SecurityRole {
 	id: number
 	name: string
+	lastModifiedAtUtc: string
+	lastModifiedBy: string | null
 	permissions?: SecurityPermission[]
 }
 

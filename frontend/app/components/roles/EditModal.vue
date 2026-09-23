@@ -30,7 +30,22 @@ const state = reactive<Partial<Schema>>({
 	permissionIds: []
 })
 
+const originalPermissionIds = ref<number[]>([])
+const lastModifiedAtUtc = ref<string | null>(null)
+const lastModifiedBy = ref<string | null>(null)
+
 const slideoverTitle = computed(() => `Edit role ${state.name?.trim() || ''}`.trim())
+
+const formattedLastModifiedAtUtc = computed(() => {
+	if (!lastModifiedAtUtc.value) {
+		return ''
+	}
+
+	return new Intl.DateTimeFormat('en-US', {
+		dateStyle: 'medium',
+		timeStyle: 'short'
+	}).format(new Date(lastModifiedAtUtc.value))
+})
 
 const permissionItems = computed(() =>
 	allPermissions.value.map(permission => ({ label: permission.name, value: Number(permission.id) }))
@@ -39,6 +54,9 @@ const permissionItems = computed(() =>
 function resetFormState() {
 	state.name = ''
 	state.permissionIds = []
+	originalPermissionIds.value = []
+	lastModifiedAtUtc.value = null
+	lastModifiedBy.value = null
 }
 
 async function loadRole() {
@@ -59,6 +77,9 @@ async function loadRole() {
 		allPermissions.value = permissionsResponse.items
 		state.name = role.name
 		state.permissionIds = role.permissions?.map(permission => permission.id) || []
+		originalPermissionIds.value = [...state.permissionIds]
+		lastModifiedAtUtc.value = role.lastModifiedAtUtc
+		lastModifiedBy.value = role.lastModifiedBy
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -84,19 +105,19 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 	loading.value = true
 
 	try {
+		const addedPermissions = event.data.permissionIds
+			.filter(id => !originalPermissionIds.value.includes(id))
+			.map(permissionId => ({ permissionId, operation: 'add' as const }))
+		const removedPermissions = originalPermissionIds.value
+			.filter(id => !event.data.permissionIds.includes(id))
+			.map(permissionId => ({ permissionId, operation: 'remove' as const }))
+
 		await $fetch('/api/security/roles', {
 			method: 'PATCH',
 			query: { id: props.roleId },
 			body: {
-				name: event.data.name
-			}
-		})
-
-		await $fetch('/api/security/roles/permissions', {
-			method: 'POST',
-			query: { id: props.roleId },
-			body: {
-				permissionIds: event.data.permissionIds
+				name: event.data.name,
+				permissions: [...addedPermissions, ...removedPermissions]
 			}
 		})
 
@@ -149,6 +170,23 @@ defineExpose({
 						placeholder="Select permissions"
 						class="w-full"
 						:disabled="loading"
+					/>
+				</UFormField>
+
+				<UFormField label="Updated By">
+					<UInput
+						:model-value="lastModifiedBy ?? undefined"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
+				<UFormField label="Updated At">
+					<UInput
+						:model-value="formattedLastModifiedAtUtc"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
 					/>
 				</UFormField>
 			</UForm>

@@ -1,4 +1,4 @@
-using Core.Security;
+﻿using Core.Security;
 using Core.Security.Specifications;
 using UseCases.Security.Permissions;
 
@@ -19,6 +19,6 @@ public class GetRoleHandler(IReadRepository<Role> repository)
             .Select(p => new PermissionDto(p.Id, p.Name, p.Description))
             .ToList();
 
-        return Result.Success(new RoleDto(entity.Id, entity.Name) { Permissions = permissions });
+        return Result.Success(new RoleDto(entity.Id, entity.Name, entity.LastModifiedAtUtc, entity.LastModifiedBy) { Permissions = permissions });
     }
 }

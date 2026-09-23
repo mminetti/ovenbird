@@ -55,7 +55,7 @@ public sealed class GetUserByIdMapper : Mapper<GetUserRequest, UserRecord, UserD
     public override UserRecord FromEntity(UserDto e)
     {
         var roles = e.Roles
-            .Select(r => new RoleRecord(r.Id, r.Name))
+            .Select(r => new RoleRecord(r.Id, r.Name, r.LastModifiedAtUtc, r.LastModifiedBy))
             .ToList();
 
         return new UserRecord(e.Id, e.Name, e.Email, e.ExternalIdentifier, e.IsActive, e.LastModifiedAtUtc, e.LastModifiedBy) { Roles = roles };

@@ -7,29 +7,42 @@ export interface SecurityRolesResponse {
 	totalCount: number
 }
 
+interface RolePermissionOperation {
+	permissionId: number
+	operation: 'add' | 'remove'
+}
+
 export default defineEventHandler(async (event) => {
 	const method = event.method
 
 	try {
 		if (method === 'POST') {
-			const body = await readBody<{ name?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, permissionIds?: unknown }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
+			const permissionIds = Array.isArray(body?.permissionIds)
+				? body.permissionIds.filter((id): id is number => typeof id === 'number')
+				: []
 
 			return await callBackend(event, '/security/roles', {
 				method: 'POST',
-				body: { name }
+				body: { name, permissionIds }
 			})
 		}
 
 		if (method === 'PATCH') {
 			const query = getQuery(event)
 			const roleId = Number(query.id)
-			const body = await readBody<{ name?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, permissions?: RolePermissionOperation[] }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
+			const permissions = Array.isArray(body?.permissions)
+				? body.permissions
+						.filter(p => typeof p?.permissionId === 'number' && (p.operation === 'add' || p.operation === 'remove'))
+						.map(p => ({ permissionId: p.permissionId, operation: p.operation }))
+				: []
 
 			return await callBackend(event, `/security/roles/${roleId}`, {
 				method: 'PUT',
-				body: { id: roleId, name }
+				body: { id: roleId, name, permissions }
 			})
 		}
 

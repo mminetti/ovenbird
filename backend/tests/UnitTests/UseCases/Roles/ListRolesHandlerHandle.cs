@@ -19,8 +19,8 @@ public class ListRolesHandlerHandle
     {
         var roles = new List<RoleDto>
         {
-            new(1, "Admin"),
-            new(2, "Editor"),
+            new(1, "Admin", DateTimeOffset.UtcNow, "tester"),
+            new(2, "Editor", DateTimeOffset.UtcNow, "tester"),
         };
         var pagedResult = new ItemPagedResult<RoleDto>(roles, 1, 10, 2, 1);
 

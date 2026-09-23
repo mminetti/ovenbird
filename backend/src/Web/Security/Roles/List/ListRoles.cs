@@ -63,7 +63,7 @@ public sealed class ListRolesMapper
     public override ListRolesResponse FromEntity(ItemPagedResult<RoleDto> e)
     {
         var items = e.Items
-            .Select(r => new RoleRecord(r.Id, r.Name))
+            .Select(r => new RoleRecord(r.Id, r.Name, r.LastModifiedAtUtc, r.LastModifiedBy))
             .ToList();
 
         return new ListRolesResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

@@ -12,7 +12,7 @@ public class ListRolesQueryService(ReadDbContext db, IQueryPropertyMapper<Role> 
     protected override IQueryable<Role> GetQuery() => db.Role;
 
     protected override Expression<Func<Role, RoleDto>> GetProjection() =>
-        r => new RoleDto(r.Id, r.Name);
+        r => new RoleDto(r.Id, r.Name, r.LastModifiedAtUtc, r.LastModifiedBy);
 
     protected override string GetDefaultOrderBy() => nameof(Role.Id);
 }

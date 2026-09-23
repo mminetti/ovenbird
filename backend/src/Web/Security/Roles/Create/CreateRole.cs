@@ -21,7 +21,7 @@ public class CreateRole(IMessageBus bus)
         {
             s.Summary = "Create a role";
             s.Description = "Creates a new role with the provided details.";
-            s.ExampleRequest = new CreateRoleRequest { Name = "Admin" };
+            s.ExampleRequest = new CreateRoleRequest { Name = "Admin", PermissionIds = [1, 2] };
 
             s.Responses[201] = Endpoints.Response201Created;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -41,7 +41,7 @@ public class CreateRole(IMessageBus bus)
         ExecuteAsync(CreateRoleRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result<int>>(
-            new CreateRoleCommand(request.Name), ct);
+            new CreateRoleCommand(request.Name, request.PermissionIds), ct);
 
         return result.ToCreatedResult(
             id => GetRoleRequest.BuildRoute(id),
