@@ -9,6 +9,7 @@ public class CreateUserRequest
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string ExternalIdentifier { get; set; } = string.Empty;
+    public IReadOnlyList<int> RoleIds { get; set; } = [];
 }
 
 public class CreateUserValidator : Validator<CreateUserRequest>
@@ -27,5 +28,8 @@ public class CreateUserValidator : Validator<CreateUserRequest>
         RuleFor(x => x.ExternalIdentifier)
             .NotEmpty().WithMessage("ExternalIdentifier is required.")
             .MaximumLength(200);
+
+        RuleForEach(x => x.RoleIds)
+            .GreaterThan(0).WithMessage("Each role ID must be greater than 0.");
     }
 }

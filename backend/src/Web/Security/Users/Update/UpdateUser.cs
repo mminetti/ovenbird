@@ -19,7 +19,19 @@ public class UpdateUser(IMessageBus bus)
         {
             s.Summary = "Update a user";
             s.Description = "Updates an existing user with the provided details.";
-            s.ExampleRequest = new UpdateUserRequest { UserId = 1, Id = 1, Name = "Alice Updated", Email = "alice@example.com", IsActive = true };
+            s.ExampleRequest = new UpdateUserRequest
+            {
+                UserId = 1,
+                Id = 1,
+                Name = "Alice Updated",
+                Email = "alice@example.com",
+                IsActive = true,
+                Roles =
+                [
+                    new UpdateUserRoleRequest { RoleId = 2, Operation = "add" },
+                    new UpdateUserRoleRequest { RoleId = 3, Operation = "remove" }
+                ]
+            };
 
             s.Responses[204] = Endpoints.Response200OkUpdated;
             s.Responses[400] = Endpoints.Response400BadRequest;
@@ -40,8 +52,12 @@ public class UpdateUser(IMessageBus bus)
     public override async Task<Results<NoContent, NotFound, ProblemHttpResult>>
         ExecuteAsync(UpdateUserRequest request, CancellationToken ct)
     {
+        var roles = request.Roles
+            .Select(r => new UserRoleOperationDto(r.RoleId, r.Operation))
+            .ToList();
+
         var result = await bus.InvokeAsync<Result>(
-            new UpdateUserCommand(request.UserId, request.Name, request.Email, request.IsActive), ct);
+            new UpdateUserCommand(request.UserId, request.Name, request.Email, request.IsActive, roles), ct);
 
         return result.ToDeleteUpdateResult();
     }

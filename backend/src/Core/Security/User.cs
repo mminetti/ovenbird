@@ -20,30 +20,29 @@ public class User : AuditableEntityBase<int>
         return this;
     }
 
-    public User SetRoles(IEnumerable<Role> roles)
+    public User AddRole(Role role)
     {
-        var roleList = roles.ToList();
-
-        if (roleList.Count > 0)
+        if (Roles.Any(r => r.Id == role.Id))
         {
-            var currentIds = Roles.Select(r => r.Id).ToHashSet();
-            var newIds = roleList.Select(r => r.Id).ToHashSet();
-
-            foreach (var role in roleList.Where(r => !currentIds.Contains(r.Id)))
-            {
-                Roles.Add(role);
-            }
-
-            foreach (var role in Roles.Where(r => !newIds.Contains(r.Id)).ToList())
-            {
-                Roles.Remove(role);
-            }
-        }
-        else
-        {
-            Roles.Clear();
+            return this;
         }
 
+        Roles.Add(role);
+        RegisterDomainEvent(new UserRolesUpdatedEvent(this));
+
+        return this;
+    }
+
+    public User RemoveRole(int roleId)
+    {
+        var role = Roles.FirstOrDefault(r => r.Id == roleId);
+
+        if (role is null)
+        {
+            return this;
+        }
+
+        Roles.Remove(role);
         RegisterDomainEvent(new UserRolesUpdatedEvent(this));
 
         return this;

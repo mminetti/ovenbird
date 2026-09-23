@@ -7,33 +7,46 @@ export interface SecurityUsersResponse {
 	totalCount: number
 }
 
+interface UserRoleOperation {
+	roleId: number
+	operation: 'add' | 'remove'
+}
+
 export default defineEventHandler(async (event) => {
 	const method = event.method
 
 	try {
 		if (method === 'POST') {
-			const body = await readBody<{ name?: unknown, email?: unknown, externalIdentifier?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, email?: unknown, externalIdentifier?: unknown, roleIds?: unknown }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
 			const email = typeof body?.email === 'string' ? body.email.trim() : ''
 			const externalIdentifier = typeof body?.externalIdentifier === 'string' ? body.externalIdentifier.trim() : ''
+			const roleIds = Array.isArray(body?.roleIds)
+				? body.roleIds.filter((id): id is number => typeof id === 'number')
+				: []
 
 			return await callBackend(event, '/security/users', {
 				method: 'POST',
-				body: { name, email, externalIdentifier }
+				body: { name, email, externalIdentifier, roleIds }
 			})
 		}
 
 		if (method === 'PATCH') {
 			const query = getQuery(event)
 			const userId = Number(query.id)
-			const body = await readBody<{ name?: unknown, email?: unknown, isActive?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, email?: unknown, isActive?: unknown, roles?: UserRoleOperation[] }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
 			const email = typeof body?.email === 'string' ? body.email.trim() : undefined
 			const isActive = typeof body?.isActive === 'boolean' ? body.isActive : undefined
+			const roles = Array.isArray(body?.roles)
+				? body.roles
+						.filter(r => typeof r?.roleId === 'number' && (r.operation === 'add' || r.operation === 'remove'))
+						.map(r => ({ roleId: r.roleId, operation: r.operation }))
+				: []
 
 			return await callBackend(event, `/security/users/${userId}`, {
 				method: 'PUT',
-				body: { id: userId, name, email, isActive }
+				body: { id: userId, name, email, isActive, roles }
 			})
 		}
 

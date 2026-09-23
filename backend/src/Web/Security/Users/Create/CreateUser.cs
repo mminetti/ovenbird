@@ -25,7 +25,8 @@ public class CreateUser(IMessageBus bus)
             {
                 Name = "Alice",
                 Email = "alice@example.com",
-                ExternalIdentifier = "ext-alice"
+                ExternalIdentifier = "ext-alice",
+                RoleIds = [1, 2]
             };
 
             s.Responses[201] = Endpoints.Response201Created;
@@ -46,7 +47,7 @@ public class CreateUser(IMessageBus bus)
         ExecuteAsync(CreateUserRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result<int>>(
-            new CreateUserCommand(request.Name, request.Email, request.ExternalIdentifier), ct);
+            new CreateUserCommand(request.Name, request.Email, request.ExternalIdentifier, request.RoleIds), ct);
 
         return result.ToCreatedResult(
             id => GetUserRequest.BuildRoute(id),

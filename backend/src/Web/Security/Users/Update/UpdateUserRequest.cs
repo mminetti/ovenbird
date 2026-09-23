@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 
 namespace Web.Security.Users.Update;
 
@@ -12,6 +12,13 @@ public class UpdateUserRequest
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public bool IsActive { get; set; }
+    public IList<UpdateUserRoleRequest> Roles { get; set; } = [];
+}
+
+public record UpdateUserRoleRequest
+{
+    public int RoleId { get; set; }
+    public string Operation { get; set; } = string.Empty;
 }
 
 public class UpdateUserValidator : Validator<UpdateUserRequest>
@@ -30,5 +37,16 @@ public class UpdateUserValidator : Validator<UpdateUserRequest>
         RuleFor(x => x.UserId)
           .Must((args, userId) => args.Id == userId)
           .WithMessage("Route and body Ids must match; cannot update Id of an existing resource.");
+
+        RuleForEach(x => x.Roles).ChildRules(role =>
+        {
+            role.RuleFor(r => r.RoleId)
+                .GreaterThan(0).WithMessage("Each role ID must be greater than 0.");
+
+            role.RuleFor(r => r.Operation)
+                .Must(op => op.Equals("add", StringComparison.OrdinalIgnoreCase)
+                            || op.Equals("remove", StringComparison.OrdinalIgnoreCase))
+                .WithMessage("Operation must be 'add' or 'remove'.");
+        });
     }
 }

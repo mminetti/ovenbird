@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
+import type { DataListItem, DataListResponse } from '~~/server/api/data-lists/[type]'
 
 const emit = defineEmits<{
 	created: [name: string]
@@ -9,7 +10,8 @@ const emit = defineEmits<{
 const schema = z.object({
 	name: z.string().min(1, 'Name is required').max(200, 'Name is too long'),
 	email: z.string().min(1, 'Email is required').email('A valid email address is required').max(200, 'Email is too long'),
-	externalIdentifier: z.string().min(1, 'External identifier is required').max(200, 'External identifier is too long')
+	externalIdentifier: z.string().min(1, 'External identifier is required').max(200, 'External identifier is too long'),
+	roleIds: z.array(z.number())
 })
 
 type Schema = z.output<typeof schema>
@@ -17,26 +19,41 @@ type Schema = z.output<typeof schema>
 const open = ref(false)
 const submitting = ref(false)
 const form = ref<{ submit: () => void }>()
+const allRoles = ref<DataListItem[]>([])
 const modalError = ref<ReturnType<typeof parseApiError> | null>(null)
 
 const state = reactive<Partial<Schema>>({
 	name: '',
 	email: '',
-	externalIdentifier: ''
+	externalIdentifier: '',
+	roleIds: []
 })
 
 const slideoverTitle = computed(() => `New user ${state.name?.trim() || ''}`.trim())
+
+const roleItems = computed(() =>
+	allRoles.value.map(role => ({ label: role.name, value: Number(role.id) }))
+)
 
 function resetForm() {
 	state.name = ''
 	state.email = ''
 	state.externalIdentifier = ''
+	state.roleIds = []
 }
 
-watch(open, (isOpen) => {
+watch(open, async (isOpen) => {
 	if (!isOpen) {
 		resetForm()
 		modalError.value = null
+		return
+	}
+
+	try {
+		const rolesResponse = await $fetch<DataListResponse>('/api/data-lists/Roles')
+		allRoles.value = rolesResponse.items
+	} catch (error) {
+		modalError.value = parseApiError(error)
 	}
 })
 
@@ -53,7 +70,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 			body: {
 				name: event.data.name,
 				email: event.data.email,
-				externalIdentifier: event.data.externalIdentifier
+				externalIdentifier: event.data.externalIdentifier,
+				roleIds: event.data.roleIds
 			}
 		})
 
@@ -92,6 +110,17 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 				</UFormField>
 				<UFormField label="External Identifier" placeholder="" name="externalIdentifier">
 					<UInput v-model="state.externalIdentifier" class="w-full" />
+				</UFormField>
+				<UFormField label="Roles" name="roleIds">
+					<USelectMenu
+						v-model="state.roleIds"
+						:items="roleItems"
+						value-key="value"
+						label-key="label"
+						multiple
+						placeholder="Select roles"
+						class="w-full"
+					/>
 				</UFormField>
 			</UForm>
 		</template>

@@ -34,6 +34,7 @@ const state = reactive<Partial<Schema>>({
 	roleIds: []
 })
 
+const originalRoleIds = ref<number[]>([])
 const externalIdentifier = ref('')
 const lastModifiedAtUtc = ref<string | null>(null)
 const lastModifiedBy = ref<string | null>(null)
@@ -60,6 +61,7 @@ function resetFormState() {
 	state.email = ''
 	state.isActive = true
 	state.roleIds = []
+	originalRoleIds.value = []
 	externalIdentifier.value = ''
 	lastModifiedAtUtc.value = null
 	lastModifiedBy.value = null
@@ -85,6 +87,7 @@ async function loadUser() {
 		state.email = loadedUser.email
 		state.isActive = loadedUser.isActive
 		state.roleIds = loadedUser.roles?.map(role => role.id) || []
+		originalRoleIds.value = [...state.roleIds]
 		externalIdentifier.value = loadedUser.externalIdentifier
 		lastModifiedAtUtc.value = loadedUser.lastModifiedAtUtc
 		lastModifiedBy.value = loadedUser.lastModifiedBy
@@ -113,21 +116,21 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 	loading.value = true
 
 	try {
+		const addedRoles = event.data.roleIds
+			.filter(id => !originalRoleIds.value.includes(id))
+			.map(roleId => ({ roleId, operation: 'add' as const }))
+		const removedRoles = originalRoleIds.value
+			.filter(id => !event.data.roleIds.includes(id))
+			.map(roleId => ({ roleId, operation: 'remove' as const }))
+
 		await $fetch('/api/security/users', {
 			method: 'PATCH',
 			query: { id: props.userId },
 			body: {
 				name: event.data.name,
 				email: event.data.email,
-				isActive: event.data.isActive
-			}
-		})
-
-		await $fetch('/api/security/users/roles', {
-			method: 'POST',
-			query: { id: props.userId },
-			body: {
-				roleIds: event.data.roleIds
+				isActive: event.data.isActive,
+				roles: [...addedRoles, ...removedRoles]
 			}
 		})
 

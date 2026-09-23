@@ -1,8 +1,9 @@
 using Core.Security;
+using Core.Security.Specifications;
 
 namespace UseCases.Security.Users.Create;
 
-public class CreateUserHandler(IRepository<User> repository)
+public class CreateUserHandler(IRepository<User> repository, IReadRepository<Role> roleRepository)
 {
     public async Task<Result<int>> Handle(CreateUserCommand command, CancellationToken ct)
     {
@@ -13,6 +14,16 @@ public class CreateUserHandler(IRepository<User> repository)
             ExternalIdentifier = command.ExternalIdentifier,
             IsActive = true
         };
+
+        if (command.RoleIds.Count > 0)
+        {
+            var roles = await roleRepository.ListAsync(new RolesByIdsSpec(command.RoleIds), ct);
+
+            foreach (var role in roles)
+            {
+                user.Roles.Add(role);
+            }
+        }
 
         var created = await repository.AddAsync(user, ct);
 
