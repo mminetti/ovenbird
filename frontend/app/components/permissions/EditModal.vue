@@ -117,7 +117,12 @@ defineExpose({
 				@submit="onSubmit"
 			>
 				<UFormField label="Name" name="name">
-					<UInput v-model="state.name" class="w-full" :ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }" disabled />
+					<UInput
+						v-model="state.name"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
 				</UFormField>
 				<UFormField label="Description" name="description">
 					<UTextarea v-model="state.description" class="w-full" :disabled="loading" />
