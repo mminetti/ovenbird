@@ -12,12 +12,14 @@ public class PermissionQueryPropertyMapper : IQueryPropertyMapper<Permission>
     {
         ["id"] = nameof(Permission.Id),
         ["name"] = nameof(Permission.Name),
+        ["moduleName"] = $"{nameof(Permission.Module)}.{nameof(PermissionModule.Name)}",
         ["description"] = nameof(Permission.Description)
     };
 
     private static readonly string[] _searchableProperties =
     [
         nameof(Permission.Name),
+        $"{nameof(Permission.Module)}.{nameof(PermissionModule.Name)}",
         nameof(Permission.Description)
     ];
 

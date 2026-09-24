@@ -20,10 +20,14 @@ public class ListPermissionsQueryServiceListAsync : IDisposable
 
         _db = new ReadDbContext(options);
 
+        _db.Set<PermissionModule>().AddRange(
+            new PermissionModule { Id = 1, Name = "Users" },
+            new PermissionModule { Id = 2, Name = "Roles" });
+
         _db.Permission.AddRange(
-            new Permission { Id = 1, Name = "users.read", Description = "Can read users" },
-            new Permission { Id = 2, Name = "users.write", Description = "Can write users" },
-            new Permission { Id = 3, Name = "roles.read", Description = "Can read roles" });
+            new Permission { Id = 1, Name = "users.read", ModuleId = 1, Description = "Can read users" },
+            new Permission { Id = 2, Name = "users.write", ModuleId = 1, Description = "Can write users" },
+            new Permission { Id = 3, Name = "roles.read", ModuleId = 2, Description = "Can read roles" });
 
         _db.SaveChanges();
 

@@ -10,6 +10,7 @@ public class UpdatePermissionRequest
     public int PermissionId { get; set; }
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
+    public int ModuleId { get; set; }
     public string Description { get; set; } = string.Empty;
 }
 
@@ -20,6 +21,9 @@ public class UpdatePermissionValidator : Validator<UpdatePermissionRequest>
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Name is required.")
             .MaximumLength(200);
+
+        RuleFor(x => x.ModuleId)
+            .GreaterThan(0).WithMessage("Module is required.");
 
         RuleFor(x => x.Description)
             .MaximumLength(500);

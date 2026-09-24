@@ -33,9 +33,11 @@ public class GetDataListQueryServiceGetListAsync : IDisposable
             new Role { Id = 1, Name = "Admin" },
             new Role { Id = 2, Name = "Editor" });
 
+        _db.Set<PermissionModule>().Add(new PermissionModule { Id = 1, Name = "Users" });
+
         _db.Permission.AddRange(
-            new Permission { Id = 1, Name = "users.write", Description = "Can write users" },
-            new Permission { Id = 2, Name = "users.read", Description = "Can read users" });
+            new Permission { Id = 1, Name = "users.write", ModuleId = 1, Description = "Can write users" },
+            new Permission { Id = 2, Name = "users.read", ModuleId = 1, Description = "Can read users" });
 
         _db.SaveChanges();
 

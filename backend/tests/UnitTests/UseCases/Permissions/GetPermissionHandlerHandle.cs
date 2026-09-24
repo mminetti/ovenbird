@@ -19,7 +19,14 @@ public class GetPermissionHandlerHandle
     [Fact]
     public async Task ReturnsPermissionDtoWhenExists()
     {
-        var permission = new Permission { Id = 1, Name = "users.read", Description = "Can read users" };
+        var permission = new Permission
+        {
+            Id = 1,
+            Name = "users.read",
+            ModuleId = 1,
+            Module = new PermissionModule { Id = 1, Name = "Users" },
+            Description = "Can read users"
+        };
 
         _repository.FirstOrDefaultAsync(Arg.Any<PermissionByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(permission);
@@ -27,7 +34,7 @@ public class GetPermissionHandlerHandle
         var result = await _handler.Handle(new GetPermissionQuery(1), CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe(new PermissionDto(1, "users.read", "Can read users"));
+        result.Value.ShouldBe(new PermissionDto(1, "users.read", 1, "Users", "Can read users"));
     }
 
     [Fact]

@@ -5,5 +5,6 @@ public class RoleWithPermissionsByIdSpec : Specification<Role>
     public RoleWithPermissionsByIdSpec(int roleId) =>
         Query
             .Where(role => role.Id == roleId)
-            .Include(role => role.Permissions);
+            .Include(role => role.Permissions)
+            .ThenInclude(permission => permission.Module);
 }

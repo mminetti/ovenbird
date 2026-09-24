@@ -12,7 +12,7 @@ public class ListPermissionsQueryService(ReadDbContext db, IQueryPropertyMapper<
     protected override IQueryable<Permission> GetQuery() => db.Permission;
 
     protected override Expression<Func<Permission, PermissionDto>> GetProjection() =>
-        p => new PermissionDto(p.Id, p.Name, p.Description);
+        p => new PermissionDto(p.Id, p.Name, p.ModuleId, p.Module.Name, p.Description);
 
     protected override string GetDefaultOrderBy() => nameof(Permission.Id);
 }

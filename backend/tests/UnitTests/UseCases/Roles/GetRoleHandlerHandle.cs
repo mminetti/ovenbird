@@ -23,7 +23,17 @@ public class GetRoleHandlerHandle
         {
             Id = 1,
             Name = "Admin",
-            Permissions = [new Permission { Id = 10, Name = "users.read", Description = "Can read users" }]
+            Permissions =
+            [
+                new Permission
+                {
+                    Id = 10,
+                    Name = "users.read",
+                    ModuleId = 1,
+                    Module = new PermissionModule { Id = 1, Name = "Users" },
+                    Description = "Can read users"
+                }
+            ]
         };
 
         _repository.FirstOrDefaultAsync(Arg.Any<RoleWithPermissionsByIdSpec>(), Arg.Any<CancellationToken>())

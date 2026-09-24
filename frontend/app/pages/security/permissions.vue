@@ -13,7 +13,7 @@ const UDropdownMenu = resolveComponent('UDropdownMenu')
 const editModal = useTemplateRef('editModal')
 const toast = useToast()
 
-type SortColumn = 'id' | 'name' | 'description'
+type SortColumn = 'id' | 'name' | 'moduleName' | 'description'
 
 const page = ref(1)
 const pageSize = ref(10)
@@ -77,6 +77,11 @@ const columnConfig: TypedColumnConfig<SecurityPermission, SortColumn>[] = [
 		key: 'id',
 		label: 'Id',
 		type: 'number'
+	},
+	{
+		key: 'moduleName',
+		label: 'Module',
+		type: 'string'
 	},
 	{
 		key: 'name',

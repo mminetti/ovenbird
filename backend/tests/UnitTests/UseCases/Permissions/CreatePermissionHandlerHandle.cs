@@ -16,13 +16,13 @@ public class CreatePermissionHandlerHandle
     [Fact]
     public async Task ReturnsSuccessWithNewId()
     {
-        var created = new Permission { Id = 5, Name = "users.read", Description = "Can read users" };
+        var created = new Permission { Id = 5, Name = "users.read", ModuleId = 1, Description = "Can read users" };
 
         _repository.AddAsync(Arg.Any<Permission>(), Arg.Any<CancellationToken>())
             .Returns(created);
 
         var result = await _handler.Handle(
-            new CreatePermissionCommand("users.read", "Can read users"),
+            new CreatePermissionCommand("users.read", 1, "Can read users"),
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
@@ -38,11 +38,12 @@ public class CreatePermissionHandlerHandle
             .Returns(c => c.Arg<Permission>());
 
         await _handler.Handle(
-            new CreatePermissionCommand("users.write", "Can write users"),
+            new CreatePermissionCommand("users.write", 1, "Can write users"),
             CancellationToken.None);
 
         captured.ShouldNotBeNull();
         captured!.Name.ShouldBe("users.write");
+        captured.ModuleId.ShouldBe(1);
         captured.Description.ShouldBe("Can write users");
     }
 }

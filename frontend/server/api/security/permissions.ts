@@ -12,26 +12,28 @@ export default defineEventHandler(async (event) => {
 
 	try {
 		if (method === 'POST') {
-			const body = await readBody<{ name?: unknown, description?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, moduleId?: unknown, description?: unknown }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
+			const moduleId = typeof body?.moduleId === 'number' ? body.moduleId : Number(body?.moduleId) || 0
 			const description = typeof body?.description === 'string' ? body.description.trim() : ''
 
 			return await callBackend(event, '/security/permissions', {
 				method: 'POST',
-				body: { name, description }
+				body: { name, moduleId, description }
 			})
 		}
 
 		if (method === 'PATCH') {
 			const query = getQuery(event)
 			const permissionId = Number(query.id)
-			const body = await readBody<{ name?: unknown, description?: unknown }>(event)
+			const body = await readBody<{ name?: unknown, moduleId?: unknown, description?: unknown }>(event)
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
+			const moduleId = typeof body?.moduleId === 'number' ? body.moduleId : Number(body?.moduleId) || undefined
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
 			return await callBackend(event, `/security/permissions/${permissionId}`, {
 				method: 'PUT',
-				body: { id: permissionId, name, description }
+				body: { id: permissionId, name, moduleId, description }
 			})
 		}
 

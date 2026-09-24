@@ -34,6 +34,8 @@ const originalPermissionIds = ref<number[]>([])
 const lastModifiedAtUtc = ref<string | null>(null)
 const lastModifiedBy = ref<string | null>(null)
 
+const { timezone } = useTimezone()
+
 const slideoverTitle = computed(() => `Edit role ${state.name?.trim() || ''}`.trim())
 
 const formattedLastModifiedAtUtc = computed(() => {
@@ -41,15 +43,10 @@ const formattedLastModifiedAtUtc = computed(() => {
 		return ''
 	}
 
-	return new Intl.DateTimeFormat('en-US', {
-		dateStyle: 'medium',
-		timeStyle: 'short'
-	}).format(new Date(lastModifiedAtUtc.value))
+	return formatUtcToTimezone(lastModifiedAtUtc.value, timezone.value)
 })
 
-const permissionItems = computed(() =>
-	allPermissions.value.map(permission => ({ label: permission.name, value: Number(permission.id) }))
-)
+const permissionItems = computed(() => groupDataListItemsByParent(allPermissions.value))
 
 function resetFormState() {
 	state.name = ''

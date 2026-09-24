@@ -39,6 +39,8 @@ const externalIdentifier = ref('')
 const lastModifiedAtUtc = ref<string | null>(null)
 const lastModifiedBy = ref<string | null>(null)
 
+const { timezone } = useTimezone()
+
 const slideoverTitle = computed(() => `Edit user ${state.name?.trim() || ''}`.trim())
 
 const formattedLastModifiedAtUtc = computed(() => {
@@ -46,10 +48,7 @@ const formattedLastModifiedAtUtc = computed(() => {
 		return ''
 	}
 
-	return new Intl.DateTimeFormat('en-US', {
-		dateStyle: 'medium',
-		timeStyle: 'short'
-	}).format(new Date(lastModifiedAtUtc.value))
+	return formatUtcToTimezone(lastModifiedAtUtc.value, timezone.value)
 })
 
 const roleItems = computed(() =>

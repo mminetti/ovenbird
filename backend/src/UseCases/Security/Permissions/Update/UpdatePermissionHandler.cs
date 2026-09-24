@@ -14,6 +14,7 @@ public class UpdatePermissionHandler(IRepository<Permission> repository)
         }
 
         permission.Name = command.Name;
+        permission.ModuleId = command.ModuleId;
         permission.Description = command.Description;
 
         await repository.UpdateAsync(permission, ct);

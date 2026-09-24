@@ -16,17 +16,18 @@ public class UpdatePermissionHandlerHandle
     [Fact]
     public async Task ReturnsSuccessWhenPermissionExists()
     {
-        var permission = new Permission { Id = 1, Name = "users.read", Description = "Can read users" };
+        var permission = new Permission { Id = 1, Name = "users.read", ModuleId = 1, Description = "Can read users" };
 
         _repository.GetByIdAsync(1, Arg.Any<CancellationToken>())
             .Returns(permission);
 
         var result = await _handler.Handle(
-            new UpdatePermissionCommand(1, "users.write", "Can write users"),
+            new UpdatePermissionCommand(1, "users.write", 2, "Can write users"),
             CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
         permission.Name.ShouldBe("users.write");
+        permission.ModuleId.ShouldBe(2);
         permission.Description.ShouldBe("Can write users");
         await _repository.Received(1).UpdateAsync(permission, Arg.Any<CancellationToken>());
     }
@@ -38,7 +39,7 @@ public class UpdatePermissionHandlerHandle
             .Returns((Permission?)null);
 
         var result = await _handler.Handle(
-            new UpdatePermissionCommand(999, "users.read", "desc"),
+            new UpdatePermissionCommand(999, "users.read", 1, "desc"),
             CancellationToken.None);
 
         result.Status.ShouldBe(Ardalis.Result.ResultStatus.NotFound);

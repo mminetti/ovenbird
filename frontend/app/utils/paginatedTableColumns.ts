@@ -31,6 +31,8 @@ interface NumberColumnConfig {
 interface DateColumnConfig {
 	dateLocale?: string
 	dateOptions?: Intl.DateTimeFormatOptions
+	/** IANA timezone (e.g. from useTimezone()) to format the UTC value in. Falls back to the browser's local timezone when omitted. */
+	timeZone?: string
 }
 
 interface BadgeColumnConfig {
@@ -76,6 +78,10 @@ export function createTypedColumns<T, TSortColumn extends string>(
 
 				if (Number.isNaN(date.getTime())) {
 					return '-'
+				}
+
+				if (config.timeZone) {
+					return formatUtcToTimezone(date, config.timeZone)
 				}
 
 				return new Intl.DateTimeFormat(config.dateLocale || 'en-US', config.dateOptions).format(date)

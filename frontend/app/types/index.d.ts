@@ -55,6 +55,8 @@ export interface Range {
 export interface SecurityPermission {
 	id: number
 	name: string
+	moduleId: number
+	moduleName: string
 	description: string
 }
 

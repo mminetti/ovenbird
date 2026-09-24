@@ -1,4 +1,4 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Common;
 using UseCases.Security.Permissions.Update;
@@ -24,6 +24,7 @@ public class UpdatePermission(IMessageBus bus)
                 PermissionId = 1,
                 Id = 1,
                 Name = "users.write",
+                ModuleId = Constants.PermissionModules.Security,
                 Description = "Can write users"
             };
 
@@ -47,7 +48,7 @@ public class UpdatePermission(IMessageBus bus)
         ExecuteAsync(UpdatePermissionRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result>(
-            new UpdatePermissionCommand(request.PermissionId, request.Name, request.Description), ct);
+            new UpdatePermissionCommand(request.PermissionId, request.Name, request.ModuleId, request.Description), ct);
 
         return result.ToDeleteUpdateResult();
     }

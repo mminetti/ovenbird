@@ -1,4 +1,4 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Common;
 using UseCases.Security.Permissions.Create;
@@ -24,6 +24,7 @@ public class CreatePermission(IMessageBus bus)
             s.ExampleRequest = new CreatePermissionRequest
             {
                 Name = "users.read",
+                ModuleId = Constants.PermissionModules.Security,
                 Description = "Can read users"
             };
 
@@ -45,7 +46,7 @@ public class CreatePermission(IMessageBus bus)
         ExecuteAsync(CreatePermissionRequest request, CancellationToken ct)
     {
         var result = await bus.InvokeAsync<Result<int>>(
-            new CreatePermissionCommand(request.Name, request.Description), ct);
+            new CreatePermissionCommand(request.Name, request.ModuleId, request.Description), ct);
 
         return result.ToCreatedResult(
             id => GetPermissionRequest.BuildRoute(id),

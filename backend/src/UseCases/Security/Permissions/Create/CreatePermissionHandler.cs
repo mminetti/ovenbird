@@ -9,6 +9,7 @@ public class CreatePermissionHandler(IRepository<Permission> repository)
         var permission = new Permission
         {
             Name = command.Name,
+            ModuleId = command.ModuleId,
             Description = command.Description
         };
 

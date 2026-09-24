@@ -27,9 +27,7 @@ const state = reactive<Partial<Schema>>({
 
 const slideoverTitle = computed(() => `New role ${state.name?.trim() || ''}`.trim())
 
-const permissionItems = computed(() =>
-	allPermissions.value.map(permission => ({ label: permission.name, value: Number(permission.id) }))
-)
+const permissionItems = computed(() => groupDataListItemsByParent(allPermissions.value))
 
 function resetForm() {
 	state.name = ''

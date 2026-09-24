@@ -7,6 +7,8 @@ defineProps<{
 
 const colorMode = useColorMode()
 const { user, logout } = useAuth()
+const { timezone } = useTimezone()
+const timezoneItems = timeZoneOptions()
 
 const items = computed<DropdownMenuItem[][]>(() => ([[{
 	type: 'label',
@@ -39,6 +41,19 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
 			e.preventDefault()
 		}
 	}]
+}, {
+	label: 'Timezone',
+	icon: 'i-lucide-clock',
+	children: timezoneItems.map(tz => ({
+		label: tz.label,
+		type: 'checkbox',
+		checked: timezone.value === tz.value,
+		onSelect(e: Event) {
+			e.preventDefault()
+
+			timezone.value = tz.value
+		}
+	}))
 }], [{
 	label: 'Log out',
 	icon: 'i-lucide-log-out',

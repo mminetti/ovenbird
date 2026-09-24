@@ -28,11 +28,16 @@ const state = reactive<Partial<Schema>>({
 	description: ''
 })
 
+const moduleId = ref<number | null>(null)
+const moduleName = ref<string | null>(null)
+
 const slideoverTitle = computed(() => `Edit permission ${state.name?.trim() || ''}`.trim())
 
 function resetFormState() {
 	state.name = ''
 	state.description = ''
+	moduleId.value = null
+	moduleName.value = null
 }
 
 async function loadPermission() {
@@ -51,6 +56,8 @@ async function loadPermission() {
 
 		state.name = permission.name
 		state.description = permission.description
+		moduleId.value = permission.moduleId
+		moduleName.value = permission.moduleName
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -81,6 +88,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 			query: { id: props.permissionId },
 			body: {
 				name: event.data.name,
+				moduleId: moduleId.value,
 				description: event.data.description || ''
 			}
 		})
@@ -119,6 +127,14 @@ defineExpose({
 				<UFormField label="Name" name="name">
 					<UInput
 						v-model="state.name"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
+				<UFormField label="Module">
+					<UInput
+						:model-value="moduleName ?? undefined"
 						class="w-full"
 						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
 						disabled
