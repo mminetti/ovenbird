@@ -1,3 +1,4 @@
+import type { SelectMenuItem } from '@nuxt/ui'
 import type { DataListItem } from '~~/server/api/data-lists/[type]'
 
 export interface GroupedSelectItem {
@@ -6,7 +7,7 @@ export interface GroupedSelectItem {
 }
 
 /** Groups data-list items by their parentId (e.g. a permission's Module) into USelectMenu's nested-array group format. */
-export function groupDataListItemsByParent(items: DataListItem[]) {
+export function groupDataListItemsByParent(items: DataListItem[]): SelectMenuItem[][] {
 	const groups = new Map<string, GroupedSelectItem[]>()
 
 	for (const item of items) {
@@ -22,7 +23,7 @@ export function groupDataListItemsByParent(items: DataListItem[]) {
 	return Array.from(groups.entries())
 		.sort(([a], [b]) => a.localeCompare(b))
 		.map(([group, groupItems]) => [
-			{ type: 'label' as const, label: group },
+			{ type: 'label', label: group },
 			...groupItems
 		])
 }
