@@ -45,7 +45,20 @@ const state = reactive<Partial<Schema>>({
 	fields: []
 })
 
+const lastModifiedAtUtc = ref<string | null>(null)
+const lastModifiedBy = ref<string | null>(null)
+
+const { timezone } = useTimezone()
+
 const slideoverTitle = computed(() => `Edit configuration ${state.name?.trim() || ''}`.trim())
+
+const formattedLastModifiedAtUtc = computed(() => {
+	if (!lastModifiedAtUtc.value) {
+		return ''
+	}
+
+	return formatUtcToTimezone(lastModifiedAtUtc.value, timezone.value)
+})
 
 const configurationTypeItems = computed(() =>
 	configurationTypes.value.map(type => ({ label: type.name, value: Number(type.id) }))
@@ -66,6 +79,8 @@ function resetFormState() {
 	state.companyId = undefined
 	state.connectorIds = []
 	state.fields = []
+	lastModifiedAtUtc.value = null
+	lastModifiedBy.value = null
 }
 
 async function loadConfiguration() {
@@ -98,6 +113,8 @@ async function loadConfiguration() {
 			name: field.name,
 			value: field.value ?? undefined
 		}))
+		lastModifiedAtUtc.value = configuration.lastModifiedAtUtc
+		lastModifiedBy.value = configuration.lastModifiedBy
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -216,6 +233,23 @@ defineExpose({
 
 				<UFormField label="Fields" name="fields">
 					<ConfigurationsFieldsEditor v-model="state.fields" :disabled="loading" />
+				</UFormField>
+
+				<UFormField label="Updated By">
+					<UInput
+						:model-value="lastModifiedBy ?? undefined"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
+				<UFormField label="Updated At">
+					<UInput
+						:model-value="formattedLastModifiedAtUtc"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
 				</UFormField>
 			</UForm>
 		</template>

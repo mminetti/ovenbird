@@ -25,7 +25,9 @@ public class GetConnectorHandler(IReadRepository<Connector> repository)
             entity.ConnectorImplementation.ConnectorTypeId,
             entity.ConnectorImplementation.ConnectorType.Name,
             entity.ConnectorImplementationId,
-            entity.ConnectorImplementation.Name)
+            entity.ConnectorImplementation.Name,
+            entity.LastModifiedAtUtc,
+            entity.LastModifiedBy)
         {
             Fields = fields
         });

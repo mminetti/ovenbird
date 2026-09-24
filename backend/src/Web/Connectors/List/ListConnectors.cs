@@ -70,7 +70,9 @@ public sealed class ListConnectorsMapper
                 c.ConnectorTypeId,
                 c.ConnectorTypeName,
                 c.ConnectorImplementationId,
-                c.ConnectorImplementationName))
+                c.ConnectorImplementationName,
+                c.LastModifiedAtUtc,
+                c.LastModifiedBy))
             .ToList();
 
         return new ListConnectorsResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

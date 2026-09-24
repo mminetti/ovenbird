@@ -7,7 +7,9 @@ public record ConnectorDto(
     int ConnectorTypeId,
     string ConnectorTypeName,
     int ConnectorImplementationId,
-    string ConnectorImplementationName)
+    string ConnectorImplementationName,
+    DateTimeOffset LastModifiedAtUtc,
+    string? LastModifiedBy)
 {
     public IReadOnlyList<ConnectorFieldDto> Fields { get; init; } = [];
 }

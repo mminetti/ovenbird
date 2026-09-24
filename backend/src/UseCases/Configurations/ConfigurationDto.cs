@@ -7,7 +7,9 @@ public record ConfigurationDto(
     int ConfigurationTypeId,
     string ConfigurationTypeName,
     int? CompanyId,
-    string? CompanyName)
+    string? CompanyName,
+    DateTimeOffset LastModifiedAtUtc,
+    string? LastModifiedBy)
 {
     public IReadOnlyList<ConfigurationFieldDto> Fields { get; init; } = [];
     public IReadOnlyList<ConfigurationConnectorDto> Connectors { get; init; } = [];

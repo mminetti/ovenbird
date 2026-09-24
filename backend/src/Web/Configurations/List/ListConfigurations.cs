@@ -70,7 +70,9 @@ public sealed class ListConfigurationsMapper
                 c.ConfigurationTypeId,
                 c.ConfigurationTypeName,
                 c.CompanyId,
-                c.CompanyName))
+                c.CompanyName,
+                c.LastModifiedAtUtc,
+                c.LastModifiedBy))
             .ToList();
 
         return new ListConfigurationsResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

@@ -19,7 +19,9 @@ public class ListConfigurationsQueryService(ReadDbContext db, IQueryPropertyMapp
             c.ConfigurationTypeId,
             c.ConfigurationType.Name,
             c.CompanyId,
-            c.Company != null ? c.Company.Name : null);
+            c.Company != null ? c.Company.Name : null,
+            c.LastModifiedAtUtc,
+            c.LastModifiedBy);
 
     protected override string GetDefaultOrderBy() => nameof(Configuration.Id);
 }

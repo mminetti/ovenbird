@@ -29,7 +29,9 @@ public class GetConfigurationHandler(IReadRepository<Configuration> repository)
             entity.ConfigurationTypeId,
             entity.ConfigurationType.Name,
             entity.CompanyId,
-            entity.Company?.Name)
+            entity.Company?.Name,
+            entity.LastModifiedAtUtc,
+            entity.LastModifiedBy)
         {
             Fields = fields,
             Connectors = connectors

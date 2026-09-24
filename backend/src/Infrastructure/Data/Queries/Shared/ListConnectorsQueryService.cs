@@ -19,7 +19,9 @@ public class ListConnectorsQueryService(ReadDbContext db, IQueryPropertyMapper<C
             c.ConnectorImplementation.ConnectorTypeId,
             c.ConnectorImplementation.ConnectorType.Name,
             c.ConnectorImplementationId,
-            c.ConnectorImplementation.Name);
+            c.ConnectorImplementation.Name,
+            c.LastModifiedAtUtc,
+            c.LastModifiedBy);
 
     protected override string GetDefaultOrderBy() => nameof(Connector.Id);
 }

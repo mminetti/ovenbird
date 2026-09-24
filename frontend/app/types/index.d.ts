@@ -95,6 +95,8 @@ export interface Connector {
 	connectorImplementationId: number
 	connectorImplementationName: string
 	fields: ConnectorField[]
+	lastModifiedAtUtc: string
+	lastModifiedBy: string | null
 }
 
 export interface Company {
@@ -136,4 +138,6 @@ export interface Configuration {
 	companyName?: string | null
 	fields: ConfigurationField[]
 	connectors: ConfigurationConnector[]
+	lastModifiedAtUtc: string
+	lastModifiedBy: string | null
 }

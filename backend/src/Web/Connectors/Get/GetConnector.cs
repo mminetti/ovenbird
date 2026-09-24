@@ -64,7 +64,9 @@ public sealed class GetConnectorMapper : Mapper<GetConnectorRequest, ConnectorRe
             e.ConnectorTypeId,
             e.ConnectorTypeName,
             e.ConnectorImplementationId,
-            e.ConnectorImplementationName)
+            e.ConnectorImplementationName,
+            e.LastModifiedAtUtc,
+            e.LastModifiedBy)
         {
             Fields = fields
         };

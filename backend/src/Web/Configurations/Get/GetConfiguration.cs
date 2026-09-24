@@ -68,7 +68,9 @@ public sealed class GetConfigurationMapper : Mapper<GetConfigurationRequest, Con
             e.ConfigurationTypeId,
             e.ConfigurationTypeName,
             e.CompanyId,
-            e.CompanyName)
+            e.CompanyName,
+            e.LastModifiedAtUtc,
+            e.LastModifiedBy)
         {
             Fields = fields,
             Connectors = connectors

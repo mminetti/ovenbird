@@ -43,7 +43,20 @@ const state = reactive<Partial<Schema>>({
 	fields: []
 })
 
+const lastModifiedAtUtc = ref<string | null>(null)
+const lastModifiedBy = ref<string | null>(null)
+
+const { timezone } = useTimezone()
+
 const slideoverTitle = computed(() => `Edit connector ${state.name?.trim() || ''}`.trim())
+
+const formattedLastModifiedAtUtc = computed(() => {
+	if (!lastModifiedAtUtc.value) {
+		return ''
+	}
+
+	return formatUtcToTimezone(lastModifiedAtUtc.value, timezone.value)
+})
 
 const connectorTypeItems = computed(() =>
 	connectorTypes.value.map(type => ({ label: type.name, value: Number(type.id) }))
@@ -68,6 +81,8 @@ function resetFormState() {
 	state.connectorTypeId = undefined
 	state.connectorImplementationId = undefined
 	state.fields = []
+	lastModifiedAtUtc.value = null
+	lastModifiedBy.value = null
 }
 
 async function loadConnector() {
@@ -98,6 +113,8 @@ async function loadConnector() {
 			value: field.value ?? undefined,
 			isSecret: field.isSecret
 		}))
+		lastModifiedAtUtc.value = connector.lastModifiedAtUtc
+		lastModifiedBy.value = connector.lastModifiedBy
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -201,6 +218,23 @@ defineExpose({
 
 				<UFormField label="Fields" name="fields">
 					<ConnectorsFieldsEditor v-model="state.fields" :disabled="loading" />
+				</UFormField>
+
+				<UFormField label="Updated By">
+					<UInput
+						:model-value="lastModifiedBy ?? undefined"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
+				<UFormField label="Updated At">
+					<UInput
+						:model-value="formattedLastModifiedAtUtc"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
 				</UFormField>
 			</UForm>
 		</template>
