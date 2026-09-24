@@ -231,25 +231,27 @@ defineExpose({
 					/>
 				</UFormField>
 
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<UFormField label="Updated By">
+						<UInput
+							:model-value="lastModifiedBy ?? undefined"
+							class="w-full"
+							:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+							disabled
+						/>
+					</UFormField>
+					<UFormField label="Updated At">
+						<UInput
+							:model-value="formattedLastModifiedAtUtc"
+							class="w-full"
+							:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+							disabled
+						/>
+					</UFormField>
+				</div>
+
 				<UFormField label="Fields" name="fields">
 					<ConfigurationsFieldsEditor v-model="state.fields" :disabled="loading" />
-				</UFormField>
-
-				<UFormField label="Updated By">
-					<UInput
-						:model-value="lastModifiedBy ?? undefined"
-						class="w-full"
-						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-						disabled
-					/>
-				</UFormField>
-				<UFormField label="Updated At">
-					<UInput
-						:model-value="formattedLastModifiedAtUtc"
-						class="w-full"
-						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-						disabled
-					/>
 				</UFormField>
 			</UForm>
 		</template>
