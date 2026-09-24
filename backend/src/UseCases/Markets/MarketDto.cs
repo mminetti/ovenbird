@@ -3,4 +3,6 @@ namespace UseCases.Markets;
 public record MarketDto(
     int Id,
     string Name,
-    string Identifier);
+    string Identifier,
+    DateTimeOffset LastModifiedAtUtc,
+    string? LastModifiedBy);

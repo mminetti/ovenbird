@@ -12,7 +12,7 @@ public class ListMarketsQueryService(ReadDbContext db, IQueryPropertyMapper<Mark
     protected override IQueryable<Market> GetQuery() => db.Set<Market>();
 
     protected override Expression<Func<Market, MarketDto>> GetProjection() =>
-        m => new MarketDto(m.Id, m.Name, m.Identifier);
+        m => new MarketDto(m.Id, m.Name, m.Identifier, m.LastModifiedAtUtc, m.LastModifiedBy);
 
     protected override string GetDefaultOrderBy() => nameof(Market.Id);
 }

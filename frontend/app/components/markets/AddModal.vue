@@ -65,7 +65,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-	<USlideover v-model:open="open" title="New market" :ui="{ content: 'max-w-2xl' }">
+	<USlideover v-model:open="open" title="New market">
 		<UButton label="New market" icon="i-lucide-plus" class="ml-auto shrink-0" />
 
 		<template #body>

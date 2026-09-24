@@ -11,6 +11,6 @@ public class GetMarketHandler(IReadRepository<Core.Market.Market> repository)
             return Result.NotFound();
         }
 
-        return Result.Success(new MarketDto(entity.Id, entity.Name, entity.Identifier));
+        return Result.Success(new MarketDto(entity.Id, entity.Name, entity.Identifier, entity.LastModifiedAtUtc, entity.LastModifiedBy));
     }
 }

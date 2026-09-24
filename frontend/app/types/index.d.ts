@@ -109,6 +109,8 @@ export interface Market {
 	id: number
 	name: string
 	identifier: string
+	lastModifiedAtUtc: string
+	lastModifiedBy: string | null
 }
 
 export interface ConfigurationField {

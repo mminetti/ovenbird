@@ -52,5 +52,5 @@ public class GetMarket(IMessageBus bus)
 public sealed class GetMarketMapper : Mapper<GetMarketRequest, MarketRecord, MarketDto>
 {
     public override MarketRecord FromEntity(MarketDto e) =>
-        new(e.Id, e.Name, e.Identifier);
+        new(e.Id, e.Name, e.Identifier, e.LastModifiedAtUtc, e.LastModifiedBy);
 }

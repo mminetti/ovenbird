@@ -28,11 +28,26 @@ const state = reactive<Partial<Schema>>({
 	identifier: ''
 })
 
+const lastModifiedAtUtc = ref<string | null>(null)
+const lastModifiedBy = ref<string | null>(null)
+
+const { timezone } = useTimezone()
+
 const slideoverTitle = computed(() => `Edit market ${state.name?.trim() || ''}`.trim())
+
+const formattedLastModifiedAtUtc = computed(() => {
+	if (!lastModifiedAtUtc.value) {
+		return ''
+	}
+
+	return formatUtcToTimezone(lastModifiedAtUtc.value, timezone.value)
+})
 
 function resetFormState() {
 	state.name = ''
 	state.identifier = ''
+	lastModifiedAtUtc.value = null
+	lastModifiedBy.value = null
 }
 
 async function loadMarket() {
@@ -49,6 +64,8 @@ async function loadMarket() {
 
 		state.name = market.name
 		state.identifier = market.identifier
+		lastModifiedAtUtc.value = market.lastModifiedAtUtc
+		lastModifiedBy.value = market.lastModifiedBy
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -100,7 +117,7 @@ defineExpose({
 </script>
 
 <template>
-	<USlideover v-model:open="open" :title="slideoverTitle" :ui="{ content: 'max-w-2xl' }">
+	<USlideover v-model:open="open" :title="slideoverTitle">
 		<template #body>
 			<ModalLoadingBar :loading="loading" />
 
@@ -120,6 +137,23 @@ defineExpose({
 
 				<UFormField label="Identifier" name="identifier">
 					<UInput v-model="state.identifier" class="w-full" :disabled="loading" />
+				</UFormField>
+
+				<UFormField label="Updated By">
+					<UInput
+						:model-value="lastModifiedBy ?? undefined"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
+				<UFormField label="Updated At">
+					<UInput
+						:model-value="formattedLastModifiedAtUtc"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
 				</UFormField>
 			</UForm>
 		</template>

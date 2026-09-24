@@ -22,9 +22,7 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
 		icon: 'i-lucide-sun',
 		type: 'checkbox',
 		checked: colorMode.value === 'light',
-		onSelect(e: Event) {
-			e.preventDefault()
-
+		onSelect() {
 			colorMode.preference = 'light'
 		}
 	}, {
@@ -32,13 +30,8 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
 		icon: 'i-lucide-moon',
 		type: 'checkbox',
 		checked: colorMode.value === 'dark',
-		onUpdateChecked(checked: boolean) {
-			if (checked) {
-				colorMode.preference = 'dark'
-			}
-		},
-		onSelect(e: Event) {
-			e.preventDefault()
+		onSelect() {
+			colorMode.preference = 'dark'
 		}
 	}]
 }, {
@@ -48,9 +41,7 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
 		label: tz.label,
 		type: 'checkbox',
 		checked: timezone.value === tz.value,
-		onSelect(e: Event) {
-			e.preventDefault()
-
+		onSelect() {
 			timezone.value = tz.value
 		}
 	}))

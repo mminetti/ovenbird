@@ -63,7 +63,7 @@ public sealed class ListMarketsMapper
     public override ListMarketsResponse FromEntity(ItemPagedResult<MarketDto> e)
     {
         var items = e.Items
-            .Select(m => new MarketRecord(m.Id, m.Name, m.Identifier))
+            .Select(m => new MarketRecord(m.Id, m.Name, m.Identifier, m.LastModifiedAtUtc, m.LastModifiedBy))
             .ToList();
 
         return new ListMarketsResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);
