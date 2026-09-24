@@ -52,5 +52,5 @@ public class GetCompany(IMessageBus bus)
 public sealed class GetCompanyMapper : Mapper<GetCompanyRequest, CompanyRecord, CompanyDto>
 {
     public override CompanyRecord FromEntity(CompanyDto e) =>
-        new(e.Id, e.Name, e.MarketId, e.MarketName, e.TimeZoneId);
+        new(e.Id, e.Name, e.MarketId, e.MarketName, e.TimeZoneId, e.LastModifiedAtUtc, e.LastModifiedBy);
 }

@@ -5,4 +5,6 @@ public record CompanyDto(
     string Name,
     int MarketId,
     string MarketName,
-    string TimeZoneId);
+    string TimeZoneId,
+    DateTimeOffset LastModifiedAtUtc,
+    string? LastModifiedBy);

@@ -103,6 +103,8 @@ export interface Company {
 	marketId: number
 	marketName: string
 	timeZoneId: string
+	lastModifiedAtUtc: string
+	lastModifiedBy: string | null
 }
 
 export interface Market {

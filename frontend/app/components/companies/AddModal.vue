@@ -92,7 +92,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-	<USlideover v-model:open="open" title="New company" :ui="{ content: 'max-w-2xl' }">
+	<USlideover v-model:open="open" title="New company">
 		<UButton label="New company" icon="i-lucide-plus" class="ml-auto shrink-0" />
 
 		<template #body>

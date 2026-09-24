@@ -17,7 +17,9 @@ public class ListCompaniesQueryService(ReadDbContext db, IQueryPropertyMapper<Co
             c.Name,
             c.MarketId,
             c.Market.Name,
-            c.TimeZoneId);
+            c.TimeZoneId,
+            c.LastModifiedAtUtc,
+            c.LastModifiedBy);
 
     protected override string GetDefaultOrderBy() => nameof(Company.Id);
 }

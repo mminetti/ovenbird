@@ -19,6 +19,8 @@ public class GetCompanyHandler(IReadRepository<Company> repository)
             entity.Name,
             entity.MarketId,
             entity.Market.Name,
-            entity.TimeZoneId));
+            entity.TimeZoneId,
+            entity.LastModifiedAtUtc,
+            entity.LastModifiedBy));
     }
 }

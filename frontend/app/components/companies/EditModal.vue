@@ -32,7 +32,20 @@ const state = reactive<Partial<Schema>>({
 	timeZoneId: undefined
 })
 
+const lastModifiedAtUtc = ref<string | null>(null)
+const lastModifiedBy = ref<string | null>(null)
+
+const { timezone } = useTimezone()
+
 const slideoverTitle = computed(() => `Edit company ${state.name?.trim() || ''}`.trim())
+
+const formattedLastModifiedAtUtc = computed(() => {
+	if (!lastModifiedAtUtc.value) {
+		return ''
+	}
+
+	return formatUtcToTimezone(lastModifiedAtUtc.value, timezone.value)
+})
 
 const marketItems = computed(() =>
 	markets.value.map(market => ({ label: market.name, value: Number(market.id) }))
@@ -44,6 +57,8 @@ function resetFormState() {
 	state.name = ''
 	state.marketId = undefined
 	state.timeZoneId = undefined
+	lastModifiedAtUtc.value = null
+	lastModifiedBy.value = null
 }
 
 async function loadCompany() {
@@ -66,6 +81,8 @@ async function loadCompany() {
 		state.name = company.name
 		state.marketId = company.marketId
 		state.timeZoneId = company.timeZoneId
+		lastModifiedAtUtc.value = company.lastModifiedAtUtc
+		lastModifiedBy.value = company.lastModifiedBy
 	} catch (error) {
 		modalError.value = parseApiError(error)
 	} finally {
@@ -118,7 +135,7 @@ defineExpose({
 </script>
 
 <template>
-	<USlideover v-model:open="open" :title="slideoverTitle" :ui="{ content: 'max-w-2xl' }">
+	<USlideover v-model:open="open" :title="slideoverTitle">
 		<template #body>
 			<ModalLoadingBar :loading="loading" />
 
@@ -157,6 +174,23 @@ defineExpose({
 						placeholder="Select a time zone"
 						class="w-full"
 						:disabled="loading"
+					/>
+				</UFormField>
+
+				<UFormField label="Updated By">
+					<UInput
+						:model-value="lastModifiedBy ?? undefined"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
+					/>
+				</UFormField>
+				<UFormField label="Updated At">
+					<UInput
+						:model-value="formattedLastModifiedAtUtc"
+						class="w-full"
+						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+						disabled
 					/>
 				</UFormField>
 			</UForm>

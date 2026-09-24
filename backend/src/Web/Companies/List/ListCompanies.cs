@@ -68,7 +68,9 @@ public sealed class ListCompaniesMapper
                 c.Name,
                 c.MarketId,
                 c.MarketName,
-                c.TimeZoneId))
+                c.TimeZoneId,
+                c.LastModifiedAtUtc,
+                c.LastModifiedBy))
             .ToList();
 
         return new ListCompaniesResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);
