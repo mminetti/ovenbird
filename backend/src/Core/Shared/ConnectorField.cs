@@ -2,7 +2,7 @@
 
 namespace Core.Shared;
 
-public class ConnectorField : AuditableEntityBase<int>
+public class ConnectorField : AuditableEntityBase<int>, IAudited
 {
     public int ConnectorId { get; set; }
     public string Name { get; set; } = string.Empty;

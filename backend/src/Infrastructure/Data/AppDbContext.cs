@@ -1,4 +1,5 @@
-﻿using Core.Market;
+﻿using Core.Common;
+using Core.Market;
 using Core.Security;
 using Core.Shared;
 
@@ -21,6 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Configuration> Configuration => Set<Configuration>();
     public DbSet<ConfigurationField> ConfigurationField => Set<ConfigurationField>();
     public DbSet<ConfigurationType> ConfigurationType => Set<ConfigurationType>();
+    public DbSet<AuditTrail> AuditTrail => Set<AuditTrail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -13,6 +13,7 @@ using Infrastructure.Data.Queries.Security;
 using Infrastructure.Data.Queries.Shared;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Secrets;
+using UseCases.Auditing.List;
 using UseCases.Common;
 using UseCases.Companies.List;
 using UseCases.Configurations.List;
@@ -48,6 +49,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IUser, SystemUser>();
         services.AddScoped<EventDispatchInterceptor>();
         services.AddScoped<AuditableEntityInterceptor>();
+        services.AddScoped<AuditTrailInterceptor>();
         services.AddScoped<IDomainEventDispatcher, WolverineDomainEventDispatcher>();
 
         // Register write DbContext
@@ -55,9 +57,10 @@ public static class InfrastructureServiceExtensions
         {
             var eventDispatchInterceptor = provider.GetRequiredService<EventDispatchInterceptor>();
             var auditableEntityInterceptor = provider.GetRequiredService<AuditableEntityInterceptor>();
+            var auditTrailInterceptor = provider.GetRequiredService<AuditTrailInterceptor>();
 
             options.UseSqlServer(connectionString);
-            options.AddInterceptors(eventDispatchInterceptor, auditableEntityInterceptor);
+            options.AddInterceptors(eventDispatchInterceptor, auditableEntityInterceptor, auditTrailInterceptor);
         });
 
         // Register read DbContext
@@ -82,6 +85,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IListCompaniesQueryService, ListCompaniesQueryService>()
             .AddScoped<IListMarketsQueryService, ListMarketsQueryService>()
             .AddScoped<IListConfigurationsQueryService, ListConfigurationsQueryService>()
+            .AddScoped<IListAuditTrailQueryService, ListAuditTrailQueryService>()
             .AddScoped<IGetDataListQueryService, GetDataListQueryService>()
             .AddScoped<IDeleteUserService, DeleteUserService>()
             .AddScoped<IFtpService, FluentFtpService>()

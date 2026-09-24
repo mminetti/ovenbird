@@ -3,7 +3,7 @@ using Core.Security.Events;
 
 namespace Core.Security;
 
-public class Role : AuditableEntityBase<int>
+public class Role : AuditableEntityBase<int>, IAudited
 {
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;

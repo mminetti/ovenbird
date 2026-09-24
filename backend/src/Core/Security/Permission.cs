@@ -2,7 +2,7 @@ using Core.Common;
 
 namespace Core.Security;
 
-public class Permission : EntityBase<int>, IAggregateRoot
+public class Permission : EntityBase<int>, IAggregateRoot, IAudited
 {
     public string Name { get; set; } = string.Empty;
     public int ModuleId { get; set; }

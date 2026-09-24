@@ -3,7 +3,7 @@ using Core.Security.Events;
 
 namespace Core.Security;
 
-public class User : AuditableEntityBase<int>
+public class User : AuditableEntityBase<int>, IAudited
 {
     public string ExternalIdentifier { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;

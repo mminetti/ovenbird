@@ -119,6 +119,13 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
                 Name = Constants.Permissions.ConfigurationsWrite,
                 ModuleId = Constants.PermissionModules.Settings,
                 Description = "Allows creating, updating, and deleting configurations."
+            },
+            new Permission
+            {
+                Id = 15,
+                Name = Constants.Permissions.AuditTrailRead,
+                ModuleId = Constants.PermissionModules.Security,
+                Description = "Allows viewing the audit trail."
             }
         );
     }

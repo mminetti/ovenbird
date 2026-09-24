@@ -2,7 +2,7 @@
 
 namespace Core.Shared;
 
-public class Company : AuditableEntityBase<int>
+public class Company : AuditableEntityBase<int>, IAudited
 {
     public string Name { get; set; } = string.Empty;
     public int MarketId { get; set; }

@@ -18,5 +18,6 @@ public static partial class Constants
         public const string MarketsWrite = "markets.write";
         public const string ConfigurationsRead = "configurations.read";
         public const string ConfigurationsWrite = "configurations.write";
+        public const string AuditTrailRead = "audit.trails.read";
     }
 }
