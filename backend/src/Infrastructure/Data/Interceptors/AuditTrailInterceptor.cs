@@ -18,6 +18,17 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
         "RolePermission"
     ];
 
+    // IAuditableEntity's stamps (CreatedBy/CreatedAtUtc/LastModifiedBy/LastModifiedAtUtc) are
+    // redundant with the AuditTrail row's own UserId/TimestampUtc, so they're excluded from
+    // values and affected-columns rather than cluttering every row.
+    private static readonly HashSet<string> _excludedProperties =
+    [
+        nameof(IAuditableEntity.CreatedBy),
+        nameof(IAuditableEntity.CreatedAtUtc),
+        nameof(IAuditableEntity.LastModifiedBy),
+        nameof(IAuditableEntity.LastModifiedAtUtc)
+    ];
+
     // Declares, per audited entity-type name, which FK properties point to entities worth
     // recording as references - either the other side of a join row, or the parent of a
     // child-entity rollup. Only consulted for entries that already pass IsAudited.
@@ -119,7 +130,7 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                     Action = AuditAction.Create,
                     UserId = _user.Id,
                     TimestampUtc = utcNow,
-                    NewValues = SerializeValues(entry.Properties, current: true),
+                    NewValues = SerializeValues(ExcludeAuditableStamps(entry.Properties), current: true),
                     References = BuildReferences(entry, entityType, useCurrentValues: true)
                 };
 
@@ -131,12 +142,14 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                     Action = AuditAction.Delete,
                     UserId = _user.Id,
                     TimestampUtc = utcNow,
-                    OldValues = SerializeValues(entry.Properties, current: false),
+                    OldValues = SerializeValues(ExcludeAuditableStamps(entry.Properties), current: false),
                     References = BuildReferences(entry, entityType, useCurrentValues: false)
                 };
 
             case EntityState.Modified:
-                var modified = entry.Properties.Where(p => p.IsModified).ToList();
+                var modified = ExcludeAuditableStamps(entry.Properties)
+                    .Where(p => p.IsModified && !Equals(p.CurrentValue, p.OriginalValue))
+                    .ToList();
 
                 if (modified.Count == 0)
                 {
@@ -160,6 +173,9 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                 return null;
         }
     }
+
+    private static IEnumerable<PropertyEntry> ExcludeAuditableStamps(IEnumerable<PropertyEntry> properties) =>
+        properties.Where(p => !_excludedProperties.Contains(p.Metadata.Name));
 
     private static bool IsAudited(EntityEntry entry) =>
         entry.Entity is IAudited || _auditedSharedTypeEntities.Contains(GetEntityTypeName(entry));

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Core.Common;
 using Core.Market;
 using Core.Security;
@@ -23,6 +24,8 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         createRow.OldValues.ShouldBeNull();
         createRow.NewValues.ShouldNotBeNull();
         createRow.NewValues!.ShouldContain("\"Name\":\"Acme\"");
+        createRow.NewValues!.ShouldNotContain("CreatedAtUtc");
+        createRow.NewValues!.ShouldNotContain("LastModifiedBy");
         createRow.AffectedColumns.ShouldBeNull();
         createRow.References.ShouldBeEmpty();
         createRow.UserId.ShouldBe("test-user");
@@ -33,7 +36,11 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         var updateRow = await SingleAuditRowAsync(nameof(Company), company.Id.ToString(), AuditAction.Update);
         updateRow.OldValues!.ShouldContain("\"Name\":\"Acme\"");
         updateRow.NewValues!.ShouldContain("\"Name\":\"Acme Corp\"");
-        updateRow.AffectedColumns!.ShouldContain("Name");
+
+        // Only Name was actually changed; repository.UpdateAsync's call to DbContext.Update
+        // marks every scalar property IsModified, so this guards against that leaking through
+        // as spurious affected columns (e.g. MarketId, TimeZoneId, which were never touched).
+        JsonSerializer.Deserialize<string[]>(updateRow.AffectedColumns!).ShouldBe(["Name"]);
 
         var companyId = company.Id;
         _dbContext.Remove(company);
