@@ -67,6 +67,7 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
             foreach (var (row, entry) in _pendingCreates)
             {
                 row.EntityId = GetEntityId(entry, useCurrentValues: true);
+                row.NewValues = SerializeValues(ExcludeAuditableStamps(entry.Properties), current: true);
             }
 
             _pendingCreates.Clear();

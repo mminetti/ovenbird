@@ -52,6 +52,23 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
     }
 
     [Fact]
+    public async Task CreateMarketAndCompanyInSameSaveChanges_NewValuesUseRealGeneratedIds()
+    {
+        // Company.MarketId is a temporary EF placeholder (a large negative number) until the
+        // Market row is actually inserted, since both are new and saved together here.
+        var market = new Market { Name = "Market", Identifier = Guid.NewGuid().ToString() };
+        var company = new Company { Name = "Acme", TimeZoneId = "UTC", Market = market };
+        _dbContext.Add(company);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var marketCreateRow = await SingleAuditRowAsync(nameof(Market), market.Id.ToString(), AuditAction.Create);
+        marketCreateRow.NewValues!.ShouldContain($"\"Id\":{market.Id}");
+
+        var companyCreateRow = await SingleAuditRowAsync(nameof(Company), company.Id.ToString(), AuditAction.Create);
+        companyCreateRow.NewValues!.ShouldContain($"\"MarketId\":{market.Id}");
+    }
+
+    [Fact]
     public async Task CreateUpdateDeleteMarketDocument_ProducesNoAuditRows()
     {
         // MarketDocument extends AuditableEntityBase (gets CreatedBy/LastModifiedBy stamps)
