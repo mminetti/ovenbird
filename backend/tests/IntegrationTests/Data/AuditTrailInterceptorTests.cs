@@ -215,6 +215,34 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
     }
 
     [Fact]
+    public async Task CreatingConfigurationWithFieldInSameSaveChanges_ReferenceUsesRealGeneratedId()
+    {
+        // Mirrors CreateConfigurationHandler, which adds the Configuration and its
+        // ConfigurationFields together in one SaveChanges call - so ConfigurationField's
+        // ConfigurationId is a temporary EF placeholder until the Configuration row is
+        // actually inserted.
+        var configurationType = new ConfigurationType { Name = "Type" };
+        _dbContext.Add(configurationType);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var configuration = new Configuration
+        {
+            Name = "Config",
+            ConfigurationTypeId = configurationType.Id,
+            ConfigurationFields = [new ConfigurationField { Name = "Field", Value = "1" }]
+        };
+        _dbContext.Add(configuration);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var field = configuration.ConfigurationFields.Single();
+
+        var createRow = await SingleAuditRowAsync(nameof(ConfigurationField), field.Id.ToString(), AuditAction.Create);
+        var reference = createRow.References.ShouldHaveSingleItem();
+        reference.ReferencedEntityType.ShouldBe(nameof(Configuration));
+        reference.ReferencedEntityId.ShouldBe(configuration.Id.ToString());
+    }
+
+    [Fact]
     public async Task AddingUpdatingConfigurationField_RollsUpToConfigurationAndIsQueryable()
     {
         var configurationType = new ConfigurationType { Name = "Type" };
