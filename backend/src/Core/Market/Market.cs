@@ -3,7 +3,7 @@ using Core.Shared;
 
 namespace Core.Market;
 
-public class Market : AuditableEntityBase<int>, IAudited
+public class Market : AuditableEntityBase<int>, IAudited, IHasDisplayName
 {
     public string Name { get; set; } = string.Empty;
     public string Identifier { get; set; } = string.Empty;

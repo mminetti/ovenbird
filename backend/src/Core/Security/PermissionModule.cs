@@ -1,6 +1,8 @@
+using Core.Common;
+
 namespace Core.Security;
 
-public class PermissionModule : EntityBase<int>
+public class PermissionModule : EntityBase<int>, IHasDisplayName
 {
     public string Name { get; set; } = string.Empty;
 

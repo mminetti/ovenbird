@@ -2,7 +2,7 @@
 
 namespace Core.Shared;
 
-public class Configuration : AuditableEntityBase<int>, IAudited
+public class Configuration : AuditableEntityBase<int>, IAudited, IHasDisplayName
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }

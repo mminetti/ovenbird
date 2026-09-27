@@ -24,6 +24,7 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         createRow.OldValues.ShouldBeNull();
         createRow.NewValues.ShouldNotBeNull();
         createRow.NewValues!.ShouldContain("\"Name\":\"Acme\"");
+        createRow.NewValues!.ShouldContain("\"MarketName\":\"Market\"");
         createRow.NewValues!.ShouldNotContain("CreatedAtUtc");
         createRow.NewValues!.ShouldNotContain("LastModifiedBy");
         createRow.References.ShouldBeEmpty();
@@ -65,6 +66,46 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
 
         var companyCreateRow = await SingleAuditRowAsync(nameof(Company), company.Id.ToString(), AuditAction.Create);
         companyCreateRow.NewValues!.ShouldContain($"\"MarketId\":{market.Id}");
+
+        // Resolved from the locally-tracked (not-yet-persisted) Market instance, not a DB query.
+        companyCreateRow.NewValues!.ShouldContain("\"MarketName\":\"Market\"");
+    }
+
+    [Fact]
+    public async Task CreatingPermission_NewValuesIncludeModuleName()
+    {
+        var module = new PermissionModule { Id = 500, Name = "Custom Module" };
+        _dbContext.Add(module);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var permission = new Permission
+        {
+            Id = 1001,
+            Name = "test.permission.2",
+            ModuleId = module.Id,
+            Description = "Test permission"
+        };
+        _dbContext.Add(permission);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var createRow = await SingleAuditRowAsync(nameof(Permission), permission.Id.ToString(), AuditAction.Create);
+        createRow.NewValues!.ShouldContain("\"ModuleName\":\"Custom Module\"");
+    }
+
+    [Fact]
+    public async Task CreatingConfigurationWithoutCompany_NewValuesOmitCompanyName()
+    {
+        var configurationType = new ConfigurationType { Name = "Type" };
+        _dbContext.Add(configurationType);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var configuration = new Configuration { Name = "Config", ConfigurationTypeId = configurationType.Id };
+        _dbContext.Add(configuration);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var createRow = await SingleAuditRowAsync(nameof(Configuration), configuration.Id.ToString(), AuditAction.Create);
+        createRow.NewValues!.ShouldContain("\"ConfigurationTypeName\":\"Type\"");
+        createRow.NewValues!.ShouldNotContain("CompanyName");
     }
 
     [Fact]

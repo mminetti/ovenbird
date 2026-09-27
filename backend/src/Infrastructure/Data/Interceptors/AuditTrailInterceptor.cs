@@ -44,17 +44,17 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
     private readonly IUser _user = user;
     private readonly List<(AuditTrail Row, EntityEntry Entry)> _pendingCreates = [];
 
-    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken cancellationToken = default)
     {
         if (eventData.Context is { } context)
         {
-            CaptureAuditTrail(context);
+            await CaptureAuditTrail(context, cancellationToken);
         }
 
-        return base.SavingChangesAsync(eventData, result, cancellationToken);
+        return await base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
     public override async ValueTask<int> SavedChangesAsync(
@@ -67,7 +67,8 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
             foreach (var (row, entry) in _pendingCreates)
             {
                 row.EntityId = GetEntityId(entry, useCurrentValues: true);
-                row.NewValues = SerializeValues(ExcludeAuditableStamps(entry.Properties), current: true);
+                row.NewValues = await SerializeValues(
+                    context, entry, ExcludeAuditableStamps(entry.Properties), current: true, cancellationToken);
             }
 
             _pendingCreates.Clear();
@@ -78,7 +79,7 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
         return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
-    private void CaptureAuditTrail(DbContext context)
+    private async Task CaptureAuditTrail(DbContext context, CancellationToken cancellationToken)
     {
         _pendingCreates.Clear();
 
@@ -101,7 +102,7 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                 continue;
             }
 
-            var row = BuildAuditRow(entry, utcNow);
+            var row = await BuildAuditRow(context, entry, utcNow, cancellationToken);
 
             if (row is null)
             {
@@ -117,7 +118,8 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
         }
     }
 
-    private AuditTrail? BuildAuditRow(EntityEntry entry, DateTimeOffset utcNow)
+    private async Task<AuditTrail?> BuildAuditRow(
+        DbContext context, EntityEntry entry, DateTimeOffset utcNow, CancellationToken cancellationToken)
     {
         var entityType = GetEntityTypeName(entry);
 
@@ -131,7 +133,8 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                     Action = AuditAction.Create,
                     UserId = _user.Id,
                     TimestampUtc = utcNow,
-                    NewValues = SerializeValues(ExcludeAuditableStamps(entry.Properties), current: true),
+                    NewValues = await SerializeValues(
+                        context, entry, ExcludeAuditableStamps(entry.Properties), current: true, cancellationToken),
                     References = BuildReferences(entry, entityType, useCurrentValues: true)
                 };
 
@@ -143,7 +146,8 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                     Action = AuditAction.Delete,
                     UserId = _user.Id,
                     TimestampUtc = utcNow,
-                    OldValues = SerializeValues(ExcludeAuditableStamps(entry.Properties), current: false),
+                    OldValues = await SerializeValues(
+                        context, entry, ExcludeAuditableStamps(entry.Properties), current: false, cancellationToken),
                     References = BuildReferences(entry, entityType, useCurrentValues: false)
                 };
 
@@ -164,8 +168,8 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                     Action = AuditAction.Update,
                     UserId = _user.Id,
                     TimestampUtc = utcNow,
-                    OldValues = SerializeValues(modified, current: false),
-                    NewValues = SerializeValues(modified, current: true),
+                    OldValues = await SerializeValues(context, entry, modified, current: false, cancellationToken),
+                    NewValues = await SerializeValues(context, entry, modified, current: true, cancellationToken),
                     References = BuildReferences(entry, entityType, useCurrentValues: true)
                 };
 
@@ -229,12 +233,59 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
         return references;
     }
 
-    private static string SerializeValues(IEnumerable<PropertyEntry> properties, bool current)
+    private static async Task<string> SerializeValues(
+        DbContext context, EntityEntry entry, IEnumerable<PropertyEntry> properties, bool current, CancellationToken cancellationToken)
     {
         var values = properties.ToDictionary(
             p => p.Metadata.Name,
             p => current ? p.CurrentValue : p.OriginalValue);
 
+        foreach (var (fkProperty, principalType, labelProperty) in DiscoverLabelableFks(entry))
+        {
+            if (!values.TryGetValue(fkProperty, out var id) || id is null)
+            {
+                continue;
+            }
+
+            values[labelProperty] = await ResolveNameAsync(context, principalType, id, cancellationToken);
+        }
+
         return JsonSerializer.Serialize(values);
     }
+
+    // Discovers labelable FKs from EF's own model metadata rather than a hand-maintained map,
+    // so a new audited entity's foreign keys are picked up automatically - no interceptor edit
+    // needed, only the referenced type opting in via IHasDisplayName (see ResolveNameAsync).
+    private static IEnumerable<(string FkProperty, Type PrincipalType, string LabelProperty)> DiscoverLabelableFks(EntityEntry entry)
+    {
+        foreach (var fk in entry.Metadata.GetForeignKeys())
+        {
+            if (fk.Properties.Count != 1)
+            {
+                continue;
+            }
+
+            var fkProperty = fk.Properties[0].Name;
+
+            if (!fkProperty.EndsWith("Id", StringComparison.Ordinal) || fkProperty.Length == 2)
+            {
+                continue;
+            }
+
+            var principalType = fk.PrincipalEntityType.ClrType;
+
+            if (!typeof(IHasDisplayName).IsAssignableFrom(principalType))
+            {
+                continue;
+            }
+
+            yield return (fkProperty, principalType, fkProperty[..^2] + "Name");
+        }
+    }
+
+    // FindAsync checks the change tracker's locally-tracked entities (even ones with a
+    // temporary key, e.g. a new parent created in the same SaveChanges call) before it ever
+    // queries the database.
+    private static async Task<string?> ResolveNameAsync(DbContext context, Type principalType, object id, CancellationToken cancellationToken) =>
+        (await context.FindAsync(principalType, [id], cancellationToken) as IHasDisplayName)?.Name;
 }
