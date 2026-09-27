@@ -28,8 +28,7 @@ public class ListAuditTrailQueryService(ReadDbContext db) : IListAuditTrailQuery
                 a.UserId,
                 a.TimestampUtc,
                 a.OldValues,
-                a.NewValues,
-                a.AffectedColumns))
+                a.NewValues))
             .AsNoTracking()
             .ToListAsync(ct);
 

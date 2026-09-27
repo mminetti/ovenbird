@@ -25,9 +25,6 @@ public class AuditTrailConfiguration : IEntityTypeConfiguration<AuditTrail>
         builder.Property(x => x.NewValues)
             .HasColumnType("nvarchar(max)");
 
-        builder.Property(x => x.AffectedColumns)
-            .HasColumnType("nvarchar(max)");
-
         builder.HasIndex(x => new { x.EntityType, x.EntityId });
 
         // NoAction: references are informational lookups, never a constraint on the

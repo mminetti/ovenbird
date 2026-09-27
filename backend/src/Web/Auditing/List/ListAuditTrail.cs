@@ -71,8 +71,7 @@ public sealed class ListAuditTrailMapper
                 a.UserId,
                 a.TimestampUtc,
                 a.OldValues,
-                a.NewValues,
-                a.AffectedColumns))
+                a.NewValues))
             .ToList();
 
         return new ListAuditTrailResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

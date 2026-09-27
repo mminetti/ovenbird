@@ -166,7 +166,6 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
                     TimestampUtc = utcNow,
                     OldValues = SerializeValues(modified, current: false),
                     NewValues = SerializeValues(modified, current: true),
-                    AffectedColumns = JsonSerializer.Serialize(modified.Select(p => p.Metadata.Name)),
                     References = BuildReferences(entry, entityType, useCurrentValues: true)
                 };
 

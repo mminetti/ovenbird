@@ -26,7 +26,6 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         createRow.NewValues!.ShouldContain("\"Name\":\"Acme\"");
         createRow.NewValues!.ShouldNotContain("CreatedAtUtc");
         createRow.NewValues!.ShouldNotContain("LastModifiedBy");
-        createRow.AffectedColumns.ShouldBeNull();
         createRow.References.ShouldBeEmpty();
         createRow.UserId.ShouldBe("test-user");
 
@@ -39,8 +38,8 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
 
         // Only Name was actually changed; repository.UpdateAsync's call to DbContext.Update
         // marks every scalar property IsModified, so this guards against that leaking through
-        // as spurious affected columns (e.g. MarketId, TimeZoneId, which were never touched).
-        JsonSerializer.Deserialize<string[]>(updateRow.AffectedColumns!).ShouldBe(["Name"]);
+        // as spurious changed values (e.g. MarketId, TimeZoneId, which were never touched).
+        JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(updateRow.NewValues!)!.Keys.ShouldBe(["Name"]);
 
         var companyId = company.Id;
         _dbContext.Remove(company);

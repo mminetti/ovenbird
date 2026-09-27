@@ -8,5 +8,4 @@ public record AuditTrailRecord(
     string? UserId,
     DateTimeOffset TimestampUtc,
     string? OldValues,
-    string? NewValues,
-    string? AffectedColumns);
+    string? NewValues);
