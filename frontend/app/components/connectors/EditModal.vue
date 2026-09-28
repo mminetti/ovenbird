@@ -13,9 +13,11 @@ const emit = defineEmits<{
 }>()
 
 const fieldSchema = z.object({
+	id: z.number().optional(),
 	name: z.string().min(1, 'Field name is required').max(200, 'Field name is too long'),
 	value: z.string().optional(),
-	isSecret: z.boolean()
+	isSecret: z.boolean(),
+	operation: z.enum(['create', 'update', 'delete']).optional()
 })
 
 const schema = z.object({
@@ -109,6 +111,7 @@ async function loadConnector() {
 		state.connectorTypeId = connector.connectorTypeId
 		state.connectorImplementationId = connector.connectorImplementationId
 		state.fields = connector.fields.map(field => ({
+			id: field.id,
 			name: field.name,
 			value: field.value ?? undefined,
 			isSecret: field.isSecret

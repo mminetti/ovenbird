@@ -8,9 +8,11 @@ export interface ConnectorsResponse {
 }
 
 interface ConnectorFieldPayload {
+	id?: unknown
 	name?: unknown
 	value?: unknown
 	isSecret?: unknown
+	operation?: unknown
 }
 
 function toFieldPayload(fields: unknown): Pick<ConnectorField, 'name' | 'value' | 'isSecret'>[] {
@@ -25,6 +27,22 @@ function toFieldPayload(fields: unknown): Pick<ConnectorField, 'name' | 'value' 
 			isSecret: Boolean(field?.isSecret)
 		}))
 		.filter(field => field.name.length > 0)
+}
+
+function toUpdateFieldPayload(fields: unknown) {
+	if (!Array.isArray(fields)) {
+		return []
+	}
+
+	return (fields as ConnectorFieldPayload[])
+		.map(field => ({
+			id: typeof field?.id === 'number' && field.id > 0 ? field.id : undefined,
+			name: typeof field?.name === 'string' ? field.name.trim() : '',
+			value: typeof field?.value === 'string' ? field.value : undefined,
+			isSecret: Boolean(field?.isSecret),
+			operation: typeof field?.operation === 'string' ? field.operation : ''
+		}))
+		.filter(field => field.operation.length > 0 && field.name.length > 0)
 }
 
 export default defineEventHandler(async (event) => {
@@ -61,7 +79,7 @@ export default defineEventHandler(async (event) => {
 					name,
 					description,
 					connectorImplementationId: Number(body?.connectorImplementationId),
-					fields: toFieldPayload(body?.fields)
+					fields: toUpdateFieldPayload(body?.fields)
 				}
 			})
 		}

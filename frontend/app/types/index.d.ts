@@ -84,6 +84,7 @@ export interface ConnectorField {
 	name: string
 	value?: string | null
 	isSecret: boolean
+	operation?: 'create' | 'update' | 'delete'
 }
 
 export interface Connector {
@@ -121,6 +122,7 @@ export interface ConfigurationField {
 	id?: number
 	name: string
 	value?: string | null
+	operation?: 'create' | 'update' | 'delete'
 }
 
 export interface ConfigurationConnector {

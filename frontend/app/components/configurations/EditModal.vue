@@ -13,8 +13,10 @@ const emit = defineEmits<{
 }>()
 
 const fieldSchema = z.object({
+	id: z.number().optional(),
 	name: z.string().min(1, 'Field name is required').max(200, 'Field name is too long'),
-	value: z.string().optional()
+	value: z.string().optional(),
+	operation: z.enum(['create', 'update', 'delete']).optional()
 })
 
 const schema = z.object({
@@ -110,6 +112,7 @@ async function loadConfiguration() {
 		state.companyId = configuration.companyId ?? undefined
 		state.connectorIds = configuration.connectors.map(connector => connector.id)
 		state.fields = configuration.fields.map(field => ({
+			id: field.id,
 			name: field.name,
 			value: field.value ?? undefined
 		}))

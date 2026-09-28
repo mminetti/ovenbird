@@ -28,7 +28,7 @@ public class UpdateConfiguration(IMessageBus bus)
                 ConfigurationTypeId = 1,
                 CompanyId = 1,
                 ConnectorIds = [1, 2],
-                Fields = [new ConfigurationFieldRequest { Name = "batchSize", Value = "100" }]
+                Fields = [new UpdateConfigurationFieldRequest { Id = 1, Name = "batchSize", Value = "100", Operation = "update" }]
             };
 
             s.Responses[204] = Endpoints.Response200OkUpdated;
@@ -51,7 +51,7 @@ public class UpdateConfiguration(IMessageBus bus)
         ExecuteAsync(UpdateConfigurationRequest request, CancellationToken ct)
     {
         var fields = request.Fields
-            .Select(f => new ConfigurationFieldInput(f.Name, f.Value))
+            .Select(f => new UpdateConfigurationFieldInput(f.Id, f.Name, f.Value, f.Operation))
             .ToList();
 
         var result = await bus.InvokeAsync<Result>(

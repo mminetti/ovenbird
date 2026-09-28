@@ -18,16 +18,40 @@ public class UpdateConnectorHandler(IRepository<Connector> repository)
         connector.Description = command.Description;
         connector.ConnectorImplementationId = command.ConnectorImplementationId;
 
-        connector.ConnectorFields.Clear();
-
         foreach (var field in command.Fields)
         {
-            connector.ConnectorFields.Add(new ConnectorField
+            switch (field.Operation)
             {
-                Name = field.Name,
-                Value = field.Value,
-                IsSecret = field.IsSecret
-            });
+                case "create":
+                    connector.ConnectorFields.Add(new ConnectorField
+                    {
+                        Name = field.Name,
+                        Value = field.Value,
+                        IsSecret = field.IsSecret
+                    });
+                    break;
+
+                case "update":
+                    var existingField = connector.ConnectorFields.FirstOrDefault(f => f.Id == field.Id);
+                    if (existingField is not null)
+                    {
+                        existingField.Name = field.Name;
+                        existingField.Value = field.Value;
+                        existingField.IsSecret = field.IsSecret;
+                    }
+                    break;
+
+                case "delete":
+                    var fieldToRemove = connector.ConnectorFields.FirstOrDefault(f => f.Id == field.Id);
+                    if (fieldToRemove is not null)
+                    {
+                        connector.ConnectorFields.Remove(fieldToRemove);
+                    }
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Invalid field operation '{field.Operation}'.");
+            }
         }
 
         await repository.UpdateAsync(connector, ct);

@@ -26,7 +26,7 @@ public class UpdateConnector(IMessageBus bus)
                 Id = 1,
                 Name = "Market data drop folder",
                 ConnectorImplementationId = 3,
-                Fields = [new ConnectorFieldRequest { Name = "host", Value = "localhost" }]
+                Fields = [new UpdateConnectorFieldRequest { Id = 1, Name = "host", Value = "localhost", Operation = "update" }]
             };
 
             s.Responses[204] = Endpoints.Response200OkUpdated;
@@ -49,7 +49,7 @@ public class UpdateConnector(IMessageBus bus)
         ExecuteAsync(UpdateConnectorRequest request, CancellationToken ct)
     {
         var fields = request.Fields
-            .Select(f => new ConnectorFieldInput(f.Name, f.Value, f.IsSecret))
+            .Select(f => new UpdateConnectorFieldInput(f.Id, f.Name, f.Value, f.IsSecret, f.Operation))
             .ToList();
 
         var result = await bus.InvokeAsync<Result>(

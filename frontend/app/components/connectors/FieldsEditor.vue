@@ -1,8 +1,10 @@
 <script setup lang="ts">
 export interface ConnectorFieldItem {
+	id?: number
 	name: string
 	value?: string
 	isSecret: boolean
+	operation?: 'create' | 'update' | 'delete'
 }
 
 const model = defineModel<ConnectorFieldItem[]>({ default: () => [] })
@@ -17,12 +19,44 @@ const entityTabs = [{
 	value: 'fields'
 }]
 
+let nextTempId = -1
+
+const visibleFields = computed(() =>
+	model.value
+		.map((field, index) => ({ field, index }))
+		.filter(({ field }) => field.operation !== 'delete')
+)
+
 function addField() {
-	model.value = [...model.value, { name: '', value: '', isSecret: false }]
+	model.value = [...model.value, { id: nextTempId--, name: '', value: '', isSecret: false, operation: 'create' }]
 }
 
 function removeField(index: number) {
-	model.value = model.value.filter((_, i) => i !== index)
+	const field = model.value[index]
+	if (!field) {
+		return
+	}
+
+	if (field.operation === 'create') {
+		model.value = model.value.filter((_, i) => i !== index)
+		return
+	}
+
+	model.value = model.value.map((f, i) => i === index ? { ...f, operation: 'delete' } : f)
+}
+
+function onFieldChange(index: number, patch: Partial<ConnectorFieldItem>) {
+	model.value = model.value.map((f, i) => {
+		if (i !== index) {
+			return f
+		}
+
+		const updated = { ...f, ...patch }
+		if (!updated.operation) {
+			updated.operation = 'update'
+		}
+		return updated
+	})
 }
 </script>
 
@@ -52,37 +86,43 @@ function removeField(index: number) {
 
 		<template #content="{ item }">
 			<div v-if="item.value === 'fields'" class="mt-3 space-y-3">
-				<div v-if="!model.length" class="rounded-lg border border-dashed border-default px-3 py-6 text-center text-sm text-muted">
+				<div v-if="!visibleFields.length" class="rounded-lg border border-dashed border-default px-3 py-6 text-center text-sm text-muted">
 					No fields
 				</div>
 
 				<div
-					v-for="(field, index) in model"
-					:key="index"
+					v-for="{ field, index } in visibleFields"
+					:key="field.id"
 					class="rounded-lg border border-default p-3 space-y-2"
 				>
 					<div class="flex items-center gap-2">
 						<UFormField :name="`fields.${index}.name`" class="mb-0 w-3/4">
 							<UInput
-								v-model="field.name"
+								:model-value="field.name"
 								class="w-full"
 								placeholder="Field name"
 								:disabled="props.disabled"
+								@update:model-value="(value) => onFieldChange(index, { name: String(value) })"
 							/>
 						</UFormField>
 
 						<UFormField label="Secret" orientation="horizontal" class="mb-0 ms-auto">
-							<USwitch v-model="field.isSecret" :disabled="props.disabled" />
+							<USwitch
+								:model-value="field.isSecret"
+								:disabled="props.disabled"
+								@update:model-value="(value) => onFieldChange(index, { isSecret: value })"
+							/>
 						</UFormField>
 					</div>
 
 					<div class="flex items-center gap-2">
 						<UFormField :name="`fields.${index}.value`" class="mb-0 flex-1">
 							<UInput
-								v-model="field.value"
+								:model-value="field.value"
 								class="w-full"
 								:placeholder="field.isSecret ? 'Secret reference name (e.g. connector-ftp-password)' : 'Value'"
 								:disabled="props.disabled"
+								@update:model-value="(value) => onFieldChange(index, { value: String(value) })"
 							/>
 						</UFormField>
 

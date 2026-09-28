@@ -8,8 +8,10 @@ export interface ConfigurationsResponse {
 }
 
 interface ConfigurationFieldPayload {
+	id?: unknown
 	name?: unknown
 	value?: unknown
+	operation?: unknown
 }
 
 function toFieldPayload(fields: unknown): Pick<ConfigurationField, 'name' | 'value'>[] {
@@ -23,6 +25,21 @@ function toFieldPayload(fields: unknown): Pick<ConfigurationField, 'name' | 'val
 			value: typeof field?.value === 'string' ? field.value : undefined
 		}))
 		.filter(field => field.name.length > 0)
+}
+
+function toUpdateFieldPayload(fields: unknown) {
+	if (!Array.isArray(fields)) {
+		return []
+	}
+
+	return (fields as ConfigurationFieldPayload[])
+		.map(field => ({
+			id: typeof field?.id === 'number' && field.id > 0 ? field.id : undefined,
+			name: typeof field?.name === 'string' ? field.name.trim() : '',
+			value: typeof field?.value === 'string' ? field.value : undefined,
+			operation: typeof field?.operation === 'string' ? field.operation : ''
+		}))
+		.filter(field => field.operation.length > 0 && field.name.length > 0)
 }
 
 function toConnectorIds(connectorIds: unknown): number[] {
@@ -71,7 +88,7 @@ export default defineEventHandler(async (event) => {
 					configurationTypeId: Number(body?.configurationTypeId),
 					companyId: body?.companyId ? Number(body.companyId) : undefined,
 					connectorIds: toConnectorIds(body?.connectorIds),
-					fields: toFieldPayload(body?.fields)
+					fields: toUpdateFieldPayload(body?.fields)
 				}
 			})
 		}

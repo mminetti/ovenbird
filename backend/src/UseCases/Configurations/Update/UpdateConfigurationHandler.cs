@@ -32,15 +32,38 @@ public class UpdateConfigurationHandler(
             configuration.Connectors.Add(connector);
         }
 
-        configuration.ConfigurationFields.Clear();
-
         foreach (var field in command.Fields)
         {
-            configuration.ConfigurationFields.Add(new ConfigurationField
+            switch (field.Operation)
             {
-                Name = field.Name,
-                Value = field.Value
-            });
+                case "create":
+                    configuration.ConfigurationFields.Add(new ConfigurationField
+                    {
+                        Name = field.Name,
+                        Value = field.Value
+                    });
+                    break;
+
+                case "update":
+                    var existingField = configuration.ConfigurationFields.FirstOrDefault(f => f.Id == field.Id);
+                    if (existingField is not null)
+                    {
+                        existingField.Name = field.Name;
+                        existingField.Value = field.Value;
+                    }
+                    break;
+
+                case "delete":
+                    var fieldToRemove = configuration.ConfigurationFields.FirstOrDefault(f => f.Id == field.Id);
+                    if (fieldToRemove is not null)
+                    {
+                        configuration.ConfigurationFields.Remove(fieldToRemove);
+                    }
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Invalid field operation '{field.Operation}'.");
+            }
         }
 
         await repository.UpdateAsync(configuration, ct);
