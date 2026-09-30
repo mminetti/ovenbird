@@ -1,4 +1,4 @@
-using Core.Shared;
+﻿using Core.Shared;
 using Core.Shared.Specifications;
 
 namespace UseCases.Configurations.Update;

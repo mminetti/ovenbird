@@ -15,7 +15,8 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
     private static readonly HashSet<string> _auditedSharedTypeEntities =
     [
         "UserRole",
-        "RolePermission"
+        "RolePermission",
+        "ConfigurationConnector"
     ];
 
     // IAuditableEntity's stamps (CreatedBy/CreatedAtUtc/LastModifiedBy/LastModifiedAtUtc) are
@@ -36,6 +37,7 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
     {
         ["UserRole"] = [("UserId", nameof(User)), ("RoleId", nameof(Role))],
         ["RolePermission"] = [("RoleId", nameof(Role)), ("PermissionId", nameof(Permission))],
+        ["ConfigurationConnector"] = [("ConfigurationId", nameof(Configuration)), ("ConnectorId", nameof(Connector))],
         [nameof(ConfigurationField)] = [("ConfigurationId", nameof(Configuration))],
         [nameof(ConnectorField)] = [("ConnectorId", nameof(Connector))]
     };

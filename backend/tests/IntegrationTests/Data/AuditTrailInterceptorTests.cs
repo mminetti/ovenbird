@@ -215,6 +215,52 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
     }
 
     [Fact]
+    public async Task AddingRemovingConnectorFromConfiguration_ProducesConfigurationConnectorAuditRowsWithBothReferences()
+    {
+        var configurationType = new ConfigurationType { Name = "Type" };
+        _dbContext.Add(configurationType);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var configuration = new Configuration { Name = "Config", ConfigurationTypeId = configurationType.Id };
+        _dbContext.Add(configuration);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var connectorType = new ConnectorType { Name = "Type" };
+        _dbContext.Add(connectorType);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var connectorImplementation = new ConnectorImplementation
+        {
+            Name = "Implementation",
+            Identifier = "impl",
+            ConnectorTypeId = connectorType.Id
+        };
+        _dbContext.Add(connectorImplementation);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var connector = new Connector { Name = "Connector", ConnectorImplementationId = connectorImplementation.Id };
+        _dbContext.Add(connector);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        // Join table key order is (ConfigurationId, ConnectorId) - see ConfigurationConfiguration.HasKey.
+        var joinEntityId = $"{configuration.Id}:{connector.Id}";
+
+        configuration.Connectors.Add(connector);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var addRow = await SingleAuditRowAsync("ConfigurationConnector", joinEntityId, AuditAction.Create);
+        addRow.References
+            .Select(r => (r.ReferencedEntityType, r.ReferencedEntityId))
+            .ShouldBe([(nameof(Configuration), configuration.Id.ToString()), (nameof(Connector), connector.Id.ToString())], ignoreOrder: true);
+
+        configuration.Connectors.Remove(connector);
+        await _dbContext.SaveChangesAsync(Ct);
+
+        var removeRow = await SingleAuditRowAsync("ConfigurationConnector", joinEntityId, AuditAction.Delete);
+        removeRow.References.Count.ShouldBe(2);
+    }
+
+    [Fact]
     public async Task CreatingConfigurationWithFieldInSameSaveChanges_ReferenceUsesRealGeneratedId()
     {
         // Mirrors CreateConfigurationHandler, which adds the Configuration and its
