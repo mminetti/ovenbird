@@ -32,6 +32,7 @@ type Schema = z.output<typeof schema>
 
 const open = ref(false)
 const loading = ref(true)
+const viewMode = ref<'form' | 'audit'>('form')
 const form = ref<{ submit: () => void }>()
 const configurationTypes = ref<DataListItem[]>([])
 const companies = ref<DataListItem[]>([])
@@ -126,6 +127,8 @@ async function loadConfiguration() {
 }
 
 watch(open, async (isOpen) => {
+	viewMode.value = 'form'
+
 	if (isOpen) {
 		await loadConfiguration()
 		return
@@ -178,90 +181,116 @@ defineExpose({
 			<ModalLoadingBar :loading="loading" />
 
 			<ModalApiError :error="modalError" class="mb-4" />
-			<UForm
-				ref="form"
-				:key="String(open)"
-				:schema="schema"
-				:validate-on="[]"
-				:state="state"
-				class="space-y-4"
-				@submit="onSubmit"
+			<Transition
+				enter-active-class="transition duration-150 ease-out"
+				enter-from-class="opacity-0"
+				enter-to-class="opacity-100"
+				leave-active-class="transition duration-100 ease-in"
+				leave-from-class="opacity-100"
+				leave-to-class="opacity-0"
+				mode="out-in"
 			>
-				<UFormField label="Name" name="name">
-					<UInput v-model="state.name" class="w-full" :disabled="loading" />
-				</UFormField>
+				<AuditTrailPanel
+					v-if="viewMode === 'audit'"
+					entity-type="Configuration"
+					:entity-id="configurationId"
+				/>
+				<UForm
+					v-else
+					ref="form"
+					:key="String(open)"
+					:schema="schema"
+					:validate-on="[]"
+					:state="state"
+					class="space-y-4"
+					@submit="onSubmit"
+				>
+					<UFormField label="Name" name="name">
+						<UInput v-model="state.name" class="w-full" :disabled="loading" />
+					</UFormField>
 
-				<UFormField label="Description" name="description">
-					<UTextarea v-model="state.description" class="w-full" :disabled="loading" />
-				</UFormField>
+					<UFormField label="Description" name="description">
+						<UTextarea v-model="state.description" class="w-full" :disabled="loading" />
+					</UFormField>
 
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<UFormField label="Type" name="configurationTypeId">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="Type" name="configurationTypeId">
+							<USelectMenu
+								v-model="state.configurationTypeId"
+								:items="configurationTypeItems"
+								value-key="value"
+								label-key="label"
+								placeholder="Select a type"
+								class="w-full"
+								:disabled="loading"
+							/>
+						</UFormField>
+
+						<UFormField label="Company" name="companyId">
+							<USelectMenu
+								v-model="state.companyId"
+								:items="companyItems"
+								value-key="value"
+								label-key="label"
+								placeholder="Select a company"
+								class="w-full"
+								:disabled="loading"
+							/>
+						</UFormField>
+					</div>
+
+					<UFormField label="Connectors" name="connectorIds">
 						<USelectMenu
-							v-model="state.configurationTypeId"
-							:items="configurationTypeItems"
+							v-model="state.connectorIds"
+							:items="connectorItems"
 							value-key="value"
 							label-key="label"
-							placeholder="Select a type"
+							multiple
+							placeholder="Select connectors"
 							class="w-full"
 							:disabled="loading"
 						/>
 					</UFormField>
 
-					<UFormField label="Company" name="companyId">
-						<USelectMenu
-							v-model="state.companyId"
-							:items="companyItems"
-							value-key="value"
-							label-key="label"
-							placeholder="Select a company"
-							class="w-full"
-							:disabled="loading"
-						/>
-					</UFormField>
-				</div>
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="Updated By">
+							<UInput
+								:model-value="lastModifiedBy ?? undefined"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+						<UFormField label="Updated At">
+							<UInput
+								:model-value="formattedLastModifiedAtUtc"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+					</div>
 
-				<UFormField label="Connectors" name="connectorIds">
-					<USelectMenu
-						v-model="state.connectorIds"
-						:items="connectorItems"
-						value-key="value"
-						label-key="label"
-						multiple
-						placeholder="Select connectors"
-						class="w-full"
-						:disabled="loading"
-					/>
-				</UFormField>
-
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<UFormField label="Updated By">
-						<UInput
-							:model-value="lastModifiedBy ?? undefined"
-							class="w-full"
-							:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-							disabled
-						/>
+					<UFormField label="Fields" name="fields">
+						<ConfigurationsFieldsEditor v-model="state.fields" :disabled="loading" />
 					</UFormField>
-					<UFormField label="Updated At">
-						<UInput
-							:model-value="formattedLastModifiedAtUtc"
-							class="w-full"
-							:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-							disabled
-						/>
-					</UFormField>
-				</div>
-
-				<UFormField label="Fields" name="fields">
-					<ConfigurationsFieldsEditor v-model="state.fields" :disabled="loading" />
-				</UFormField>
-			</UForm>
+				</UForm>
+			</Transition>
 		</template>
 
 		<template #footer>
 			<div class="flex justify-end gap-2 w-full">
 				<UButton
+					v-if="viewMode === 'form'"
+					label="Audit"
+					icon="i-lucide-history"
+					color="neutral"
+					variant="ghost"
+					:disabled="loading"
+					@click="viewMode = 'audit'"
+				/>
+				<UButton
+					v-if="viewMode === 'form'"
 					label="Cancel"
 					color="neutral"
 					variant="subtle"
@@ -269,12 +298,21 @@ defineExpose({
 					@click="open = false"
 				/>
 				<UButton
+					v-if="viewMode === 'form'"
 					label="Save"
 					color="primary"
 					variant="solid"
 					:loading="loading"
 					:disabled="loading"
 					@click="form?.submit()"
+				/>
+				<UButton
+					v-if="viewMode === 'audit'"
+					label="Back to edit"
+					icon="i-lucide-arrow-left"
+					color="neutral"
+					variant="subtle"
+					@click="viewMode = 'form'"
 				/>
 			</div>
 		</template>

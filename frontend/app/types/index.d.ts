@@ -118,6 +118,19 @@ export interface Market {
 	lastModifiedBy: string | null
 }
 
+export type AuditAction = 'Create' | 'Update' | 'Delete'
+
+export interface AuditTrailRecord {
+	id: number
+	entityType: string
+	entityId: string
+	action: AuditAction
+	userId: string | null
+	timestampUtc: string
+	oldValues: string | null
+	newValues: string | null
+}
+
 export interface ConfigurationField {
 	id?: number
 	name: string
