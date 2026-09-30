@@ -1,6 +1,8 @@
-﻿namespace Core.Shared;
+﻿using Core.Common;
 
-public class ConnectorType : EntityBase<int>
+namespace Core.Shared;
+
+public class ConnectorType : EntityBase<int>, IHasDisplayName
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
