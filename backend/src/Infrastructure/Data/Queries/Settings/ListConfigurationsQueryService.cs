@@ -4,7 +4,7 @@ using Infrastructure.Data.Queries.Common;
 using UseCases.Settings.Configurations;
 using UseCases.Settings.Configurations.List;
 
-namespace Infrastructure.Data.Queries.Shared;
+namespace Infrastructure.Data.Queries.Settings;
 
 public class ListConfigurationsQueryService(ReadDbContext db, IQueryPropertyMapper<Configuration> propertyMapper)
     : PagedQueryServiceBase<Configuration, ConfigurationDto>(propertyMapper), IListConfigurationsQueryService

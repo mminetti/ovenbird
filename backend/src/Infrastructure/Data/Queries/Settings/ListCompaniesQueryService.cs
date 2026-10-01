@@ -4,7 +4,7 @@ using Infrastructure.Data.Queries.Common;
 using UseCases.Settings.Companies;
 using UseCases.Settings.Companies.List;
 
-namespace Infrastructure.Data.Queries.Shared;
+namespace Infrastructure.Data.Queries.Settings;
 
 public class ListCompaniesQueryService(ReadDbContext db, IQueryPropertyMapper<Company> propertyMapper)
     : PagedQueryServiceBase<Company, CompanyDto>(propertyMapper), IListCompaniesQueryService

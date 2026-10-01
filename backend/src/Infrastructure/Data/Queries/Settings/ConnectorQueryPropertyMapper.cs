@@ -1,7 +1,7 @@
 ﻿using Core.Settings;
 using Infrastructure.Data.Queries.Common;
 
-namespace Infrastructure.Data.Queries.Shared;
+namespace Infrastructure.Data.Queries.Settings;
 
 /// <summary>
 /// Maps ConnectorDto property names to Connector entity property names for search and ordering.

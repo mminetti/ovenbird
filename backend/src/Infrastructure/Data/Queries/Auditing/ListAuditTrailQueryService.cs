@@ -3,7 +3,7 @@ using UseCases.Auditing;
 using UseCases.Auditing.List;
 using UseCases.Common;
 
-namespace Infrastructure.Data.Queries.Common;
+namespace Infrastructure.Data.Queries.Auditing;
 
 public class ListAuditTrailQueryService(ReadDbContext db) : IListAuditTrailQueryService
 {

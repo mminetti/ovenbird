@@ -4,7 +4,7 @@ using Core.Common;
 using Core.Market;
 using Core.Security;
 using Core.Settings;
-using Infrastructure.Data.Queries.Common;
+using Infrastructure.Data.Queries.Auditing;
 
 namespace IntegrationTests.Data;
 

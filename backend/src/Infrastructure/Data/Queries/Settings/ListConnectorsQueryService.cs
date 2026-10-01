@@ -4,7 +4,7 @@ using Infrastructure.Data.Queries.Common;
 using UseCases.Settings.Connectors;
 using UseCases.Settings.Connectors.List;
 
-namespace Infrastructure.Data.Queries.Shared;
+namespace Infrastructure.Data.Queries.Settings;
 
 public class ListConnectorsQueryService(ReadDbContext db, IQueryPropertyMapper<Connector> propertyMapper)
     : PagedQueryServiceBase<Connector, ConnectorDto>(propertyMapper), IListConnectorsQueryService

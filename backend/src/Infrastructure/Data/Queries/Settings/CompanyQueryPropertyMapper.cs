@@ -1,8 +1,7 @@
-using Core.Market;
 using Core.Settings;
 using Infrastructure.Data.Queries.Common;
 
-namespace Infrastructure.Data.Queries.Shared;
+namespace Infrastructure.Data.Queries.Settings;
 
 /// <summary>
 /// Maps CompanyDto property names to Company entity property names for search and ordering.
@@ -13,14 +12,14 @@ public class CompanyQueryPropertyMapper : IQueryPropertyMapper<Company>
     {
         ["id"] = nameof(Company.Id),
         ["name"] = nameof(Company.Name),
-        ["marketName"] = $"{nameof(Company.Market)}.{nameof(Market.Name)}",
+        ["marketName"] = $"{nameof(Company.Market)}.{nameof(Core.Market.Market.Name)}",
         ["timeZoneId"] = nameof(Company.TimeZoneId)
     };
 
     private static readonly string[] _searchableProperties =
     [
         nameof(Company.Name),
-        $"{nameof(Company.Market)}.{nameof(Market.Name)}"
+        $"{nameof(Company.Market)}.{nameof(Core.Market.Market.Name)}"
     ];
 
     public string? MapToEntityProperty(string dtoPropertyName) =>

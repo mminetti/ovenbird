@@ -1,7 +1,7 @@
 using Core.Settings;
 using Infrastructure.Data.Queries.Common;
 
-namespace Infrastructure.Data.Queries.Shared;
+namespace Infrastructure.Data.Queries.Settings;
 
 /// <summary>
 /// Maps ConfigurationDto property names to Configuration entity property names for search and ordering.
