@@ -5,7 +5,7 @@ using UseCases.Common.DataLists.Get;
 using Web.Extensions;
 using Web.Resources;
 
-namespace Web.DataLists.Get;
+namespace Web.Endpoints.Common.DataLists.Get;
 
 /// <summary>
 /// Endpoint to retrieve reference data for UI dropdowns.

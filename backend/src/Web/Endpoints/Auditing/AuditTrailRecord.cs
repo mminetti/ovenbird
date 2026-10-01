@@ -1,4 +1,4 @@
-namespace Web.Auditing;
+namespace Web.Endpoints.Auditing;
 
 public record AuditTrailRecord(
     long Id,

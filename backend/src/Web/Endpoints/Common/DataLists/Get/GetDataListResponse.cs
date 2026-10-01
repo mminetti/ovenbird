@@ -1,4 +1,4 @@
-namespace Web.DataLists.Get;
+namespace Web.Endpoints.Common.DataLists.Get;
 
 public record ValuePairRecord(string Id, string Name, string? ParentId = null);
 

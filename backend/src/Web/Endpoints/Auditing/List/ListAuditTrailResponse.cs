@@ -1,6 +1,6 @@
 using UseCases.Common;
 
-namespace Web.Auditing.List;
+namespace Web.Endpoints.Auditing.List;
 
 public record ListAuditTrailResponse : ItemPagedResult<AuditTrailRecord>
 {

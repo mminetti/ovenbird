@@ -1,7 +1,7 @@
 using FluentValidation;
 using UseCases.Common.Constants;
 
-namespace Web.Auditing.List;
+namespace Web.Endpoints.Auditing.List;
 
 public sealed class ListAuditTrailRequest
 {

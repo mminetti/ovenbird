@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using UseCases.Common.DataLists;
 
-namespace Web.DataLists.Get;
+namespace Web.Endpoints.Common.DataLists.Get;
 
 public sealed class GetDataListRequest
 {

@@ -5,7 +5,7 @@ using UseCases.Common;
 using UseCases.Common.Constants;
 using Web.Resources;
 
-namespace Web.Auditing.List;
+namespace Web.Endpoints.Auditing.List;
 
 public class ListAuditTrail(IMessageBus bus) : Endpoint<ListAuditTrailRequest, ListAuditTrailResponse, ListAuditTrailMapper>
 {
