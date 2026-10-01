@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using UseCases.DataLists;
+using UseCases.Common.DataLists;
 
 namespace Web.DataLists.Get;
 

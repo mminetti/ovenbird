@@ -1,4 +1,4 @@
-namespace UseCases.Markets.Create;
+﻿namespace UseCases.Market.Markets.Create;
 
 public class CreateMarketHandler(IRepository<Core.Market.Market> repository)
 {

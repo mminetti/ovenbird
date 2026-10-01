@@ -1,4 +1,4 @@
-namespace UseCases.Markets;
+﻿namespace UseCases.Market.Markets;
 
 public record MarketDto(
     int Id,

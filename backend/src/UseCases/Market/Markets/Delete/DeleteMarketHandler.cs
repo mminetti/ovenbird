@@ -1,4 +1,4 @@
-namespace UseCases.Markets.Delete;
+﻿namespace UseCases.Market.Markets.Delete;
 
 public class DeleteMarketHandler(IRepository<Core.Market.Market> repository)
 {

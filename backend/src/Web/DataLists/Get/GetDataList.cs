@@ -1,7 +1,7 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
-using UseCases.DataLists;
-using UseCases.DataLists.Get;
+using UseCases.Common.DataLists;
+using UseCases.Common.DataLists.Get;
 using Web.Extensions;
 using Web.Resources;
 

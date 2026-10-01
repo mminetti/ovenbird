@@ -1,8 +1,8 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Common;
-using UseCases.Markets;
-using UseCases.Markets.Get;
+using UseCases.Market.Markets;
+using UseCases.Market.Markets.Get;
 using Web.Extensions;
 using Web.Resources;
 

@@ -1,4 +1,4 @@
-namespace UseCases.Markets.List;
+﻿namespace UseCases.Market.Markets.List;
 
 public record ListMarketsQuery(
     int? Page = 1,

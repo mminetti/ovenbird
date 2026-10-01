@@ -1,4 +1,4 @@
-namespace UseCases.Markets.Update;
+﻿namespace UseCases.Market.Markets.Update;
 
 public record UpdateMarketCommand(
     int MarketId,

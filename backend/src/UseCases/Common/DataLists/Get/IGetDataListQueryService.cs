@@ -1,4 +1,6 @@
-namespace UseCases.DataLists.Get;
+﻿using UseCases.Common.DataLists;
+
+namespace UseCases.Common.DataLists.Get;
 
 public interface IGetDataListQueryService
 {

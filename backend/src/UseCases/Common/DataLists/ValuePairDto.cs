@@ -1,4 +1,4 @@
-namespace UseCases.DataLists;
+﻿namespace UseCases.Common.DataLists;
 
 /// <summary>
 /// A key-value pair for dropdown lists and reference data.

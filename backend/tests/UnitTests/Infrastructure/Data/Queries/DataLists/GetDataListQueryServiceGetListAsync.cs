@@ -1,10 +1,10 @@
-using Core.Market;
+﻿using Core.Market;
 using Core.Security;
 using Core.Settings;
 using Infrastructure.Data;
 using Infrastructure.Data.Queries.DataLists;
 using Microsoft.EntityFrameworkCore;
-using UseCases.DataLists;
+using UseCases.Common.DataLists;
 
 namespace UnitTests.Infrastructure.Data.Queries.DataLists;
 

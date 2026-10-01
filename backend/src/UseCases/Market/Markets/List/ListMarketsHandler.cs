@@ -1,4 +1,6 @@
-namespace UseCases.Markets.List;
+﻿using UseCases.Market.Markets;
+
+namespace UseCases.Market.Markets.List;
 
 public class ListMarketsHandler(IListMarketsQueryService query)
 {

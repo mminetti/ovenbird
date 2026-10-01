@@ -1,4 +1,6 @@
-namespace UseCases.Markets.Get;
+﻿using UseCases.Market.Markets;
+
+namespace UseCases.Market.Markets.Get;
 
 public class GetMarketHandler(IReadRepository<Core.Market.Market> repository)
 {

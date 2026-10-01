@@ -1,4 +1,4 @@
-namespace UseCases.DataLists;
+﻿namespace UseCases.Common.DataLists;
 
 /// <summary>
 /// Reference data for a specific data list type.

@@ -1,4 +1,4 @@
-namespace UseCases.DataLists;
+﻿namespace UseCases.Common.DataLists;
 
 /// <summary>
 /// Types of reference data available for UI dropdowns.

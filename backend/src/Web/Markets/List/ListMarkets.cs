@@ -1,7 +1,7 @@
-using Ardalis.Result;
+﻿using Ardalis.Result;
 using UseCases.Common;
-using UseCases.Markets;
-using UseCases.Markets.List;
+using UseCases.Market.Markets;
+using UseCases.Market.Markets.List;
 using Web.Resources;
 
 namespace Web.Markets.List;

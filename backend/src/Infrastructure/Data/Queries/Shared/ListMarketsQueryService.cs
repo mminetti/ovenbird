@@ -1,8 +1,8 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Core.Market;
 using Infrastructure.Data.Queries.Common;
-using UseCases.Markets;
-using UseCases.Markets.List;
+using UseCases.Market.Markets;
+using UseCases.Market.Markets.List;
 
 namespace Infrastructure.Data.Queries.Shared;
 

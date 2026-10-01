@@ -1,8 +1,8 @@
-using Core.Market;
+﻿using Core.Market;
 using Core.Security;
 using Core.Settings;
-using UseCases.DataLists;
-using UseCases.DataLists.Get;
+using UseCases.Common.DataLists;
+using UseCases.Common.DataLists.Get;
 
 namespace Infrastructure.Data.Queries.DataLists;
 

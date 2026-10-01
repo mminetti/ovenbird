@@ -1,5 +1,5 @@
-using UseCases.DataLists;
-using UseCases.DataLists.Get;
+﻿using UseCases.Common.DataLists;
+using UseCases.Common.DataLists.Get;
 
 namespace UnitTests.UseCases.DataLists;
 
