@@ -92,7 +92,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-	<USlideover v-model:open="open" title="New company">
+	<USlideover v-model:open="open" title="New company" :ui="{ content: 'max-w-2xl' }">
 		<UButton label="New company" icon="i-lucide-plus" class="ml-auto shrink-0" />
 
 		<template #body>
@@ -117,29 +117,31 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 					/>
 				</UFormField>
 
-				<UFormField label="Market" name="marketId">
-					<USelectMenu
-						v-model="state.marketId"
-						:items="marketItems"
-						value-key="value"
-						label-key="label"
-						placeholder="Select a market"
-						class="w-full"
-						:disabled="submitting || loadingLists"
-					/>
-				</UFormField>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<UFormField label="Market" name="marketId">
+						<USelectMenu
+							v-model="state.marketId"
+							:items="marketItems"
+							value-key="value"
+							label-key="label"
+							placeholder="Select a market"
+							class="w-full"
+							:disabled="submitting || loadingLists"
+						/>
+					</UFormField>
 
-				<UFormField label="Time zone" name="timeZoneId">
-					<USelectMenu
-						v-model="state.timeZoneId"
-						:items="timeZoneItems"
-						value-key="value"
-						label-key="label"
-						placeholder="Select a time zone"
-						class="w-full"
-						:disabled="submitting"
-					/>
-				</UFormField>
+					<UFormField label="Time zone" name="timeZoneId">
+						<USelectMenu
+							v-model="state.timeZoneId"
+							:items="timeZoneItems"
+							value-key="value"
+							label-key="label"
+							placeholder="Select a time zone"
+							class="w-full"
+							:disabled="submitting"
+						/>
+					</UFormField>
+				</div>
 			</UForm>
 		</template>
 

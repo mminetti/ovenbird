@@ -76,7 +76,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-	<USlideover v-model:open="open" :title="slideoverTitle">
+	<USlideover v-model:open="open" :title="slideoverTitle" :ui="{ content: 'max-w-2xl' }">
 		<UButton label="New role" icon="i-lucide-plus" class="ml-auto shrink-0" />
 
 		<template #body>

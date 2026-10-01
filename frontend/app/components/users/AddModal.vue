@@ -86,7 +86,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-	<USlideover v-model:open="open" :title="slideoverTitle">
+	<USlideover v-model:open="open" :title="slideoverTitle" :ui="{ content: 'max-w-2xl' }">
 		<UButton label="New user" icon="i-lucide-plus" class="ml-auto shrink-0" />
 
 		<template #body>
@@ -102,12 +102,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 				class="space-y-4"
 				@submit="onSubmit"
 			>
-				<UFormField label="Name" placeholder="" name="name">
-					<UInput v-model="state.name" class="w-full" autofocus />
-				</UFormField>
-				<UFormField label="Email" placeholder="" name="email">
-					<UInput v-model="state.email" type="email" class="w-full" />
-				</UFormField>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+					<UFormField label="Name" placeholder="" name="name">
+						<UInput v-model="state.name" class="w-full" autofocus />
+					</UFormField>
+					<UFormField label="Email" placeholder="" name="email">
+						<UInput v-model="state.email" type="email" class="w-full" />
+					</UFormField>
+				</div>
 				<UFormField label="External Identifier" placeholder="" name="externalIdentifier">
 					<UInput v-model="state.externalIdentifier" class="w-full" />
 				</UFormField>

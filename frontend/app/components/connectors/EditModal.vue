@@ -32,6 +32,7 @@ type Schema = z.output<typeof schema>
 
 const open = ref(false)
 const loading = ref(true)
+const viewMode = ref<'form' | 'audit'>('form')
 const form = ref<{ submit: () => void }>()
 const connectorTypes = ref<DataListItem[]>([])
 const connectorImplementations = ref<DataListItem[]>([])
@@ -126,6 +127,8 @@ async function loadConnector() {
 }
 
 watch(open, async (isOpen) => {
+	viewMode.value = 'form'
+
 	if (isOpen) {
 		await loadConnector()
 		return
@@ -176,77 +179,103 @@ defineExpose({
 			<ModalLoadingBar :loading="loading" />
 
 			<ModalApiError :error="modalError" class="mb-4" />
-			<UForm
-				ref="form"
-				:key="String(open)"
-				:schema="schema"
-				:validate-on="[]"
-				:state="state"
-				class="space-y-4"
-				@submit="onSubmit"
+			<Transition
+				enter-active-class="transition duration-150 ease-out"
+				enter-from-class="opacity-0"
+				enter-to-class="opacity-100"
+				leave-active-class="transition duration-100 ease-in"
+				leave-from-class="opacity-100"
+				leave-to-class="opacity-0"
+				mode="out-in"
 			>
-				<UFormField label="Name" name="name">
-					<UInput v-model="state.name" class="w-full" :disabled="loading" />
-				</UFormField>
-
-				<UFormField label="Description" name="description">
-					<UTextarea v-model="state.description" class="w-full" :disabled="loading" />
-				</UFormField>
-
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<UFormField label="Type" name="connectorTypeId">
-						<USelectMenu
-							v-model="state.connectorTypeId"
-							:items="connectorTypeItems"
-							value-key="value"
-							label-key="label"
-							placeholder="Select a type"
-							class="w-full"
-							:disabled="loading"
-						/>
+				<AuditTrailPanel
+					v-if="viewMode === 'audit'"
+					entity-type="Connector"
+					:entity-id="connectorId"
+				/>
+				<UForm
+					v-else
+					ref="form"
+					:key="String(open)"
+					:schema="schema"
+					:validate-on="[]"
+					:state="state"
+					class="space-y-4"
+					@submit="onSubmit"
+				>
+					<UFormField label="Name" name="name">
+						<UInput v-model="state.name" class="w-full" :disabled="loading" />
 					</UFormField>
 
-					<UFormField label="Implementation" name="connectorImplementationId">
-						<USelectMenu
-							v-model="state.connectorImplementationId"
-							:items="connectorImplementationItems"
-							value-key="value"
-							label-key="label"
-							placeholder="Select an implementation"
-							class="w-full"
-							:disabled="loading || state.connectorTypeId === undefined"
-						/>
+					<UFormField label="Description" name="description">
+						<UTextarea v-model="state.description" class="w-full" :disabled="loading" />
 					</UFormField>
-				</div>
 
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-					<UFormField label="Updated By">
-						<UInput
-							:model-value="lastModifiedBy ?? undefined"
-							class="w-full"
-							:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-							disabled
-						/>
-					</UFormField>
-					<UFormField label="Updated At">
-						<UInput
-							:model-value="formattedLastModifiedAtUtc"
-							class="w-full"
-							:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-							disabled
-						/>
-					</UFormField>
-				</div>
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="Type" name="connectorTypeId">
+							<USelectMenu
+								v-model="state.connectorTypeId"
+								:items="connectorTypeItems"
+								value-key="value"
+								label-key="label"
+								placeholder="Select a type"
+								class="w-full"
+								:disabled="loading"
+							/>
+						</UFormField>
 
-				<UFormField label="Fields" name="fields">
-					<ConnectorsFieldsEditor v-model="state.fields" :disabled="loading" />
-				</UFormField>
-			</UForm>
+						<UFormField label="Implementation" name="connectorImplementationId">
+							<USelectMenu
+								v-model="state.connectorImplementationId"
+								:items="connectorImplementationItems"
+								value-key="value"
+								label-key="label"
+								placeholder="Select an implementation"
+								class="w-full"
+								:disabled="loading || state.connectorTypeId === undefined"
+							/>
+						</UFormField>
+					</div>
+
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="Updated By">
+							<UInput
+								:model-value="lastModifiedBy ?? undefined"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+						<UFormField label="Updated At">
+							<UInput
+								:model-value="formattedLastModifiedAtUtc"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+					</div>
+
+					<UFormField label="Fields" name="fields">
+						<ConnectorsFieldsEditor v-model="state.fields" :disabled="loading" />
+					</UFormField>
+				</UForm>
+			</Transition>
 		</template>
 
 		<template #footer>
 			<div class="flex justify-end gap-2 w-full">
 				<UButton
+					v-if="viewMode === 'form'"
+					label="Audit"
+					icon="i-lucide-history"
+					color="neutral"
+					variant="ghost"
+					:disabled="loading"
+					@click="viewMode = 'audit'"
+				/>
+				<UButton
+					v-if="viewMode === 'form'"
 					label="Cancel"
 					color="neutral"
 					variant="subtle"
@@ -254,12 +283,21 @@ defineExpose({
 					@click="open = false"
 				/>
 				<UButton
+					v-if="viewMode === 'form'"
 					label="Save"
 					color="primary"
 					variant="solid"
 					:loading="loading"
 					:disabled="loading"
 					@click="form?.submit()"
+				/>
+				<UButton
+					v-if="viewMode === 'audit'"
+					label="Back to edit"
+					icon="i-lucide-arrow-left"
+					color="neutral"
+					variant="subtle"
+					@click="viewMode = 'form'"
 				/>
 			</div>
 		</template>

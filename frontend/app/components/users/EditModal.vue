@@ -23,6 +23,7 @@ type Schema = z.output<typeof schema>
 
 const open = ref(false)
 const loading = ref(true)
+const viewMode = ref<'form' | 'audit'>('form')
 const form = ref<{ submit: () => void }>()
 const allRoles = ref<DataListItem[]>([])
 const modalError = ref<ReturnType<typeof parseApiError> | null>(null)
@@ -98,6 +99,8 @@ async function loadUser() {
 }
 
 watch(open, async (isOpen) => {
+	viewMode.value = 'form'
+
 	if (isOpen) {
 		await loadUser()
 		return
@@ -154,78 +157,111 @@ defineExpose({
 </script>
 
 <template>
-	<USlideover v-model:open="open" :title="slideoverTitle">
+	<USlideover v-model:open="open" :title="slideoverTitle" :ui="{ content: 'max-w-2xl' }">
 		<template #body>
 			<ModalLoadingBar :loading="loading" />
 
 			<ModalApiError :error="modalError" class="mb-4" />
-			<UForm
-				ref="form"
-				:key="String(open)"
-				:schema="schema"
-				:validate-on="[]"
-				:state="state"
-				class="space-y-4"
-				@submit="onSubmit"
+			<Transition
+				enter-active-class="transition duration-150 ease-out"
+				enter-from-class="opacity-0"
+				enter-to-class="opacity-100"
+				leave-active-class="transition duration-100 ease-in"
+				leave-from-class="opacity-100"
+				leave-to-class="opacity-0"
+				mode="out-in"
 			>
-				<UFormField label="Name" name="name">
-					<UInput v-model="state.name" class="w-full" :disabled="loading" />
-				</UFormField>
-				<UFormField label="Email" name="email">
-					<UInput
-						v-model="state.email"
-						type="email"
-						class="w-full"
-						:disabled="loading"
-					/>
-				</UFormField>
-				<UFormField label="External Identifier">
-					<UInput
-						:model-value="externalIdentifier"
-						class="w-full"
-						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-						disabled
-					/>
-				</UFormField>
-				<UFormField label="Active" name="isActive">
-					<USwitch v-model="state.isActive" :disabled="loading" />
-				</UFormField>
+				<AuditTrailPanel
+					v-if="viewMode === 'audit'"
+					entity-type="User"
+					:entity-id="userId"
+				/>
+				<UForm
+					v-else
+					ref="form"
+					:key="String(open)"
+					:schema="schema"
+					:validate-on="[]"
+					:state="state"
+					class="space-y-4"
+					@submit="onSubmit"
+				>
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="Name" name="name">
+							<UInput v-model="state.name" class="w-full" :disabled="loading" />
+						</UFormField>
+						<UFormField label="Email" name="email">
+							<UInput
+								v-model="state.email"
+								type="email"
+								class="w-full"
+								:disabled="loading"
+							/>
+						</UFormField>
+					</div>
 
-				<UFormField label="Roles" name="roleIds">
-					<USelectMenu
-						v-model="state.roleIds"
-						:items="roleItems"
-						value-key="value"
-						label-key="label"
-						multiple
-						placeholder="Select roles"
-						class="w-full"
-						:disabled="loading"
-					/>
-				</UFormField>
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="External Identifier">
+							<UInput
+								:model-value="externalIdentifier"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+						<UFormField label="Active" name="isActive">
+							<USwitch v-model="state.isActive" :disabled="loading" />
+						</UFormField>
+					</div>
 
-				<UFormField label="Updated By">
-					<UInput
-						:model-value="lastModifiedBy ?? undefined"
-						class="w-full"
-						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-						disabled
-					/>
-				</UFormField>
-				<UFormField label="Updated At">
-					<UInput
-						:model-value="formattedLastModifiedAtUtc"
-						class="w-full"
-						:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
-						disabled
-					/>
-				</UFormField>
-			</UForm>
+					<UFormField label="Roles" name="roleIds">
+						<USelectMenu
+							v-model="state.roleIds"
+							:items="roleItems"
+							value-key="value"
+							label-key="label"
+							multiple
+							placeholder="Select roles"
+							class="w-full"
+							:disabled="loading"
+						/>
+					</UFormField>
+
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<UFormField label="Updated By">
+							<UInput
+								:model-value="lastModifiedBy ?? undefined"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+						<UFormField label="Updated At">
+							<UInput
+								:model-value="formattedLastModifiedAtUtc"
+								class="w-full"
+								:ui="{ base: 'bg-elevated text-muted disabled:opacity-100' }"
+								disabled
+							/>
+						</UFormField>
+					</div>
+				</UForm>
+			</Transition>
 		</template>
 
 		<template #footer>
 			<div class="flex justify-end gap-2 w-full">
 				<UButton
+					v-if="viewMode === 'form'"
+					label="Audit"
+					icon="i-lucide-history"
+					color="neutral"
+					variant="ghost"
+					:disabled="loading"
+					@click="viewMode = 'audit'"
+				/>
+				<UButton
+					v-if="viewMode === 'form'"
 					label="Cancel"
 					color="neutral"
 					variant="subtle"
@@ -233,12 +269,21 @@ defineExpose({
 					@click="open = false"
 				/>
 				<UButton
+					v-if="viewMode === 'form'"
 					label="Save"
 					color="primary"
 					variant="solid"
 					:loading="loading"
 					:disabled="loading"
 					@click="form?.submit()"
+				/>
+				<UButton
+					v-if="viewMode === 'audit'"
+					label="Back to edit"
+					icon="i-lucide-arrow-left"
+					color="neutral"
+					variant="subtle"
+					@click="viewMode = 'form'"
 				/>
 			</div>
 		</template>
