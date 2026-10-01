@@ -1,8 +1,8 @@
 ﻿using Core.Common;
 using Core.Market;
 using Core.Market.Specifications;
-using Core.Shared;
-using Core.Shared.Specifications;
+using Core.Settings;
+using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;

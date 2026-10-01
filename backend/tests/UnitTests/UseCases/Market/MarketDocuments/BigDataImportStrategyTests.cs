@@ -1,5 +1,5 @@
 ﻿using Core.Common;
-using Core.Shared;
+using Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;

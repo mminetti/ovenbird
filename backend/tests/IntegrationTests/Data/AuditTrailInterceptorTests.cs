@@ -2,7 +2,7 @@ using System.Text.Json;
 using Core.Common;
 using Core.Market;
 using Core.Security;
-using Core.Shared;
+using Core.Settings;
 using Infrastructure.Data.Queries.Common;
 
 namespace IntegrationTests.Data;

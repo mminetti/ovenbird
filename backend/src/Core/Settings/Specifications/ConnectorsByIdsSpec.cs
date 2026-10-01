@@ -1,4 +1,4 @@
-namespace Core.Shared.Specifications;
+namespace Core.Settings.Specifications;
 
 public class ConnectorsByIdsSpec : Specification<Connector>
 {

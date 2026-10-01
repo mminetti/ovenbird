@@ -4,7 +4,7 @@ using Core.Market;
 using Core.Security;
 using Core.Security.Interfaces;
 using Core.Security.Services;
-using Core.Shared;
+using Core.Settings;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;
 using Infrastructure.Data.Queries.Common;

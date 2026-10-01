@@ -1,6 +1,6 @@
 ﻿using Core.Common;
 
-namespace Core.Shared;
+namespace Core.Settings;
 
 public class ConnectorType : EntityBase<int>, IHasDisplayName
 {

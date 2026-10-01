@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Core.Common;
 using Core.Security;
-using Core.Shared;
+using Core.Settings;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using UseCases.Common;
@@ -189,7 +189,7 @@ public class AuditTrailInterceptor(TimeProvider dateTime, IUser user) : SaveChan
 
     // EF Core gives shared-type (property-bag) entities, like our join tables, the short name
     // they were registered with; ordinary CLR entities get their full namespace-qualified name
-    // from Metadata.Name, so use ClrType.Name instead to get e.g. "Company" not "Core.Shared.Company".
+    // from Metadata.Name, so use ClrType.Name instead to get e.g. "Company" not "Core.Settings.Company".
     private static string GetEntityTypeName(EntityEntry entry) =>
         entry.Metadata.IsPropertyBag ? entry.Metadata.Name : entry.Metadata.ClrType.Name;
 

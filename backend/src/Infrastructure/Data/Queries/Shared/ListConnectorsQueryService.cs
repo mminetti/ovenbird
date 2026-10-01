@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using Core.Shared;
+using Core.Settings;
 using Infrastructure.Data.Queries.Common;
 using UseCases.Connectors;
 using UseCases.Connectors.List;

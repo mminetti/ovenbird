@@ -1,6 +1,6 @@
 using Azure;
 using Azure.Security.KeyVault.Secrets;
-using Core.Shared;
+using Core.Settings;
 using UseCases.Interfaces.Secrets;
 
 namespace Infrastructure.Services.Secrets;

@@ -1,4 +1,4 @@
-using Core.Shared;
+using Core.Settings;
 
 namespace Infrastructure.Data.Config.Shared;
 

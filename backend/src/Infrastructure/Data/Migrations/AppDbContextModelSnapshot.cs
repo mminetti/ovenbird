@@ -469,7 +469,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("Core.Shared.Company", b =>
+            modelBuilder.Entity("Core.Settings.Company", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -511,7 +511,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Company");
                 });
 
-            modelBuilder.Entity("Core.Shared.Configuration", b =>
+            modelBuilder.Entity("Core.Settings.Configuration", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -557,7 +557,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Configuration");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
+            modelBuilder.Entity("Core.Settings.ConfigurationField", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -598,7 +598,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("ConfigurationField");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConfigurationType", b =>
+            modelBuilder.Entity("Core.Settings.ConfigurationType", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -624,7 +624,7 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Core.Shared.Connector", b =>
+            modelBuilder.Entity("Core.Settings.Connector", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -665,7 +665,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Connector");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorField", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorField", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -709,7 +709,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("ConnectorField");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorImplementation", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorImplementation", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -780,7 +780,7 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorType", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorType", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
@@ -845,13 +845,13 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("ConfigurationConnector", b =>
                 {
-                    b.HasOne("Core.Shared.Configuration", null)
+                    b.HasOne("Core.Settings.Configuration", null)
                         .WithMany()
                         .HasForeignKey("ConfigurationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Core.Shared.Connector", null)
+                    b.HasOne("Core.Settings.Connector", null)
                         .WithMany()
                         .HasForeignKey("ConnectorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -898,7 +898,7 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Market.MarketDocument", b =>
                 {
-                    b.HasOne("Core.Shared.Company", "Company")
+                    b.HasOne("Core.Settings.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -934,7 +934,7 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Module");
                 });
 
-            modelBuilder.Entity("Core.Shared.Company", b =>
+            modelBuilder.Entity("Core.Settings.Company", b =>
                 {
                     b.HasOne("Core.Market.Market", "Market")
                         .WithMany("Companies")
@@ -945,14 +945,14 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Market");
                 });
 
-            modelBuilder.Entity("Core.Shared.Configuration", b =>
+            modelBuilder.Entity("Core.Settings.Configuration", b =>
                 {
-                    b.HasOne("Core.Shared.Company", "Company")
+                    b.HasOne("Core.Settings.Company", "Company")
                         .WithMany("Configurations")
                         .HasForeignKey("CompanyId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Core.Shared.ConfigurationType", "ConfigurationType")
+                    b.HasOne("Core.Settings.ConfigurationType", "ConfigurationType")
                         .WithMany("Configurations")
                         .HasForeignKey("ConfigurationTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -963,9 +963,9 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ConfigurationType");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConfigurationField", b =>
+            modelBuilder.Entity("Core.Settings.ConfigurationField", b =>
                 {
-                    b.HasOne("Core.Shared.Configuration", "Configuration")
+                    b.HasOne("Core.Settings.Configuration", "Configuration")
                         .WithMany("ConfigurationFields")
                         .HasForeignKey("ConfigurationId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -974,9 +974,9 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Configuration");
                 });
 
-            modelBuilder.Entity("Core.Shared.Connector", b =>
+            modelBuilder.Entity("Core.Settings.Connector", b =>
                 {
-                    b.HasOne("Core.Shared.ConnectorImplementation", "ConnectorImplementation")
+                    b.HasOne("Core.Settings.ConnectorImplementation", "ConnectorImplementation")
                         .WithMany("Connectors")
                         .HasForeignKey("ConnectorImplementationId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -985,9 +985,9 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ConnectorImplementation");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorField", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorField", b =>
                 {
-                    b.HasOne("Core.Shared.Connector", "Connector")
+                    b.HasOne("Core.Settings.Connector", "Connector")
                         .WithMany("ConnectorFields")
                         .HasForeignKey("ConnectorId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -996,9 +996,9 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Connector");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorImplementation", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorImplementation", b =>
                 {
-                    b.HasOne("Core.Shared.ConnectorType", "ConnectorType")
+                    b.HasOne("Core.Settings.ConnectorType", "ConnectorType")
                         .WithMany("ConnectorImplementations")
                         .HasForeignKey("ConnectorTypeId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -1047,32 +1047,32 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Permissions");
                 });
 
-            modelBuilder.Entity("Core.Shared.Company", b =>
+            modelBuilder.Entity("Core.Settings.Company", b =>
                 {
                     b.Navigation("Configurations");
                 });
 
-            modelBuilder.Entity("Core.Shared.Configuration", b =>
+            modelBuilder.Entity("Core.Settings.Configuration", b =>
                 {
                     b.Navigation("ConfigurationFields");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConfigurationType", b =>
+            modelBuilder.Entity("Core.Settings.ConfigurationType", b =>
                 {
                     b.Navigation("Configurations");
                 });
 
-            modelBuilder.Entity("Core.Shared.Connector", b =>
+            modelBuilder.Entity("Core.Settings.Connector", b =>
                 {
                     b.Navigation("ConnectorFields");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorImplementation", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorImplementation", b =>
                 {
                     b.Navigation("Connectors");
                 });
 
-            modelBuilder.Entity("Core.Shared.ConnectorType", b =>
+            modelBuilder.Entity("Core.Settings.ConnectorType", b =>
                 {
                     b.Navigation("ConnectorImplementations");
                 });

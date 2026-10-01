@@ -1,8 +1,8 @@
 ﻿using Core.Common.Extensions;
 using Core.Market;
 using Core.Market.Specifications;
-using Core.Shared;
-using Core.Shared.Specifications;
+using Core.Settings;
+using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 
 namespace UseCases.Market.MarketDocuments.Import;

@@ -1,6 +1,6 @@
 using Core.Market;
 using Core.Security;
-using Core.Shared;
+using Core.Settings;
 using UseCases.DataLists;
 using UseCases.DataLists.Get;
 

@@ -1,5 +1,5 @@
 using Core.Market;
-using Core.Shared;
+using Core.Settings;
 using Infrastructure.Data.Queries.Common;
 
 namespace Infrastructure.Data.Queries.Shared;

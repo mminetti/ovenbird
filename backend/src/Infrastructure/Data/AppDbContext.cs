@@ -1,7 +1,7 @@
 ﻿using Core.Common;
 using Core.Market;
 using Core.Security;
-using Core.Shared;
+using Core.Settings;
 
 namespace Infrastructure.Data;
 

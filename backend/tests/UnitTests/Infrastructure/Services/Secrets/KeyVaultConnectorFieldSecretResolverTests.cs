@@ -1,6 +1,6 @@
 using Azure;
 using Azure.Security.KeyVault.Secrets;
-using Core.Shared;
+using Core.Settings;
 using Infrastructure.Services.Secrets;
 
 namespace UnitTests.Infrastructure.Services.Secrets;

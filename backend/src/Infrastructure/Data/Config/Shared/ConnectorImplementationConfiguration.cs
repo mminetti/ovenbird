@@ -1,5 +1,5 @@
 ﻿using Core.Common;
-using Core.Shared;
+using Core.Settings;
 using Infrastructure.Services.Files;
 
 namespace Infrastructure.Data.Config.Shared;

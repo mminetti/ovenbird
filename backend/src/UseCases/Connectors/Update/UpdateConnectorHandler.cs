@@ -1,5 +1,5 @@
-using Core.Shared;
-using Core.Shared.Specifications;
+using Core.Settings;
+using Core.Settings.Specifications;
 
 namespace UseCases.Connectors.Update;
 
