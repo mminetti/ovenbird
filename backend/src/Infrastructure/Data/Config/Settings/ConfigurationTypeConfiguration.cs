@@ -1,7 +1,7 @@
 ﻿using Core.Common.Constants;
 using Core.Settings;
 
-namespace Infrastructure.Data.Config.Shared;
+namespace Infrastructure.Data.Config.Settings;
 
 public class ConfigurationTypeConfiguration : IEntityTypeConfiguration<ConfigurationType>
 {

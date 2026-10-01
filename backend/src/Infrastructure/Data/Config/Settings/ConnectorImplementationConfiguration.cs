@@ -2,7 +2,7 @@
 using Core.Settings;
 using Infrastructure.Services.Files;
 
-namespace Infrastructure.Data.Config.Shared;
+namespace Infrastructure.Data.Config.Settings;
 
 public class ConnectorImplementationConfiguration : IEntityTypeConfiguration<ConnectorImplementation>
 {

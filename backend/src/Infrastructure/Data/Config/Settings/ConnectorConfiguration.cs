@@ -1,6 +1,6 @@
 ﻿using Core.Settings;
 
-namespace Infrastructure.Data.Config.Shared;
+namespace Infrastructure.Data.Config.Settings;
 
 public class ConnectorConfiguration : BaseEntityTypeConfiguration<Connector, int>
 {

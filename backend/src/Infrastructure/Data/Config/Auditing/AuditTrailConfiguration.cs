@@ -1,6 +1,6 @@
 ﻿using Core.Auditing;
 
-namespace Infrastructure.Data.Config.Common;
+namespace Infrastructure.Data.Config.Auditing;
 
 public class AuditTrailConfiguration : IEntityTypeConfiguration<AuditTrail>
 {
