@@ -1,4 +1,4 @@
-﻿namespace Core.Common;
+﻿namespace Core.Common.Constants;
 
 public static partial class Constants
 {

@@ -1,4 +1,4 @@
-﻿using Core.Common;
+﻿using Core.Common.Constants;
 using Core.Market;
 
 namespace Infrastructure.Data.Config.Market;

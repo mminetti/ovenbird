@@ -20,7 +20,7 @@ public class ImportMarketDocumentHandler(
     {
         var documentIds = new List<long>();
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeSpec(Core.Common.Constants.ConfigurationTypes.EdiImport), ct);
+            new ConfigurationByTypeSpec(Core.Common.Constants.Constants.ConfigurationTypes.EdiImport), ct);
 
         foreach (var configuration in configurations)
         {
@@ -59,8 +59,8 @@ public class ImportMarketDocumentHandler(
                             Name = fileName,
                             File = uploadedFileReference,
                             CompanyId = company.Id,
-                            DirectionId = Core.Common.Constants.MarketDocumentDirections.Inbound,
-                            StatusId = Core.Common.Constants.MarketDocumentStatuses.New
+                            DirectionId = Core.Common.Constants.Constants.MarketDocumentDirections.Inbound,
+                            StatusId = Core.Common.Constants.Constants.MarketDocumentStatuses.New
                         };
 
                         var created = await documentRepository.AddAsync(document, ct);

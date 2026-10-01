@@ -1,4 +1,4 @@
-﻿using Core.Common;
+﻿using Core.Common.Constants;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Settings;
