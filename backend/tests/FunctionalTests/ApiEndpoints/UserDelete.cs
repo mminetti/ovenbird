@@ -1,5 +1,5 @@
 using System.Net;
-using Web.Security.Users.Delete;
+using Web.Endpoints.Security.Users.Delete;
 
 namespace FunctionalTests.ApiEndpoints;
 

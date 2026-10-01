@@ -31,17 +31,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\Endpoints.Designer.cs">
+    <Compile Update="Resources\EndpointSummaries.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
-      <DependentUpon>Endpoints.resx</DependentUpon>
+      <DependentUpon>EndpointSummaries.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources\Endpoints.resx">
+    <EmbeddedResource Update="Resources\EndpointSummaries.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>Endpoints.Designer.cs</LastGenOutput>
+      <LastGenOutput>EndpointSummaries.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
 

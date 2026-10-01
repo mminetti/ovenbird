@@ -1,0 +1,72 @@
+﻿using Ardalis.Result;
+using UseCases.Common;
+using UseCases.Common.Constants;
+using UseCases.Security.Roles;
+using UseCases.Security.Roles.List;
+using Web.Resources;
+
+namespace Web.Endpoints.Security.Roles.List;
+
+public class ListRoles(IMessageBus bus) : Endpoint<ListRolesRequest, ListRolesResponse, ListRolesMapper>
+{
+    private readonly IMessageBus _bus = bus;
+
+    public override void Configure()
+    {
+        Get(ListRolesRequest.Route);
+        Permissions(Constants.Permissions.RolesRead);
+
+        Summary(s =>
+        {
+            s.Summary = "List roles";
+            s.Description = "Retrieves a paginated list of all roles.";
+            s.ExampleRequest = new ListRolesRequest { Page = 1, PerPage = 10 };
+
+            s.Params["page"] = EndpointSummaries.ParamPage;
+            s.Params["per_page"] = string.Format(EndpointSummaries.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
+            s.Params["search"] = string.Format(EndpointSummaries.ParamSearch, "name");
+            s.Params["order_by"] = EndpointSummaries.ParamOrderBy;
+
+            s.Responses[200] = EndpointSummaries.Response200Ok;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
+        });
+
+        Tags("Security");
+
+        Description(builder => builder
+            .Accepts<ListRolesRequest>()
+            .Produces<ListRolesResponse>(200, "application/json")
+            .ProducesProblem(400)
+            .ProducesProblem(500));
+    }
+
+    public override async Task HandleAsync(ListRolesRequest request, CancellationToken ct)
+    {
+        var result = await _bus.InvokeAsync<Result<ItemPagedResult<RoleDto>>>(
+            new ListRolesQuery(request.Page, request.PerPage, request.Search, request.OrderBy), ct);
+
+        if (!result.IsSuccess)
+        {
+            await Send.ErrorsAsync(statusCode: 400, ct);
+            return;
+        }
+
+        var response = Map.FromEntity(result.Value);
+
+        await Send.OkAsync(response, ct);
+    }
+}
+
+public sealed class ListRolesMapper
+    : Mapper<ListRolesRequest, ListRolesResponse, ItemPagedResult<RoleDto>>
+{
+    public override ListRolesResponse FromEntity(ItemPagedResult<RoleDto> e)
+    {
+        var items = e.Items
+            .Select(r => new RoleRecord(r.Id, r.Name, r.LastModifiedAtUtc, r.LastModifiedBy))
+            .ToList();
+
+        return new ListRolesResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);
+    }
+}

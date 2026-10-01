@@ -1,5 +1,5 @@
-﻿using Web.Security.Users;
-using Web.Security.Users.Get;
+﻿using Web.Endpoints.Security.Users;
+using Web.Endpoints.Security.Users.Get;
 
 namespace FunctionalTests.ApiEndpoints;
 

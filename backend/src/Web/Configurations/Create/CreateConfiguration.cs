@@ -31,9 +31,9 @@ public class CreateConfiguration(IMessageBus bus)
                 Fields = [new ConfigurationFieldRequest { Name = "batchSize", Value = "100" }]
             };
 
-            s.Responses[201] = Endpoints.Response201Created;
-            s.Responses[400] = Endpoints.Response400BadRequest;
-            s.Responses[500] = Endpoints.Response500InternalServerError;
+            s.Responses[201] = EndpointSummaries.Response201Created;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
         });
 
         Tags("Configurations");

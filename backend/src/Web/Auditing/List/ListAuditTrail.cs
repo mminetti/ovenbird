@@ -24,12 +24,12 @@ public class ListAuditTrail(IMessageBus bus) : Endpoint<ListAuditTrailRequest, L
 
             s.Params["entity_type"] = "The audited entity type to look up, e.g. \"Configuration\".";
             s.Params["entity_id"] = "The entity's id, as a string.";
-            s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
+            s.Params["page"] = EndpointSummaries.ParamPage;
+            s.Params["per_page"] = string.Format(EndpointSummaries.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
 
-            s.Responses[200] = Endpoints.Response200Ok;
-            s.Responses[400] = Endpoints.Response400BadRequest;
-            s.Responses[500] = Endpoints.Response500InternalServerError;
+            s.Responses[200] = EndpointSummaries.Response200Ok;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
         });
 
         Tags("Auditing");

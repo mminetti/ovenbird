@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Web.Security.Users.Update;
+using Web.Endpoints.Security.Users.Update;
 
 namespace FunctionalTests.ApiEndpoints;
 

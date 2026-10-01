@@ -21,10 +21,10 @@ public class DeleteConnector(IMessageBus bus)
             s.Description = "Deletes an existing connector by its unique identifier.";
             s.ExampleRequest = new DeleteConnectorRequest { ConnectorId = 1 };
 
-            s.Responses[204] = Endpoints.Response204Deleted;
-            s.Responses[400] = Endpoints.Response400BadRequest;
-            s.Responses[404] = Endpoints.Response404NotFound;
-            s.Responses[500] = Endpoints.Response500InternalServerError;
+            s.Responses[204] = EndpointSummaries.Response204Deleted;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[404] = EndpointSummaries.Response404NotFound;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
         });
 
         Tags("Connectors");

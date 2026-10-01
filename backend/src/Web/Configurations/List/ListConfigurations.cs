@@ -22,14 +22,14 @@ public class ListConfigurations(IMessageBus bus) : Endpoint<ListConfigurationsRe
             s.Description = "Retrieves a paginated list of all configurations.";
             s.ExampleRequest = new ListConfigurationsRequest { Page = 1, PerPage = 10 };
 
-            s.Params["page"] = Endpoints.ParamPage;
-            s.Params["per_page"] = string.Format(Endpoints.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
-            s.Params["search"] = string.Format(Endpoints.ParamSearch, "name");
-            s.Params["order_by"] = Endpoints.ParamOrderBy;
+            s.Params["page"] = EndpointSummaries.ParamPage;
+            s.Params["per_page"] = string.Format(EndpointSummaries.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
+            s.Params["search"] = string.Format(EndpointSummaries.ParamSearch, "name");
+            s.Params["order_by"] = EndpointSummaries.ParamOrderBy;
 
-            s.Responses[200] = Endpoints.Response200Ok;
-            s.Responses[400] = Endpoints.Response400BadRequest;
-            s.Responses[500] = Endpoints.Response500InternalServerError;
+            s.Responses[200] = EndpointSummaries.Response200Ok;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
         });
 
         Tags("Configurations");

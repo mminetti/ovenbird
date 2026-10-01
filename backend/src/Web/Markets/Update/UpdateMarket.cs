@@ -27,10 +27,10 @@ public class UpdateMarket(IMessageBus bus)
                 Identifier = "PJM"
             };
 
-            s.Responses[204] = Endpoints.Response200OkUpdated;
-            s.Responses[400] = Endpoints.Response400BadRequest;
-            s.Responses[404] = Endpoints.Response404NotFound;
-            s.Responses[500] = Endpoints.Response500InternalServerError;
+            s.Responses[204] = EndpointSummaries.Response200OkUpdated;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[404] = EndpointSummaries.Response404NotFound;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
         });
 
         Tags("Markets");

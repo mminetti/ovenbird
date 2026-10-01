@@ -1,0 +1,72 @@
+﻿using Ardalis.Result;
+using UseCases.Common;
+using UseCases.Common.Constants;
+using UseCases.Security.Users;
+using UseCases.Security.Users.List;
+using Web.Resources;
+
+namespace Web.Endpoints.Security.Users.List;
+
+public class ListUsers(IMessageBus bus) : Endpoint<ListUsersRequest, ListUsersResponse, ListUsersMapper>
+{
+    private readonly IMessageBus _bus = bus;
+    
+    public override void Configure()
+    {
+        Get(ListUsersRequest.Route);
+        Permissions(Constants.Permissions.UsersRead);
+
+        Summary(s =>
+        {
+            s.Summary = "List users";
+            s.Description = "Retrieves a paginated list of all users.";
+            s.ExampleRequest = new ListUsersRequest { Page = 1, PerPage = 10 };
+
+            s.Params["page"] = EndpointSummaries.ParamPage;
+            s.Params["per_page"] = string.Format(EndpointSummaries.ParamPerPage, Constants.Pagination.MaxPageSize, Constants.Pagination.DefaultPageSize);
+            s.Params["search"] = string.Format(EndpointSummaries.ParamSearch, "name and email");
+            s.Params["order_by"] = EndpointSummaries.ParamOrderBy;
+
+            s.Responses[200] = EndpointSummaries.Response200Ok;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
+        });
+
+        Tags("Security");
+
+        Description(builder => builder
+            .Accepts<ListUsersRequest>()
+            .Produces<ListUsersResponse>(200, "application/json")
+            .ProducesProblem(400)
+            .ProducesProblem(500));
+    }
+
+    public override async Task HandleAsync(ListUsersRequest request, CancellationToken ct)
+    {
+        var result = await _bus.InvokeAsync<Result<ItemPagedResult<UserDto>>>(
+            new ListUsersQuery(request.Page, request.PerPage, request.Search, request.OrderBy), ct);
+
+        if (!result.IsSuccess)
+        {
+            await Send.ErrorsAsync(statusCode: 400, ct);
+            return;
+        }
+
+        var response = Map.FromEntity(result.Value);
+
+        await Send.OkAsync(response, ct);
+    }
+}
+
+public sealed class ListUsersMapper
+    : Mapper<ListUsersRequest, ListUsersResponse, ItemPagedResult<UserDto>>
+{
+    public override ListUsersResponse FromEntity(ItemPagedResult<UserDto> e)
+    {
+        var items = e.Items
+            .Select(u => new UserRecord(u.Id, u.Name, u.Email, u.ExternalIdentifier, u.IsActive, u.LastModifiedAtUtc, u.LastModifiedBy))
+            .ToList();
+
+        return new ListUsersResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);
+    }
+}

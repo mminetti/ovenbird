@@ -21,11 +21,11 @@ public class GetDataList(IMessageBus bus) : Endpoint<GetDataListRequest, Ok<GetD
             s.Summary = "Get a data list";
             s.Description = "Retrieves reference data for populating UI dropdowns. Returns Id-Name pairs for the specified type.";
 
-            s.Params["Type"] = string.Format(Endpoints.ParamDataListType, string.Join(", ", Enum.GetNames<DataListType>()));
+            s.Params["Type"] = string.Format(EndpointSummaries.ParamDataListType, string.Join(", ", Enum.GetNames<DataListType>()));
 
-            s.Responses[200] = Endpoints.Response200Ok;
-            s.Responses[400] = Endpoints.Response400BadRequest;
-            s.Responses[500] = Endpoints.Response500InternalServerError;
+            s.Responses[200] = EndpointSummaries.Response200Ok;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
         });
 
         Tags("Data-Lists");

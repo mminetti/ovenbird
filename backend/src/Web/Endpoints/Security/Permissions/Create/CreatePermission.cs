@@ -1,0 +1,55 @@
+﻿using Ardalis.Result;
+using Microsoft.AspNetCore.Http.HttpResults;
+using UseCases.Common.Constants;
+using UseCases.Security.Permissions.Create;
+using Web.Extensions;
+using Web.Resources;
+using Web.Endpoints.Security.Permissions.Get;
+
+namespace Web.Endpoints.Security.Permissions.Create;
+
+public class CreatePermission(IMessageBus bus)
+    : Endpoint<CreatePermissionRequest,
+               Results<Created<CreatePermissionResponse>, ValidationProblem, ProblemHttpResult>>
+{
+    public override void Configure()
+    {
+        Post(CreatePermissionRequest.Route);
+        Permissions(Constants.Permissions.PermissionsWrite);
+
+        Summary(s =>
+        {
+            s.Summary = "Create a permission";
+            s.Description = "Creates a new permission with the provided details.";
+            s.ExampleRequest = new CreatePermissionRequest
+            {
+                Name = "users.read",
+                ModuleId = Constants.PermissionModules.Security,
+                Description = "Can read users"
+            };
+
+            s.Responses[201] = EndpointSummaries.Response201Created;
+            s.Responses[400] = EndpointSummaries.Response400BadRequest;
+            s.Responses[500] = EndpointSummaries.Response500InternalServerError;
+        });
+
+        Tags("Security");
+
+        Description(builder => builder
+            .Accepts<CreatePermissionRequest>("application/json")
+            .Produces<CreatePermissionResponse>(201, "application/json")
+            .ProducesProblem(400)
+            .ProducesProblem(500));
+    }
+
+    public override async Task<Results<Created<CreatePermissionResponse>, ValidationProblem, ProblemHttpResult>>
+        ExecuteAsync(CreatePermissionRequest request, CancellationToken ct)
+    {
+        var result = await bus.InvokeAsync<Result<int>>(
+            new CreatePermissionCommand(request.Name, request.ModuleId, request.Description), ct);
+
+        return result.ToCreatedResult(
+            id => GetPermissionRequest.BuildRoute(id),
+            id => new CreatePermissionResponse(id));
+    }
+}
