@@ -1,4 +1,4 @@
-namespace Core.Common;
+﻿namespace Core.Auditing;
 
 // Owned by AuditTrail; no independent identity. Points at another entity involved in the
 // change - either the other side of a many-to-many join row, or the parent aggregate of a

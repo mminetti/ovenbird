@@ -1,4 +1,4 @@
-using Core.Common;
+using Core.Auditing;
 using UseCases.Auditing;
 using UseCases.Auditing.List;
 using UseCases.Common;

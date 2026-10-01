@@ -1,4 +1,5 @@
-﻿using Core.Common;
+﻿using Core.Auditing;
+using Core.Common;
 using Core.Security.Events;
 
 namespace Core.Security;

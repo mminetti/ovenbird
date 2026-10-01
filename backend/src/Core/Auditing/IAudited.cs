@@ -1,4 +1,4 @@
-namespace Core.Common;
+namespace Core.Auditing;
 
 // Marker interface opting an entity into the audit trail (see AuditTrailInterceptor).
 // Independent of IAuditableEntity/AuditableEntityBase (CreatedBy/LastModifiedBy stamps) -

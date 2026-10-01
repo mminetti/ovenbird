@@ -1,4 +1,4 @@
-﻿using Core.Common;
+﻿using Core.Auditing;
 
 namespace Infrastructure.Data.Config.Common;
 

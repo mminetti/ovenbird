@@ -1,4 +1,4 @@
-namespace Core.Common;
+namespace Core.Auditing;
 
 public class AuditTrail : EntityBase<long>, IAggregateRoot
 {

@@ -1,3 +1,4 @@
+using Core.Auditing;
 using Core.Common;
 
 namespace Core.Security;

@@ -1,4 +1,4 @@
-﻿namespace Core.Audit;
+﻿namespace Core.Auditing;
 
 public enum AuditAction
 {
