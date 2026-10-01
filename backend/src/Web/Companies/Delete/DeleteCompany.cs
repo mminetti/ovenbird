@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Common;
-using UseCases.Companies.Delete;
+using UseCases.Settings.Companies.Delete;
 using Web.Extensions;
 using Web.Resources;
 

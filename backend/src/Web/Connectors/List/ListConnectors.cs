@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using UseCases.Common;
-using UseCases.Connectors;
-using UseCases.Connectors.List;
+using UseCases.Settings.Connectors;
+using UseCases.Settings.Connectors.List;
 using Web.Resources;
 
 namespace Web.Connectors.List;

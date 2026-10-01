@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using UseCases.Common;
-using UseCases.Configurations;
-using UseCases.Configurations.List;
+using UseCases.Settings.Configurations;
+using UseCases.Settings.Configurations.List;
 using Web.Resources;
 
 namespace Web.Configurations.List;

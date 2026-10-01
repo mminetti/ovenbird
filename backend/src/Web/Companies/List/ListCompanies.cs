@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using UseCases.Common;
-using UseCases.Companies;
-using UseCases.Companies.List;
+using UseCases.Settings.Companies;
+using UseCases.Settings.Companies.List;
 using Web.Resources;
 
 namespace Web.Companies.List;

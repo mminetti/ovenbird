@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
 using UseCases.Common;
-using UseCases.Companies.Create;
+using UseCases.Settings.Companies.Create;
 using Web.Companies.Get;
 using Web.Extensions;
 using Web.Resources;

@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
 using Core.Settings;
 using Infrastructure.Data.Queries.Common;
-using UseCases.Configurations;
-using UseCases.Configurations.List;
+using UseCases.Settings.Configurations;
+using UseCases.Settings.Configurations.List;
 
 namespace Infrastructure.Data.Queries.Shared;
 
