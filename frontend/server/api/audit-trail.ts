@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
 			params.set('per_page', String(query.pageSize))
 		}
 
-		return await callBackend<AuditTrailResponse>(event, `/audit-trail?${params.toString()}`)
+		return await callBackend<AuditTrailResponse>(event, `/common/audit-trails?${params.toString()}`)
 	} catch (error) {
 		return handleBackendError(error, event)
 	}

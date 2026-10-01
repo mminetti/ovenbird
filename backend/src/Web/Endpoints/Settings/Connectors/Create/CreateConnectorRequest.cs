@@ -4,7 +4,7 @@ namespace Web.Endpoints.Settings.Connectors.Create;
 
 public class CreateConnectorRequest
 {
-    public const string Route = "/connectors";
+    public const string Route = "/settings/connectors";
 
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }

@@ -5,7 +5,7 @@ namespace Web.Endpoints.Auditing.List;
 
 public sealed class ListAuditTrailRequest
 {
-    public const string Route = "/audit-trail";
+    public const string Route = "/common/audit-trails";
 
     [BindFrom("entity_type")]
     public string EntityType { get; init; } = string.Empty;

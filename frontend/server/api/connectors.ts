@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
 			const name = typeof body?.name === 'string' ? body.name.trim() : ''
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
-			return await callBackend(event, '/connectors', {
+			return await callBackend(event, '/settings/connectors', {
 				method: 'POST',
 				body: {
 					name,
@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
 			const name = typeof body?.name === 'string' ? body.name.trim() : undefined
 			const description = typeof body?.description === 'string' ? body.description.trim() : undefined
 
-			return await callBackend(event, `/connectors/${connectorId}`, {
+			return await callBackend(event, `/settings/connectors/${connectorId}`, {
 				method: 'PUT',
 				body: {
 					id: connectorId,
@@ -88,7 +88,7 @@ export default defineEventHandler(async (event) => {
 			const query = getQuery(event)
 			const connectorId = Number(query.id)
 
-			return await callBackend(event, `/connectors/${connectorId}`, {
+			return await callBackend(event, `/settings/connectors/${connectorId}`, {
 				method: 'DELETE'
 			})
 		}
@@ -97,12 +97,12 @@ export default defineEventHandler(async (event) => {
 
 		if (query.id) {
 			const connectorId = Number(query.id)
-			return await callBackend<Connector>(event, `/connectors/${connectorId}`)
+			return await callBackend<Connector>(event, `/settings/connectors/${connectorId}`)
 		}
 
 		const params = getListQueryParams(query)
 
-		return await callBackend<ConnectorsResponse>(event, `/connectors?${params.toString()}`)
+		return await callBackend<ConnectorsResponse>(event, `/settings/connectors?${params.toString()}`)
 	} catch (error) {
 		return handleBackendError(error, event)
 	}

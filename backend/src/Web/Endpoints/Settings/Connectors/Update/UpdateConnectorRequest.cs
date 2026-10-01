@@ -4,7 +4,7 @@ namespace Web.Endpoints.Settings.Connectors.Update;
 
 public class UpdateConnectorRequest
 {
-    public const string Route = "/connectors/{ConnectorId:int}";
+    public const string Route = "/settings/connectors/{ConnectorId:int}";
     public static string BuildRoute(int connectorId) => Route.Replace("{ConnectorId:int}", connectorId.ToString());
 
     public int ConnectorId { get; set; }
