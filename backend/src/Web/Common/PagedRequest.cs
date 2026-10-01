@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using UseCases.Common;
+using UseCases.Common.Constants;
 
 namespace Web.Common;
 

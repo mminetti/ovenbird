@@ -1,6 +1,6 @@
 ﻿using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
-using UseCases.Common;
+using UseCases.Common.Constants;
 using UseCases.Security.Permissions.Update;
 using Web.Extensions;
 using Web.Resources;

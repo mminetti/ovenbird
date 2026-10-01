@@ -188,7 +188,7 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         {
             Id = 1000,
             Name = "test.permission",
-            ModuleId = UseCases.Common.Constants.PermissionModules.Security,
+            ModuleId = UseCases.Common.Constants.Constants.PermissionModules.Security,
             Description = "Test permission"
         };
         _dbContext.Add(permission);

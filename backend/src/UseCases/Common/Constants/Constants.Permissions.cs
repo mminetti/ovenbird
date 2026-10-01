@@ -1,4 +1,4 @@
-﻿namespace UseCases.Common;
+﻿namespace UseCases.Common.Constants;
 
 public static partial class Constants
 {

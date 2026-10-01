@@ -1,5 +1,6 @@
 ﻿using Ardalis.Result;
 using UseCases.Common;
+using UseCases.Common.Constants;
 using UseCases.Market.Markets;
 using UseCases.Market.Markets.List;
 using Web.Resources;

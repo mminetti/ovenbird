@@ -1,5 +1,5 @@
 ﻿using Core.Security;
-using UseCases.Common;
+using UseCases.Common.Constants;
 
 namespace Infrastructure.Data.Config.Security;
 
