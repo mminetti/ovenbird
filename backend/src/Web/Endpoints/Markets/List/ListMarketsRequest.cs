@@ -1,0 +1,12 @@
+using Web.Common;
+
+namespace Web.Endpoints.Markets.List;
+
+public sealed class ListMarketsRequest : PagedRequest
+{
+    public const string Route = "/settings/markets";
+}
+
+public sealed class ListMarketsValidator : PagedRequestValidator<ListMarketsRequest>
+{
+}

@@ -1,0 +1,12 @@
+using Web.Common;
+
+namespace Web.Endpoints.Settings.Configurations.List;
+
+public sealed class ListConfigurationsRequest : PagedRequest
+{
+    public const string Route = "/settings/configurations";
+}
+
+public sealed class ListConfigurationsValidator : PagedRequestValidator<ListConfigurationsRequest>
+{
+}
