@@ -30,17 +30,9 @@ builder.Services.AddQuartz(q =>
     q.ScheduleJob<MarketDocumentImportJob>(
         trigger => trigger
             .WithIdentity("MarketDocumentImportTrigger")
+            //.StartNow(),
             .WithCronSchedule(cronSchedule),
         job => job.WithIdentity("MarketDocumentImportJob"));
-
-    //var queueKey = JobKey.Create(nameof(MarketDocumentImportJob));
-
-    //q.AddJob<MarketDocumentImportJob>(jobBuilder => jobBuilder.WithIdentity(queueKey))
-    //    .AddTrigger(trigger =>
-    //        trigger
-    //        .ForJob(queueKey)
-    //        .WithSimpleSchedule(x => x.WithIntervalInHours(1))
-    //    .StartNow());
 });
 
 builder.Services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);

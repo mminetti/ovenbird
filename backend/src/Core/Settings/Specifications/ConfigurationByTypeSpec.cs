@@ -4,11 +4,12 @@ public class ConfigurationByTypeSpec : Specification<Configuration>
 {
     public ConfigurationByTypeSpec(int typeId) =>
         Query
-            .Where(configuration => configuration.ConfigurationTypeId == typeId)
-            .Include(configuration => configuration.Company)
-            .Include(configuration => configuration.ConfigurationType)
-            .Include(configuration => configuration.Connectors)
-                .ThenInclude(connector => connector.ConnectorImplementation)
-            .Include(configuration => configuration.Connectors)
-                .ThenInclude(connector => connector.ConnectorFields);
+            .Where(x => x.ConfigurationTypeId == typeId)
+            .Include(x => x.Company)
+            .Include(x => x.ConfigurationType)
+            .Include(x => x.ConfigurationFields)
+            .Include(x => x.Connectors)
+                .ThenInclude(x => x.ConnectorImplementation)
+            .Include(x => x.Connectors)
+                .ThenInclude(x => x.ConnectorFields);
 }
