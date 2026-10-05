@@ -1,6 +1,8 @@
-﻿using Infrastructure;
+﻿using Core.Market;
+using Infrastructure;
 using Infrastructure.Data;
 using Quartz;
+using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 using Wolverine;
 using Worker.Jobs.Market;
@@ -14,8 +16,8 @@ builder.Services.AddInfrastructureServices(builder.Configuration, startupLogger)
 
 builder.UseWolverine(opts =>
 {
-    opts.Discovery.IncludeAssembly(typeof(Core.Market.MarketDocument).Assembly);
-    opts.Discovery.IncludeAssembly(typeof(UseCases.Market.MarketDocuments.Import.ImportMarketDocumentCommand).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(MarketDocument).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(ImportMarketDocumentCommand).Assembly);
     opts.Discovery.IncludeAssembly(typeof(InfrastructureServiceExtensions).Assembly);
 
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
