@@ -6,6 +6,6 @@ public class FtpOptions
     public int Port { get; set; } = 22;
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public string RemoteDirectory {  get; set; } = string.Empty;
+    public string RootDirectory {  get; set; } = string.Empty;
     public string Implementation { get; set; } = string.Empty;
 }

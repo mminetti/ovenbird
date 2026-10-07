@@ -1,5 +1,4 @@
-﻿using Core.Common.Extensions;
-using Core.Market;
+﻿using Core.Market;
 using Core.Market.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -12,14 +11,14 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketImportStrategyResolver strategyResolver,
-    TimeProvider timeProvider)
+    MarketImportStrategyResolver strategyResolver)
 {
     private const string HandlerIdentifier = "handler";
 
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
+
         var configurations = await configurationReadRepository.ListAsync(
             new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.EdiImport), ct);
 
@@ -30,7 +29,6 @@ public class ImportMarketDocumentHandler(
                 var company = configuration.GetRequiredCompany();
 
                 var import = strategyResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
-                var timeZone = TimeZoneInfo.FindSystemTimeZoneById(company.TimeZoneId);
 
                 var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
 
@@ -49,11 +47,9 @@ public class ImportMarketDocumentHandler(
                             continue;
                         }
 
-                        using var ftpStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
+                        using var fileStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
 
-                        var storageKey = GetStorageKey(timeProvider.GetUtcNow(), timeZone, company.Name, fileName);
-
-                        var uploadedFileReference = await import.UploadDocumentAsync(configuration, ftpStream, storageKey, ct);
+                        var uploadedFileReference = await import.UploadDocumentAsync(configuration, fileStream, fileName, ct);
 
                         var document = new MarketDocument
                         {
@@ -67,6 +63,8 @@ public class ImportMarketDocumentHandler(
                         var created = await documentRepository.AddAsync(document, ct);
 
                         documentIds.Add(created.Id);
+
+                        // publish event market.document.inbound.created
                     }
                     catch (Exception)
                     {
@@ -81,12 +79,5 @@ public class ImportMarketDocumentHandler(
         }
 
         return Result.Success<IReadOnlyList<long>>(documentIds);
-    }
-
-    private static string GetStorageKey(DateTimeOffset utcNow, TimeZoneInfo timeZone, string companyName, string fileName)
-    {
-        var now = TimeZoneInfo.ConvertTime(utcNow, timeZone);
-        var rootFilePath = $"edi/import/{companyName}/{now:yyyy/MM/dd}".ToSlug();
-        return $"{rootFilePath}/{fileName}";
     }
 }

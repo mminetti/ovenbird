@@ -75,7 +75,7 @@ public class LocalFileSystemFtpServiceTests : IDisposable
         Host = "unused",
         Username = "unused",
         Password = "unused",
-        RemoteDirectory = _remoteDirectory,
+        RootDirectory = _remoteDirectory,
     };
 
     public void Dispose()

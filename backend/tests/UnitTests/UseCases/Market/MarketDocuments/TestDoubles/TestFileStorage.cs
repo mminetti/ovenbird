@@ -14,10 +14,11 @@ public class TestFileStorage : IFileStorage
 
     public List<string> UploadedPaths { get; } = [];
 
-    public async Task<string> UploadAsync(FileStorageOptions options, Stream content, string remotePath, CancellationToken ct)
+    public async Task<string> UploadAsync(FileStorageOptions options, Stream content, string fileName, CancellationToken ct)
     {
         using var buffer = new MemoryStream();
         await content.CopyToAsync(buffer, ct);
+        var remotePath = $"{options.FileFolder}/{fileName}";
         _blobs[remotePath] = buffer.ToArray();
         UploadedPaths.Add(remotePath);
 

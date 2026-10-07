@@ -24,7 +24,7 @@ public class BigDataImportStrategyTests
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataImportStrategy(services.BuildServiceProvider(), _secretResolver);
+        _strategy = new BigDataImportStrategy(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class BigDataImportStrategyTests
         _ftpService.ListAsync(
                 Arg.Is<FtpOptions>(o =>
                     o.Host == "sftp.example.com" && o.Port == 2222 && o.Username == "user" &&
-                    o.Password == "pass" && o.RemoteDirectory == "remote/dir"),
+                    o.Password == "pass" && o.RootDirectory == "remote/dir"),
                 Arg.Any<CancellationToken>())
             .Returns(["remote/dir/file1.csv"]);
 
@@ -119,7 +119,7 @@ public class BigDataImportStrategyTests
 
         if (remoteDirectory is not null)
         {
-            fields.Add(new ConfigurationField { ConfigurationId = 1, Name = "ftp.remote.directory", Value = remoteDirectory });
+            fields.Add(new ConfigurationField { ConfigurationId = 1, Name = "ftp.root.directory", Value = remoteDirectory });
         }
 
         return new Configuration

@@ -13,7 +13,7 @@ public class FluentFtpService() : IFtpService
         using var client = CreateClient(options);
         await client.Connect(ct);
 
-        var listing = await client.GetListing(options.RemoteDirectory, ct);
+        var listing = await client.GetListing(options.RootDirectory, ct);
 
         return listing
             .Where(item => item.Type == FtpObjectType.File)

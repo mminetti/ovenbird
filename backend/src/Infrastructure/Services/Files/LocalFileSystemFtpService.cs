@@ -1,14 +1,7 @@
-using UseCases.Interfaces.Files;
+﻿using UseCases.Interfaces.Files;
 
 namespace Infrastructure.Services.Files;
 
-/// <summary>
-/// Reads/writes files from a local "drop folder" instead of a real FTP/SFTP server.
-/// Not for production use - intended to let the BigData import strategy be exercised
-/// end-to-end while running the app locally, by pointing a connector's
-/// "ftp.remote.directory" field at a folder on disk. Host/username/password connector
-/// fields are still required by BigDataImportStrategy but are ignored here.
-/// </summary>
 public class LocalFileSystemFtpService : IFtpService
 {
     public Task<IReadOnlyList<string>> ListAsync(FtpOptions options, CancellationToken ct)
@@ -53,7 +46,7 @@ public class LocalFileSystemFtpService : IFtpService
         await content.CopyToAsync(fileStream, ct);
     }
 
-    private static string ResolveDirectory(FtpOptions options) => Path.GetFullPath(options.RemoteDirectory);
+    private static string ResolveDirectory(FtpOptions options) => Path.GetFullPath(options.RootDirectory);
 
     private static string ResolvePath(FtpOptions options, string remotePath)
     {
@@ -63,7 +56,7 @@ public class LocalFileSystemFtpService : IFtpService
         if (!fullPath.StartsWith(directory, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
-                $"Remote path '{remotePath}' is outside of the configured remote directory '{options.RemoteDirectory}'.");
+                $"Remote path '{remotePath}' is outside of the configured root directory '{options.RootDirectory}'.");
         }
 
         return fullPath;

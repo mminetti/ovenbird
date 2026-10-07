@@ -18,6 +18,7 @@ public class ImportMarketDocumentHandlerHandle
     private const string FileStorageImplementation = "TestFileStorage";
     private const string RemoteDirectory = "remote/dir";
     private const string RootDirectory = "import-market-documents";
+    private const string FileStorageFolder = "edi/import";
 
     private readonly IRepository<MarketDocument> _documentRepository = Substitute.For<IRepository<MarketDocument>>();
     private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
@@ -38,14 +39,13 @@ public class ImportMarketDocumentHandlerHandle
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
         var resolver = new MarketImportStrategyResolver(
-            [new BigDataImportStrategy(services.BuildServiceProvider(), secretResolver)]);
+            [new BigDataImportStrategy(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
 
         _handler = new ImportMarketDocumentHandler(
             _documentRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            resolver,
-            TimeProvider.System);
+            resolver);
     }
 
     [Fact]
@@ -141,7 +141,6 @@ public class ImportMarketDocumentHandlerHandle
             },
             ConnectorFields =
             [
-                new ConnectorField { ConnectorId = 2, Name = "root.directory", Value = RootDirectory },
                 new ConnectorField { ConnectorId = 2, Name = "connection.string", Value = "UseDevelopmentStorage=true" },
             ],
         };
@@ -156,7 +155,9 @@ public class ImportMarketDocumentHandlerHandle
             ConfigurationFields =
             [
                 new ConfigurationField { ConfigurationId = 1, Name = "handler", Value = "BigData" },
-                new ConfigurationField { ConfigurationId = 1, Name = "ftp.remote.directory", Value = RemoteDirectory },
+                new ConfigurationField { ConfigurationId = 1, Name = "ftp.root.directory", Value = RemoteDirectory },
+                new ConfigurationField { ConfigurationId = 1, Name = "file.storage.root.directory", Value = RootDirectory },
+                new ConfigurationField { ConfigurationId = 1, Name = "file.storage.folder", Value = FileStorageFolder },
             ],
         };
     }

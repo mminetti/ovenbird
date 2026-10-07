@@ -16,7 +16,7 @@ public class SshNetSftpService : IFtpService
 
         var files = new List<string>();
 
-        await foreach (SftpFile file in client.ListDirectoryAsync(options.RemoteDirectory, ct))
+        await foreach (SftpFile file in client.ListDirectoryAsync(options.RootDirectory, ct))
         {
             if (file.IsRegularFile)
             {

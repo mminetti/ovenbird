@@ -21,7 +21,7 @@ public class TestFtpService : IFtpService
     public Task<IReadOnlyList<string>> ListAsync(FtpOptions options, CancellationToken ct)
     {
         IReadOnlyList<string> matches = _files.Keys
-            .Where(path => path.StartsWith(options.RemoteDirectory, StringComparison.OrdinalIgnoreCase))
+            .Where(path => path.StartsWith(options.RootDirectory, StringComparison.OrdinalIgnoreCase))
             .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
             .ToList();
 

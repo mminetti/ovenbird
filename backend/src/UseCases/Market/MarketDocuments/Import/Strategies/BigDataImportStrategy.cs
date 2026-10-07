@@ -2,22 +2,23 @@
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
+using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import.Strategies;
 
-public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorFieldSecretResolver secretResolver)
+public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorFieldSecretResolver secretResolver, TimeProvider timeProvider)
     : IMarketImportStrategy
 {
     private const int DefaultFtpPort = 22;
 
-    private const string FtpHost = "host";
-    private const string FtpPort = "port";
-    private const string FtpUsername = "username";
-    private const string FtpPassword = "password";
-    private const string FtpRemoteDirectory = "ftp.remote.directory";
-
-    private const string FileStorageRootDirectory = "root.directory";
-    private const string FileStorageConnectionString = "connection.string";
+    private const string ConnectorFtpHost = "host";
+    private const string ConnectorFtpPort = "port";
+    private const string ConnectorFtpUsername = "username";
+    private const string ConnectorFtpPassword = "password";
+    private const string ConnectorFileStorageConnectionString = "connection.string";
+    private const string ConfigurationFtpRootDirectory = "ftp.root.directory";
+    private const string ConfigurationFileStorageRootDirectory = "file.storage.root.directory";
+    private const string ConfigurationFileStorageFolder = "file.storage.folder";
 
     public string Identifier => "BigData";
 
@@ -35,11 +36,11 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
         return await ftp.Service.DownloadAsync(ftp.Options, remoteFilePath, ct);
     }
 
-    public async Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct)
+    public async Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string fileName, CancellationToken ct)
     {
         var fileStorage = await ResolveFileStorage(configuration, ct);
 
-        return await fileStorage.Service.UploadAsync(fileStorage.Options, content, remoteFilePath, ct);
+        return await fileStorage.Service.UploadAsync(fileStorage.Options, content, fileName, ct);
     }
 
     private record FtpContext(FtpOptions Options, IFtpService Service);
@@ -78,27 +79,32 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
 
     private async Task<FtpOptions> ResolveFtpOptions(Configuration configuration, CancellationToken ct)
     {
-        var connector = configuration.GetRequiredConnector(Core.Common.Constants.Constants.ConnectorTypes.Ftp);
+        var connector = configuration.GetRequiredConnector(CoreConstants.ConnectorTypes.Ftp);
 
         return new FtpOptions
         {
-            Host = await connector.GetRequiredValueAsync(FtpHost, secretResolver, ct),
-            Port = int.TryParse(connector.GetValue(FtpPort), out var port) ? port : DefaultFtpPort,
-            Username = await connector.GetRequiredValueAsync(FtpUsername, secretResolver, ct),
-            Password = await connector.GetRequiredValueAsync(FtpPassword, secretResolver, ct),
-            RemoteDirectory = configuration.GetRequiredValue(FtpRemoteDirectory),
+            Host = await connector.GetRequiredValueAsync(ConnectorFtpHost, secretResolver, ct),
+            Port = int.TryParse(connector.GetValue(ConnectorFtpPort), out var port) ? port : DefaultFtpPort,
+            Username = await connector.GetRequiredValueAsync(ConnectorFtpUsername, secretResolver, ct),
+            Password = await connector.GetRequiredValueAsync(ConnectorFtpPassword, secretResolver, ct),
+            RootDirectory = configuration.GetRequiredValue(ConfigurationFtpRootDirectory),
             Implementation = connector.ConnectorImplementation.Identifier,
         };
     }
 
     private async Task<FileStorageOptions> ResolveFileOptions(Configuration configuration, CancellationToken ct)
     {
-        var connector = configuration.GetRequiredConnector(Core.Common.Constants.Constants.ConnectorTypes.FileStorage);
+        var connector = configuration.GetRequiredConnector(CoreConstants.ConnectorTypes.FileStorage);
+
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration.GetRequiredCompany().TimeZoneId);
+
+        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
 
         return new FileStorageOptions
         {
-            RootDirectory = await connector.GetRequiredValueAsync(FileStorageRootDirectory, secretResolver, ct),
-            ConnectionString = await connector.GetRequiredValueAsync(FileStorageConnectionString, secretResolver, ct),
+            RootDirectory = configuration.GetRequiredValue(ConfigurationFileStorageRootDirectory),
+            FileFolder = $"{configuration.GetRequiredValue(ConfigurationFileStorageFolder)}/{now:yyyy/MM/dd}",
+            ConnectionString = await connector.GetRequiredValueAsync(ConnectorFileStorageConnectionString, secretResolver, ct),
             Implementation = connector.ConnectorImplementation.Identifier,
         };
     }

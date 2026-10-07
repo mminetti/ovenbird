@@ -14,12 +14,14 @@ public class AzureBlobFileStorage : IFileStorage
     public async Task<string> UploadAsync(
         FileStorageOptions options, 
         Stream content, 
-        string remotePath, 
+        string fileName, 
         CancellationToken ct)
     {
         var client = GetClient(options);
 
         await client.CreateIfNotExistsAsync(cancellationToken: ct);
+
+        var remotePath = $"{options.FileFolder}/{fileName}"; 
 
         var blobClient = client.GetBlobClient(remotePath);
         await blobClient.UploadAsync(content, overwrite: true, ct);

@@ -7,5 +7,5 @@ public interface IMarketImportStrategy
     string Identifier { get; }
     Task<IReadOnlyList<string>> ListFilesAsync(Configuration configuration, CancellationToken ct);
     Task<Stream> DownloadFileAsync(Configuration configuration, string remoteFilePath, CancellationToken ct);
-    Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string remoteFilePath, CancellationToken ct);
+    Task<string> UploadDocumentAsync(Configuration configuration, Stream content, string fileName, CancellationToken ct);
 }
