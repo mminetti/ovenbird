@@ -1,4 +1,4 @@
-namespace UseCases.Market.MarketDocuments.Import.Processors.Readers;
+﻿namespace UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 public class MarketDocumentTransactionReaderResolver(IEnumerable<IMarketDocumentTransactionReader> readers)
 {

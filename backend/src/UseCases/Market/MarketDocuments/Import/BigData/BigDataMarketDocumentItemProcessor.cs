@@ -1,9 +1,10 @@
 ﻿using System.Xml.Linq;
 using Core.Market;
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
+using UseCases.Market.MarketDocuments.Import.BigData.Readers;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
-namespace UseCases.Market.MarketDocuments.Import.Processors;
+namespace UseCases.Market.MarketDocuments.Import.BigData;
 
 public class BigDataMarketDocumentItemProcessor(MarketDocumentTransactionReaderResolver readerResolver)
     : IMarketDocumentItemProcessor

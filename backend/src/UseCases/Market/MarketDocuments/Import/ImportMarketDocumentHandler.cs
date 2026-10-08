@@ -2,7 +2,7 @@
 using Core.Market.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using UseCases.Market.MarketDocuments.Import.Strategies;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -11,7 +11,7 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketImportStrategyResolver strategyResolver,
+    MarketDocumentProcessorResolver strategyResolver,
     IMessageBus bus)
 {
     private const string HandlerIdentifier = "handler";
@@ -29,9 +29,9 @@ public class ImportMarketDocumentHandler(
             {
                 var company = configuration.GetRequiredCompany();
 
-                var import = strategyResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+                var processor = strategyResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-                var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
+                var remoteFilePaths = await processor.ListFilesAsync(configuration, ct);
 
                 foreach (var remoteFilePath in remoteFilePaths)
                 {
@@ -48,9 +48,9 @@ public class ImportMarketDocumentHandler(
                             continue;
                         }
 
-                        using var fileStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
+                        using var fileStream = await processor.DownloadFileAsync(configuration, remoteFilePath, ct);
 
-                        var uploadedFileReference = await import.UploadDocumentAsync(configuration, fileStream, fileName, ct);
+                        var uploadedFileReference = await processor.UploadDocumentAsync(configuration, fileStream, fileName, ct);
 
                         var document = new MarketDocument
                         {

@@ -1,9 +1,9 @@
-using System.Text;
+﻿using System.Text;
 using System.Xml.Linq;
 using Core.Common.Constants;
 using Core.Market;
-using UseCases.Market.MarketDocuments.Import.Processors;
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
+using UseCases.Market.MarketDocuments.Import.BigData;
+using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 

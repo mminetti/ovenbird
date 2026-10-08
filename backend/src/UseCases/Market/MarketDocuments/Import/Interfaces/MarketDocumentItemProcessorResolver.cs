@@ -1,4 +1,4 @@
-namespace UseCases.Market.MarketDocuments.Import.Processors;
+﻿namespace UseCases.Market.MarketDocuments.Import.Interfaces;
 
 public class MarketDocumentItemProcessorResolver(IEnumerable<IMarketDocumentItemProcessor> processors)
 {

@@ -1,4 +1,4 @@
-using UseCases.Market.MarketDocuments.Import.Processors;
+﻿using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 

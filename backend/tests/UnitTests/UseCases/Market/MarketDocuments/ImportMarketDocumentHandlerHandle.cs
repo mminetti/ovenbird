@@ -5,11 +5,12 @@ using Core.Market.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
+using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
-using UseCases.Market.MarketDocuments.Import.Strategies;
-using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
+using UseCases.Market.MarketDocuments.Import.BigData;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
@@ -41,8 +42,8 @@ public class ImportMarketDocumentHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        var resolver = new MarketImportStrategyResolver(
-            [new BigDataImportStrategy(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
+        var resolver = new MarketDocumentProcessorResolver(
+            [new BigDataMarketDocumentProcessor(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())

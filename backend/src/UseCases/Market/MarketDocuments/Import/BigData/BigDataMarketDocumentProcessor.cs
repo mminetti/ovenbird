@@ -2,12 +2,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
-namespace UseCases.Market.MarketDocuments.Import.Strategies;
+namespace UseCases.Market.MarketDocuments.Import.BigData;
 
-public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorFieldSecretResolver secretResolver, TimeProvider timeProvider)
-    : IMarketImportStrategy
+public class BigDataMarketDocumentProcessor(
+    IServiceProvider serviceProvider, 
+    IConnectorFieldSecretResolver secretResolver, 
+    TimeProvider timeProvider)
+    : IMarketDocumentProcessor
 {
     private const int DefaultFtpPort = 22;
 

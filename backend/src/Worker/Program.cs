@@ -3,9 +3,8 @@ using Infrastructure;
 using Infrastructure.Data;
 using Quartz;
 using UseCases.Market.MarketDocuments.Import;
-using UseCases.Market.MarketDocuments.Import.Processors;
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
-using UseCases.Market.MarketDocuments.Import.Strategies;
+using UseCases.Market.MarketDocuments.Import.BigData.Readers;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 using Worker.Jobs.Market;
 
@@ -24,7 +23,7 @@ builder.UseWolverine(opts =>
 
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
-    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketImportStrategyResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentProcessorResolver>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentItemProcessorResolver>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentTransactionReaderResolver>();
 });

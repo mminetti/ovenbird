@@ -1,15 +1,15 @@
-using System.Text;
+﻿using System.Text;
 using Core.Common.Constants;
 using Core.Market;
 using Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
+using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
-using UseCases.Market.MarketDocuments.Import.Processors;
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
-using UseCases.Market.MarketDocuments.Import.Strategies;
-using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
+using UseCases.Market.MarketDocuments.Import.BigData;
+using UseCases.Market.MarketDocuments.Import.BigData.Readers;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -23,7 +23,7 @@ public class ImportMarketDocumentItemHandlerHandle
     private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly TestFileStorage _fileStorage = new();
-    private readonly BigDataImportStrategy _strategy;
+    private readonly BigDataMarketDocumentProcessor _strategy;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
 
@@ -37,9 +37,9 @@ public class ImportMarketDocumentItemHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataImportStrategy(services.BuildServiceProvider(), secretResolver, TimeProvider.System);
+        _strategy = new BigDataMarketDocumentProcessor(services.BuildServiceProvider(), secretResolver, TimeProvider.System);
 
-        var strategyResolver = new MarketImportStrategyResolver([_strategy]);
+        var strategyResolver = new MarketDocumentProcessorResolver([_strategy]);
 
         var readerResolver = new MarketDocumentTransactionReaderResolver(
             [new UsageTransactionReader(), new InvoiceTransactionReader()]);

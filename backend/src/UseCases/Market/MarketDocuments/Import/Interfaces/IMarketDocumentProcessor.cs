@@ -1,8 +1,8 @@
 ﻿using Core.Settings;
 
-namespace UseCases.Market.MarketDocuments.Import.Strategies;
+namespace UseCases.Market.MarketDocuments.Import.Interfaces;
 
-public interface IMarketImportStrategy
+public interface IMarketDocumentProcessor
 {
     string Identifier { get; }
     Task<IReadOnlyList<string>> ListFilesAsync(Configuration configuration, CancellationToken ct);

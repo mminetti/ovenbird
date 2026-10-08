@@ -1,6 +1,6 @@
-using Core.Market;
+﻿using Core.Market;
 
-namespace UseCases.Market.MarketDocuments.Import.Processors;
+namespace UseCases.Market.MarketDocuments.Import.Interfaces;
 
 public interface IMarketDocumentItemProcessor
 {

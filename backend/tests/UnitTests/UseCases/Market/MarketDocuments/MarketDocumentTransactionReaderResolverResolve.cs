@@ -1,4 +1,4 @@
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
+﻿using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 

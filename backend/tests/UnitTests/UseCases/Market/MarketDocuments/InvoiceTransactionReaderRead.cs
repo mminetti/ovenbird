@@ -1,5 +1,5 @@
-using System.Xml.Linq;
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
+﻿using System.Xml.Linq;
+using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 

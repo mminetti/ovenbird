@@ -22,15 +22,15 @@ using UseCases.Settings.Configurations.List;
 using UseCases.Settings.Connectors.List;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
-using UseCases.Market.MarketDocuments.Import.Processors;
-using UseCases.Market.MarketDocuments.Import.Processors.Readers;
-using UseCases.Market.MarketDocuments.Import.Strategies;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
 using UseCases.Security.Users;
 using UseCases.Security.Users.List;
 using UseCases.Market.Markets.List;
 using UseCases.Common.DataLists.Get;
+using UseCases.Market.MarketDocuments.Import.BigData;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
+using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 namespace Infrastructure;
 
@@ -97,8 +97,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFtpService, LocalFileSystemFtpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<IFileStorage, LocalFileSystemFileStorage>()
-            .AddScoped<IMarketImportStrategy, BigDataImportStrategy>()
-            .AddScoped<MarketImportStrategyResolver>()
+            .AddScoped<IMarketDocumentProcessor, BigDataMarketDocumentProcessor>()
+            .AddScoped<MarketDocumentProcessorResolver>()
             .AddScoped<IMarketDocumentItemProcessor, BigDataMarketDocumentItemProcessor>()
             .AddScoped<MarketDocumentItemProcessorResolver>()
             .AddScoped<IMarketDocumentTransactionReader, UsageTransactionReader>()

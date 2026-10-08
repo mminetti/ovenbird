@@ -1,7 +1,7 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using Core.Market;
 
-namespace UseCases.Market.MarketDocuments.Import.Processors.Readers;
+namespace UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 public class UsageTransactionReader : IMarketDocumentTransactionReader
 {

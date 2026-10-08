@@ -1,7 +1,6 @@
 ﻿using Core.Market;
 using Core.Settings;
-using UseCases.Market.MarketDocuments.Import.Processors;
-using UseCases.Market.MarketDocuments.Import.Strategies;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
@@ -9,7 +8,7 @@ public class ImportMarketDocumentItemHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketImportStrategyResolver strategyResolver,
+    MarketDocumentProcessorResolver strategyResolver,
     MarketDocumentItemProcessorResolver processorResolver)
 {
     private const string HandlerIdentifier = "handler";

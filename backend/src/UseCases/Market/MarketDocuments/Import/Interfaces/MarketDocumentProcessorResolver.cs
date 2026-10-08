@@ -1,8 +1,8 @@
-﻿namespace UseCases.Market.MarketDocuments.Import.Strategies;
+﻿namespace UseCases.Market.MarketDocuments.Import.Interfaces;
 
-public class MarketImportStrategyResolver(IEnumerable<IMarketImportStrategy> strategies)
+public class MarketDocumentProcessorResolver(IEnumerable<IMarketDocumentProcessor> strategies)
 {
-    public IMarketImportStrategy Resolve(string identifier)
+    public IMarketDocumentProcessor Resolve(string identifier)
     {
         var match = strategies.FirstOrDefault(s =>
             string.Equals(s.Identifier, identifier, StringComparison.OrdinalIgnoreCase));

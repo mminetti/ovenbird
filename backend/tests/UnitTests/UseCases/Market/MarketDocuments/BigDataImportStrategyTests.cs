@@ -3,7 +3,7 @@ using Core.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
-using UseCases.Market.MarketDocuments.Import.Strategies;
+using UseCases.Market.MarketDocuments.Import.BigData;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -13,7 +13,7 @@ public class BigDataImportStrategyTests
 
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
     private readonly IConnectorFieldSecretResolver _secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
-    private readonly BigDataImportStrategy _strategy;
+    private readonly BigDataMarketDocumentProcessor _strategy;
 
     public BigDataImportStrategyTests()
     {
@@ -24,7 +24,7 @@ public class BigDataImportStrategyTests
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataImportStrategy(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
+        _strategy = new BigDataMarketDocumentProcessor(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
     }
 
     [Fact]
