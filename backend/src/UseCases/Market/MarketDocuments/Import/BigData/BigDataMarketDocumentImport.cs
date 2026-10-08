@@ -70,7 +70,7 @@ public class BigDataMarketDocumentImport(
             var set = transaction.Element("TransactionSet")?.Value ?? string.Empty;
             var subSet = transaction.Element("TransactionSubSet")?.Value ?? string.Empty;
 
-            var reader = ResolveReader(set);
+            var reader = ResolveReader($"{set}_{subSet}");
             var item = reader.Read(transaction);
 
             item.Set = set;

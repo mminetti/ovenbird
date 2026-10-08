@@ -5,19 +5,35 @@ namespace UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 public class UsageTransactionReader : IMarketDocumentTransactionReader
 {
-    public const string TransactionSet = "867";
+    public const string Identifier = "867_03";
 
     public MarketDocumentItem Read(XElement transactionElement)
     {
-        var usage = transactionElement.Element("Usage");
+        var transaction = transactionElement.Element("Usage");
+
+        var purposeCode = transaction?.Element("PurposeCode")?.Value ?? string.Empty;
+        var purpose = purposeCode switch
+        {
+            "01" => "CANCEL",
+            "05" => "REPLACE",
+            "07" => "DUPLICATE",
+            _ => "ORIGINAL",
+        };
+
+        var reportType = transaction?.Element("ReportType")?.Value ?? string.Empty;
+        var subPurpose = reportType switch
+        {
+            "C1" => "INTERVAL",
+            _ => "NONINTERVAL",
+        };
 
         return new MarketDocumentItem
         {
-            Purpose = usage?.Element("PurposeCode")?.Value ?? string.Empty,
-            SubPurpose = usage?.Element("ReportType")?.Value ?? string.Empty,
-            TrackingNumber = usage?.Element("TransactionReferenceNumber")?.Value ?? string.Empty,
-            OriginalTrackingNumber = usage?.Element("OriginalTransactionNumber")?.Value,
-            ServicePointIdentifier = usage?.Element("UtilityAccountNumber")?.Value ?? string.Empty,
+            Purpose = purpose,
+            SubPurpose = subPurpose,
+            TrackingNumber = transaction?.Element("TransactionReferenceNumber")?.Value ?? string.Empty,
+            OriginalTrackingNumber = transaction?.Element("OriginalTransactionNumber")?.Value,
+            ServicePointIdentifier = transaction?.Element("UtilityAccountNumber")?.Value ?? string.Empty,
         };
     }
 }
