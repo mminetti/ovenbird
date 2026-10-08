@@ -9,9 +9,9 @@ public class InvoiceTransactionReader : IMarketDocumentTransactionReader
 
     public MarketDocumentItem Read(XElement transactionElement)
     {
-        var invoice = transactionElement.Element("Invoice");
+        var transaction = transactionElement.Element("Invoice");
 
-        var billPurpose = invoice?.Element("BillPurpose")?.Value ?? string.Empty;
+        var billPurpose = transaction?.Element("BillPurpose")?.Value ?? string.Empty;
         var purpose = billPurpose switch
         {
             "01" => "CANCEL",
@@ -20,7 +20,7 @@ public class InvoiceTransactionReader : IMarketDocumentTransactionReader
             _ => "ORIGINAL",
         };
 
-        var billActionCode = invoice?.Element("BillActionCode")?.Value ?? string.Empty;
+        var billActionCode = transaction?.Element("BillActionCode")?.Value ?? string.Empty;
         var subPurpose = billActionCode switch
         {
             "26" => "CHARGES",
@@ -30,13 +30,21 @@ public class InvoiceTransactionReader : IMarketDocumentTransactionReader
             _ => "MONTH",
         };
 
+        var fields = transaction?.Flatten("Invoice") ?? [];
+
         return new MarketDocumentItem
         {
             Purpose = purpose,
             SubPurpose = subPurpose,
-            TrackingNumber = invoice?.Element("BillNumber")?.Value ?? string.Empty,
-            OriginalTrackingNumber = invoice?.Element("OriginalBillNumber")?.Value,
-            ServicePointIdentifier = invoice?.Element("LDCAccountNumber")?.Value ?? string.Empty,
+            TrackingNumber = transaction?.Element("BillNumber")?.Value ?? string.Empty,
+            OriginalTrackingNumber = transaction?.Element("OriginalBillNumber")?.Value,
+            ServicePointIdentifier = transaction?.Element("LDCAccountNumber")?.Value ?? string.Empty,
+            Fields = [.. fields.Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                .Select(x => new MarketDocumentItemField
+                {
+                    FieldName = x.Name,
+                    FieldValue = x.Value
+                })],
         };
     }
 }
