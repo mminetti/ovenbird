@@ -11,7 +11,7 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketDocumentProcessorResolver strategyResolver,
+    MarketDocumentImportResolver importResolver,
     IMessageBus bus)
 {
     private const string HandlerIdentifier = "handler";
@@ -29,9 +29,9 @@ public class ImportMarketDocumentHandler(
             {
                 var company = configuration.GetRequiredCompany();
 
-                var processor = strategyResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+                var import = importResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-                var remoteFilePaths = await processor.ListFilesAsync(configuration, ct);
+                var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
 
                 foreach (var remoteFilePath in remoteFilePaths)
                 {
@@ -48,9 +48,9 @@ public class ImportMarketDocumentHandler(
                             continue;
                         }
 
-                        using var fileStream = await processor.DownloadFileAsync(configuration, remoteFilePath, ct);
+                        using var fileStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
 
-                        var uploadedFileReference = await processor.UploadDocumentAsync(configuration, fileStream, fileName, ct);
+                        var uploadedFileReference = await import.UploadDocumentAsync(configuration, fileStream, fileName, ct);
 
                         var document = new MarketDocument
                         {
@@ -65,22 +65,8 @@ public class ImportMarketDocumentHandler(
 
                         documentIds.Add(created.Id);
 
-                        try
-                        {
-                            var itemResult = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
-                                new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
-
-                            if (!itemResult.IsSuccess)
-                            {
-                                created.StatusId = CoreConstants.MarketDocumentStatuses.Error;
-                                await documentRepository.UpdateAsync(created, ct);
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            created.StatusId = CoreConstants.MarketDocumentStatuses.Error;
-                            await documentRepository.UpdateAsync(created, ct);
-                        }
+                        await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
+                            new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
                     }
                     catch (Exception)
                     {

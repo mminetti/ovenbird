@@ -13,7 +13,7 @@ public class BigDataImportStrategyTests
 
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
     private readonly IConnectorFieldSecretResolver _secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
-    private readonly BigDataMarketDocumentProcessor _strategy;
+    private readonly BigDataMarketDocumentImport _strategy;
 
     public BigDataImportStrategyTests()
     {
@@ -24,7 +24,7 @@ public class BigDataImportStrategyTests
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataMarketDocumentProcessor(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
+        _strategy = new BigDataMarketDocumentImport(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
     }
 
     [Fact]

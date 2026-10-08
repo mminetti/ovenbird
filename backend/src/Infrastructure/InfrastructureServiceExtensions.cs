@@ -97,10 +97,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFtpService, LocalFileSystemFtpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<IFileStorage, LocalFileSystemFileStorage>()
-            .AddScoped<IMarketDocumentProcessor, BigDataMarketDocumentProcessor>()
-            .AddScoped<MarketDocumentProcessorResolver>()
-            .AddScoped<IMarketDocumentItemProcessor, BigDataMarketDocumentItemProcessor>()
-            .AddScoped<MarketDocumentItemProcessorResolver>()
+            .AddScoped<IMarketDocumentImport, BigDataMarketDocumentImport>()
+            .AddScoped<MarketDocumentImportResolver>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));

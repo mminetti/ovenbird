@@ -42,8 +42,8 @@ public class ImportMarketDocumentHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        var resolver = new MarketDocumentProcessorResolver(
-            [new BigDataMarketDocumentProcessor(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
+        var resolver = new MarketDocumentImportResolver(
+            [new BigDataMarketDocumentImport(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())

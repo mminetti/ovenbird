@@ -2,6 +2,7 @@
 using Core.Common.Constants;
 using Core.Market;
 using Core.Settings;
+using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
@@ -23,7 +24,7 @@ public class ImportMarketDocumentItemHandlerHandle
     private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly TestFileStorage _fileStorage = new();
-    private readonly BigDataMarketDocumentProcessor _strategy;
+    private readonly BigDataMarketDocumentImport _strategy;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
 
@@ -41,25 +42,21 @@ public class ImportMarketDocumentItemHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataMarketDocumentProcessor(serviceProvider, secretResolver, TimeProvider.System);
+        _strategy = new BigDataMarketDocumentImport(serviceProvider, secretResolver, TimeProvider.System);
 
-        var strategyResolver = new MarketDocumentProcessorResolver([_strategy]);
-
-        var processorResolver = new MarketDocumentItemProcessorResolver(
-            [new BigDataMarketDocumentItemProcessor(serviceProvider)]);
+        var strategyResolver = new MarketDocumentImportResolver([_strategy]);
 
         _configuration = CreateConfiguration();
 
         _configurationReadRepository
-            .GetByIdAsync(_configuration.Id, Arg.Any<CancellationToken>())
+            .FirstOrDefaultAsync(Arg.Any<ConfigurationByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(_configuration);
 
         _handler = new ImportMarketDocumentItemHandler(
             _itemRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            strategyResolver,
-            processorResolver);
+            strategyResolver);
     }
 
     [Fact]

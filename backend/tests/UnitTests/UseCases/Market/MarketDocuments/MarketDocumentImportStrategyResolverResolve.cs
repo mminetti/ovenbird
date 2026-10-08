@@ -7,12 +7,12 @@ public class MarketDocumentImportStrategyResolverResolve
     [Fact]
     public void ReturnsExactMarketMatchWhenAvailable()
     {
-        var defaultStrategy = Substitute.For<IMarketDocumentProcessor>();
+        var defaultStrategy = Substitute.For<IMarketDocumentImport>();
 
-        var b3Strategy = Substitute.For<IMarketDocumentProcessor>();
+        var b3Strategy = Substitute.For<IMarketDocumentImport>();
         b3Strategy.Identifier.Returns("b3");
 
-        var resolver = new MarketDocumentProcessorResolver([defaultStrategy, b3Strategy]);
+        var resolver = new MarketDocumentImportResolver([defaultStrategy, b3Strategy]);
 
         resolver.Resolve("B3").ShouldBe(b3Strategy);
     }
