@@ -22,6 +22,8 @@ using UseCases.Settings.Configurations.List;
 using UseCases.Settings.Connectors.List;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
+using UseCases.Market.MarketDocuments.Import.Processors;
+using UseCases.Market.MarketDocuments.Import.Processors.Readers;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
@@ -97,6 +99,11 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFileStorage, LocalFileSystemFileStorage>()
             .AddScoped<IMarketImportStrategy, BigDataImportStrategy>()
             .AddScoped<MarketImportStrategyResolver>()
+            .AddScoped<IMarketDocumentItemProcessor, BigDataMarketDocumentItemProcessor>()
+            .AddScoped<MarketDocumentItemProcessorResolver>()
+            .AddScoped<IMarketDocumentTransactionReader, UsageTransactionReader>()
+            .AddScoped<IMarketDocumentTransactionReader, InvoiceTransactionReader>()
+            .AddScoped<MarketDocumentTransactionReaderResolver>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));

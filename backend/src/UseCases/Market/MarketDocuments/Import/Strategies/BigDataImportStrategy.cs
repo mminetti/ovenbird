@@ -43,6 +43,13 @@ public class BigDataImportStrategy(IServiceProvider serviceProvider, IConnectorF
         return await fileStorage.Service.UploadAsync(fileStorage.Options, content, fileName, ct);
     }
 
+    public async Task<Stream> OpenDocumentAsync(Configuration configuration, string fileReference, CancellationToken ct)
+    {
+        var fileStorage = await ResolveFileStorage(configuration, ct);
+
+        return await fileStorage.Service.OpenReadAsync(fileStorage.Options, fileReference, ct);
+    }
+
     private record FtpContext(FtpOptions Options, IFtpService Service);
 
     private record FileStorageContext(FileStorageOptions Options, IFileStorage Service);

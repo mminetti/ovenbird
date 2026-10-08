@@ -1,4 +1,5 @@
-﻿using Core.Common.Constants;
+﻿using Ardalis.Result;
+using Core.Common.Constants;
 using Core.Market;
 using Core.Market.Specifications;
 using Core.Settings;
@@ -9,6 +10,7 @@ using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
+using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -25,6 +27,7 @@ public class ImportMarketDocumentHandlerHandle
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly TestFtpService _ftpService = new();
     private readonly TestFileStorage _fileStorage = new();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly ImportMarketDocumentHandler _handler;
 
     public ImportMarketDocumentHandlerHandle()
@@ -41,11 +44,16 @@ public class ImportMarketDocumentHandlerHandle
         var resolver = new MarketImportStrategyResolver(
             [new BigDataImportStrategy(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
 
+        _bus
+            .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success<IReadOnlyList<long>>([]));
+
         _handler = new ImportMarketDocumentHandler(
             _documentRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            resolver);
+            resolver,
+            _bus);
     }
 
     [Fact]
@@ -102,6 +110,90 @@ public class ImportMarketDocumentHandlerHandle
         var roundTrippedContent = await reader.ReadToEndAsync(CancellationToken.None);
 
         roundTrippedContent.ShouldBe(newFileContent);
+    }
+
+    [Fact]
+    public async Task MarksDocumentErrorAndContinues_WhenItemImportResultIsFailure()
+    {
+        _ftpService.SeedFile($"{RemoteDirectory}/newfile.csv", "A,B,C\n1,2,3");
+
+        var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
+        var configuration = CreateConfiguration(company);
+
+        _configurationReadRepository
+            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
+            .Returns([configuration]);
+
+        _documentReadRepository
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByNameAndCompanySpec>(), Arg.Any<CancellationToken>())
+            .Returns((MarketDocument?)null);
+
+        long nextId = 100;
+        MarketDocument? created = null;
+        _documentRepository
+            .AddAsync(Arg.Do<MarketDocument>(d => created = d), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var document = callInfo.Arg<MarketDocument>();
+                document.Id = nextId++;
+                return document;
+            });
+
+        _bus
+            .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
+            .Returns(Result<IReadOnlyList<long>>.Error("Unresolvable TransactionSet"));
+
+        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe([100]);
+
+        created.ShouldNotBeNull();
+        created!.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Error);
+
+        await _documentRepository.Received(1).UpdateAsync(created, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task MarksDocumentErrorAndContinues_WhenItemImportThrows()
+    {
+        _ftpService.SeedFile($"{RemoteDirectory}/newfile.csv", "A,B,C\n1,2,3");
+
+        var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
+        var configuration = CreateConfiguration(company);
+
+        _configurationReadRepository
+            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
+            .Returns([configuration]);
+
+        _documentReadRepository
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByNameAndCompanySpec>(), Arg.Any<CancellationToken>())
+            .Returns((MarketDocument?)null);
+
+        long nextId = 100;
+        MarketDocument? created = null;
+        _documentRepository
+            .AddAsync(Arg.Do<MarketDocument>(d => created = d), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var document = callInfo.Arg<MarketDocument>();
+                document.Id = nextId++;
+                return document;
+            });
+
+        _bus
+            .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
+            .Returns<Result<IReadOnlyList<long>>>(_ => throw new InvalidOperationException("Market Document Transaction Reader couldn't resolve TransactionSet '999'."));
+
+        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe([100]);
+
+        created.ShouldNotBeNull();
+        created!.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Error);
+
+        await _documentRepository.Received(1).UpdateAsync(created, Arg.Any<CancellationToken>());
     }
 
     private static Configuration CreateConfiguration(Company company)

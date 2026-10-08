@@ -11,7 +11,8 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketImportStrategyResolver strategyResolver)
+    MarketImportStrategyResolver strategyResolver,
+    IMessageBus bus)
 {
     private const string HandlerIdentifier = "handler";
 
@@ -64,7 +65,22 @@ public class ImportMarketDocumentHandler(
 
                         documentIds.Add(created.Id);
 
-                        // publish event market.document.inbound.created
+                        try
+                        {
+                            var itemResult = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
+                                new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
+
+                            if (!itemResult.IsSuccess)
+                            {
+                                created.StatusId = CoreConstants.MarketDocumentStatuses.Error;
+                                await documentRepository.UpdateAsync(created, ct);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            created.StatusId = CoreConstants.MarketDocumentStatuses.Error;
+                            await documentRepository.UpdateAsync(created, ct);
+                        }
                     }
                     catch (Exception)
                     {

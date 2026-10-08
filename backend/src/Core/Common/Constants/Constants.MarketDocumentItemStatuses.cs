@@ -1,0 +1,11 @@
+namespace Core.Common.Constants;
+
+public static partial class Constants
+{
+    public static class MarketDocumentItemStatuses
+    {
+        public const int New = 1;
+        public const int Done = 2;
+        public const int Error = 3;
+    }
+}

@@ -3,6 +3,8 @@ using Infrastructure;
 using Infrastructure.Data;
 using Quartz;
 using UseCases.Market.MarketDocuments.Import;
+using UseCases.Market.MarketDocuments.Import.Processors;
+using UseCases.Market.MarketDocuments.Import.Processors.Readers;
 using UseCases.Market.MarketDocuments.Import.Strategies;
 using Wolverine;
 using Worker.Jobs.Market;
@@ -23,6 +25,8 @@ builder.UseWolverine(opts =>
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketImportStrategyResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentItemProcessorResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentTransactionReaderResolver>();
 });
 
 var cronSchedule = builder.Configuration["MarketDocumentImport:CronSchedule"] ?? "0 0 2 * * ?";
