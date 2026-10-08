@@ -5,7 +5,7 @@ namespace UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 public class UsageTransactionReader : IMarketDocumentTransactionReader
 {
-    public string Set => "867";
+    public const string TransactionSet = "867";
 
     public MarketDocumentItem Read(XElement transactionElement)
     {

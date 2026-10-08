@@ -1,7 +1,8 @@
-﻿using System.Text;
+using System.Text;
 using System.Xml.Linq;
 using Core.Common.Constants;
 using Core.Market;
+using Microsoft.Extensions.DependencyInjection;
 using UseCases.Market.MarketDocuments.Import.BigData;
 using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
@@ -13,15 +14,16 @@ public class BigDataMarketDocumentItemProcessorProcessAsync
     public async Task DispatchesEachTransactionToTheReaderMatchingItsTransactionSet()
     {
         var usageReader = Substitute.For<IMarketDocumentTransactionReader>();
-        usageReader.Set.Returns("867");
         usageReader.Read(Arg.Any<XElement>()).Returns(_ => new MarketDocumentItem());
 
         var invoiceReader = Substitute.For<IMarketDocumentTransactionReader>();
-        invoiceReader.Set.Returns("810");
         invoiceReader.Read(Arg.Any<XElement>()).Returns(_ => new MarketDocumentItem());
 
-        var resolver = new MarketDocumentTransactionReaderResolver([usageReader, invoiceReader]);
-        var processor = new BigDataMarketDocumentItemProcessor(resolver);
+        var services = new ServiceCollection();
+        services.AddKeyedSingleton("867", usageReader);
+        services.AddKeyedSingleton("810", invoiceReader);
+
+        var processor = new BigDataMarketDocumentItemProcessor(services.BuildServiceProvider());
 
         const string xml = """
             <Document>
@@ -63,8 +65,8 @@ public class BigDataMarketDocumentItemProcessorProcessAsync
     [Fact]
     public async Task PropagatesExceptionWhenTransactionSetCannotBeResolved()
     {
-        var resolver = new MarketDocumentTransactionReaderResolver([]);
-        var processor = new BigDataMarketDocumentItemProcessor(resolver);
+        var services = new ServiceCollection();
+        var processor = new BigDataMarketDocumentItemProcessor(services.BuildServiceProvider());
 
         const string xml = """
             <Document>

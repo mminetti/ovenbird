@@ -31,21 +31,22 @@ public class ImportMarketDocumentItemHandlerHandle
     {
         var services = new ServiceCollection();
         services.AddKeyedSingleton<IFileStorage>(FileStorageImplementation, _fileStorage);
+        services.AddKeyedSingleton<IMarketDocumentTransactionReader, UsageTransactionReader>(UsageTransactionReader.TransactionSet);
+        services.AddKeyedSingleton<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.TransactionSet);
+
+        var serviceProvider = services.BuildServiceProvider();
 
         var secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
         secretResolver
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataMarketDocumentProcessor(services.BuildServiceProvider(), secretResolver, TimeProvider.System);
+        _strategy = new BigDataMarketDocumentProcessor(serviceProvider, secretResolver, TimeProvider.System);
 
         var strategyResolver = new MarketDocumentProcessorResolver([_strategy]);
 
-        var readerResolver = new MarketDocumentTransactionReaderResolver(
-            [new UsageTransactionReader(), new InvoiceTransactionReader()]);
-
         var processorResolver = new MarketDocumentItemProcessorResolver(
-            [new BigDataMarketDocumentItemProcessor(readerResolver)]);
+            [new BigDataMarketDocumentItemProcessor(serviceProvider)]);
 
         _configuration = CreateConfiguration();
 

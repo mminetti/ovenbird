@@ -1,13 +1,13 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 using Core.Market;
+using Microsoft.Extensions.DependencyInjection;
 using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import.BigData;
 
-public class BigDataMarketDocumentItemProcessor(MarketDocumentTransactionReaderResolver readerResolver)
-    : IMarketDocumentItemProcessor
+public class BigDataMarketDocumentItemProcessor(IServiceProvider serviceProvider) : IMarketDocumentItemProcessor
 {
     public string Identifier => "BigData";
 
@@ -24,7 +24,7 @@ public class BigDataMarketDocumentItemProcessor(MarketDocumentTransactionReaderR
             var set = transaction.Element("TransactionSet")?.Value ?? string.Empty;
             var subSet = transaction.Element("TransactionSubSet")?.Value ?? string.Empty;
 
-            var reader = readerResolver.Resolve(set);
+            var reader = ResolveReader(set);
             var item = reader.Read(transaction);
 
             item.Set = set;
@@ -36,5 +36,18 @@ public class BigDataMarketDocumentItemProcessor(MarketDocumentTransactionReaderR
         }
 
         return items;
+    }
+
+    private IMarketDocumentTransactionReader ResolveReader(string set)
+    {
+        try
+        {
+            return serviceProvider.GetRequiredKeyedService<IMarketDocumentTransactionReader>(set);
+        }
+        catch (InvalidOperationException ex)
+        {
+            throw new InvalidOperationException(
+                $"Market Document Transaction Reader couldn't resolve TransactionSet '{set}'.", ex);
+        }
     }
 }

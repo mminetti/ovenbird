@@ -101,9 +101,6 @@ public static class InfrastructureServiceExtensions
             .AddScoped<MarketDocumentProcessorResolver>()
             .AddScoped<IMarketDocumentItemProcessor, BigDataMarketDocumentItemProcessor>()
             .AddScoped<MarketDocumentItemProcessorResolver>()
-            .AddScoped<IMarketDocumentTransactionReader, UsageTransactionReader>()
-            .AddScoped<IMarketDocumentTransactionReader, InvoiceTransactionReader>()
-            .AddScoped<MarketDocumentTransactionReaderResolver>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));
@@ -111,6 +108,8 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedTransient<IFtpService, LocalFileSystemFtpService>(nameof(LocalFileSystemFtpService));
         services.AddKeyedTransient<IFileStorage, AzureBlobFileStorage>(nameof(AzureBlobFileStorage));
         services.AddKeyedTransient<IFileStorage, LocalFileSystemFileStorage>(nameof(LocalFileSystemFileStorage));
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, UsageTransactionReader>(UsageTransactionReader.TransactionSet);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.TransactionSet);
 
         var keyVaultUri = config["KeyVault:Uri"];
 
