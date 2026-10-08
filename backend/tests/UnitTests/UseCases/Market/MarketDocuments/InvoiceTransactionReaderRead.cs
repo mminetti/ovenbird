@@ -12,8 +12,8 @@ public class InvoiceTransactionReaderRead
     {
         var transaction = XElement.Parse("""
             <Transaction>
-              <SupplierDUNS>1890692841000</SupplierDUNS>
-              <UtilityDUNS>007923311</UtilityDUNS>
+              <SupplierDUNS>1234567890123</SupplierDUNS>
+              <UtilityDUNS>123456789</UtilityDUNS>
               <TransactionSet>810</TransactionSet>
               <TransactionSubSet>02</TransactionSubSet>
               <State>TX</State>
@@ -21,19 +21,19 @@ public class InvoiceTransactionReaderRead
               <Invoice>
                 <BillDate>20260702</BillDate>
                 <BillNumber>97X1260702220427505973</BillNumber>
-                <CrossRefNumber>970631306720260702205530734744</CrossRefNumber>
+                <OriginalBillNumber>970631306720260702205530734744</OriginalBillNumber>
                 <BillActionCode>PR</BillActionCode>
                 <BillPurpose>00</BillPurpose>
                 <LDCAccountNumber>10204049751086976</LDCAccountNumber>
-                <LDCName>AEP TEXAS NORTH (ERCOT)</LDCName>
+                <LDCName>ACME UTILITY CO</LDCName>
               </Invoice>
             </Transaction>
             """);
 
         var item = _reader.Read(transaction);
 
-        item.Purpose.ShouldBe("00");
-        item.SubPurpose.ShouldBe("PR");
+        item.Purpose.ShouldBe("ORIGINAL");
+        item.SubPurpose.ShouldBe("MONTH");
         item.TrackingNumber.ShouldBe("97X1260702220427505973");
         item.OriginalTrackingNumber.ShouldBe("970631306720260702205530734744");
         item.ServicePointIdentifier.ShouldBe("10204049751086976");

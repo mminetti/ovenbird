@@ -67,7 +67,7 @@ public class ImportMarketDocumentItemHandlerHandle
               <TransactionList>
                 <Transaction>
                   <TransactionSet>867</TransactionSet>
-                  <TransactionSubSet>04</TransactionSubSet>
+                  <TransactionSubSet>03</TransactionSubSet>
                   <Usage>
                     <PurposeCode>SU</PurposeCode>
                     <TransactionReferenceNumber>REF-1</TransactionReferenceNumber>

@@ -24,8 +24,8 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
         invoiceReader.Read(Arg.Any<XElement>()).Returns(_ => new MarketDocumentItem());
 
         var services = new ServiceCollection();
-        services.AddKeyedSingleton("867", usageReader);
-        services.AddKeyedSingleton("810", invoiceReader);
+        services.AddKeyedSingleton(UsageTransactionReader.Identifier, usageReader);
+        services.AddKeyedSingleton(InvoiceTransactionReader.Identifier, invoiceReader);
 
         var processor = CreateProcessor(services.BuildServiceProvider());
 
@@ -34,7 +34,7 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
               <TransactionList>
                 <Transaction>
                   <TransactionSet>867</TransactionSet>
-                  <TransactionSubSet>04</TransactionSubSet>
+                  <TransactionSubSet>03</TransactionSubSet>
                   <Usage><PurposeCode>SU</PurposeCode></Usage>
                 </Transaction>
                 <Transaction>
@@ -53,7 +53,7 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
         items.Count.ShouldBe(2);
 
         items[0].Set.ShouldBe("867");
-        items[0].SubSet.ShouldBe("04");
+        items[0].SubSet.ShouldBe("03");
         items[0].MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.New);
         items[0].Raw.ShouldContain("<TransactionSet>867</TransactionSet>");
 

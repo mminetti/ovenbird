@@ -17,4 +17,5 @@ public class MarketDocumentItem : AuditableEntityBase<long>
 
     public MarketDocument? MarketDocument { get; set; }
     public MarketDocumentItemStatus MarketDocumentItemStatus { get; set; } = default!;
+    public ICollection<MarketDocumentItemField> Fields { get; set; } = [];
 }

@@ -27,6 +27,8 @@ public class UsageTransactionReader : IMarketDocumentTransactionReader
             _ => "NONINTERVAL",
         };
 
+        var fields = transaction?.Flatten("Usage") ?? [];
+
         return new MarketDocumentItem
         {
             Purpose = purpose,
@@ -34,6 +36,12 @@ public class UsageTransactionReader : IMarketDocumentTransactionReader
             TrackingNumber = transaction?.Element("TransactionReferenceNumber")?.Value ?? string.Empty,
             OriginalTrackingNumber = transaction?.Element("OriginalTransactionNumber")?.Value,
             ServicePointIdentifier = transaction?.Element("UtilityAccountNumber")?.Value ?? string.Empty,
+            Fields = [.. fields.Where(x => !string.IsNullOrWhiteSpace(x.Value))
+                .Select(x => new MarketDocumentItemField 
+                { 
+                    FieldName = x.Name, 
+                    FieldValue = x.Value 
+                })],
         };
     }
 }
