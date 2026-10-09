@@ -10,5 +10,11 @@ public class MeterConfiguration : BaseEntityTypeConfiguration<Meter, long>
 
         builder.Property(x => x.Identifier)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
+
+        // Cascade: meters are owned by the service point, delete with it.
+        builder.HasOne(x => x.ServicePoint)
+            .WithMany(x => x.Meters)
+            .HasForeignKey(x => x.ServicePointId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -1,16 +1,16 @@
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace Infrastructure.Services.Market.BigData.EntityBuilders;
 
 [XmlRoot("Transaction")]
 public class UsageTransactionXml
 {
-    public string? SupplierDUNS { get; set; }
-    public string? UtilityDUNS { get; set; }
-    public string? TransactionSet { get; set; }
-    public string? TransactionSubSet { get; set; }
-    public string? State { get; set; }
-    public string? Commodity { get; set; }
+    public string SupplierDUNS { get; set; } = string.Empty;
+    public string UtilityDUNS { get; set; } = string.Empty;
+    public string TransactionSet { get; set; } = string.Empty;
+    public string TransactionSubSet { get; set; } = string.Empty;
+    public string State { get; set; } = string.Empty;
+    public string Commodity { get; set; } = string.Empty;
 
     public UsageXml Usage { get; set; } = new();
 }
@@ -26,7 +26,7 @@ public class UsageXml
     public string? EGSName { get; set; }
     public string? CreateDateTime { get; set; }
     public string? TimestampReceived { get; set; }
-    public string? UtilityAccountNumber { get; set; }
+    public string UtilityAccountNumber { get; set; } = string.Empty;
     public string? TranNr814 { get; set; }
 
     [XmlArray("UsageMeterList")]

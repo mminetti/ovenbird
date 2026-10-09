@@ -8,12 +8,11 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.EntityBuilders;
 public class BigDataLookupServiceTests
 {
     private readonly IReadRepository<ServicePoint> _servicePointReadRepository = Substitute.For<IReadRepository<ServicePoint>>();
-    private readonly IReadRepository<Meter> _meterReadRepository = Substitute.For<IReadRepository<Meter>>();
     private readonly BigDataLookupService _service;
 
     public BigDataLookupServiceTests()
     {
-        _service = new BigDataLookupService(_servicePointReadRepository, _meterReadRepository);
+        _service = new BigDataLookupService(_servicePointReadRepository);
     }
 
     [Fact]
@@ -41,63 +40,27 @@ public class BigDataLookupServiceTests
     }
 
     [Fact]
-    public async Task GetServicePointIdReturnsMatchingServicePointId()
+    public async Task GetServicePointAsyncReturnsMatchingServicePoint()
     {
+        var servicePoint = new ServicePoint { Id = 20, Identifier = "SP-1" };
+
         _servicePointReadRepository
             .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new ServicePoint { Id = 20, Identifier = "SP-1" });
+            .Returns(servicePoint);
 
-        var id = await _service.GetServicePointId("SP-1", CancellationToken.None);
+        var result = await _service.GetServicePointAsync("SP-1", CancellationToken.None);
 
-        id.ShouldBe(20);
+        result.ShouldBe(servicePoint);
     }
 
     [Fact]
-    public async Task GetServicePointIdThrowsWhenIdentifierIsMissing()
-    {
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _service.GetServicePointId(null, CancellationToken.None));
-    }
-
-    [Fact]
-    public async Task GetServicePointIdThrowsWhenNotFound()
+    public async Task GetServicePointAsyncThrowsWhenNotFound()
     {
         _servicePointReadRepository
             .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns((ServicePoint?)null);
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => _service.GetServicePointId("SP-1", CancellationToken.None));
-    }
-
-    [Fact]
-    public async Task GetMeterIdReturnsNullWhenIdentifierIsMissing()
-    {
-        var id = await _service.GetMeterId(null, CancellationToken.None);
-
-        id.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task GetMeterIdReturnsMatchingMeterId()
-    {
-        _meterReadRepository
-            .FirstOrDefaultAsync(Arg.Any<MeterByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new Meter { Id = 30, Identifier = "MTR-1" });
-
-        var id = await _service.GetMeterId("MTR-1", CancellationToken.None);
-
-        id.ShouldBe(30);
-    }
-
-    [Fact]
-    public async Task GetMeterIdThrowsWhenIdentifierIsPresentButNotFound()
-    {
-        _meterReadRepository
-            .FirstOrDefaultAsync(Arg.Any<MeterByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((Meter?)null);
-
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _service.GetMeterId("MTR-1", CancellationToken.None));
+            () => _service.GetServicePointAsync("SP-1", CancellationToken.None));
     }
 }

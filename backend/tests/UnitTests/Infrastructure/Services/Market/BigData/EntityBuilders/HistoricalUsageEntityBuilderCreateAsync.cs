@@ -25,8 +25,19 @@ public class HistoricalUsageEntityBuilderCreateAsync
 
         _lookupService.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
         _lookupService.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
-        _lookupService.GetServicePointId("ACCT-1", Arg.Any<CancellationToken>()).Returns(20L);
-        _lookupService.GetMeterId("MTR-1", Arg.Any<CancellationToken>()).Returns((long?)30);
+
+        var servicePoint = new ServicePoint
+        {
+            Id = 20,
+            Identifier = "SP-1",
+            Meters =
+            [
+                new Meter { Id = 30, Identifier = "MTR-1" },
+                new Meter { Id = 31, Identifier = "MTR-2" },
+            ],
+        };
+
+        _lookupService.GetServicePointAsync("ACCT-1", Arg.Any<CancellationToken>()).Returns(servicePoint);
     }
 
     private const string Xml = """
@@ -54,6 +65,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
                 </UsageQuantityList>
               </UsageMeter>
               <UsageMeter>
+                <MeterIdentifier>MTR-2</MeterIdentifier>
                 <ServicePeriodBeginDate>20260601</ServicePeriodBeginDate>
                 <ServicePeriodEndDate>20260630</ServicePeriodEndDate>
                 <UsageQuantityList>
@@ -86,7 +98,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
     {
         _accountReadRepository
             .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new Account { Id = 10, Identifier = "ACCT-1" });
+            .Returns(new Account { Id = 10, Identifier = "814-REF" });
 
         long nextUsageId = 100;
         var createdUsages = new List<HistoricalUsage>();
@@ -119,7 +131,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
         createdUsages[0].CommodityId.ShouldBe(Constants.Commodities.Electricity);
         createdUsages[0].UnitOfMeasureId.ShouldBe(Constants.UnitOfMeasures.KilowattHour);
 
-        createdUsages[1].MeterId.ShouldBeNull();
+        createdUsages[1].MeterId.ShouldBe(31);
         createdUsages[1].Consumption.ShouldBe(200);
 
         createdReferences.Count.ShouldBe(2);
@@ -145,26 +157,26 @@ public class HistoricalUsageEntityBuilderCreateAsync
     {
         _accountReadRepository
             .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new Account { Id = 10, Identifier = "ACCT-1" });
+            .Returns(new Account { Id = 10, Identifier = "814-REF" });
 
         _lookupService
-            .GetServicePointId("ACCT-1", Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<long>(new InvalidOperationException("ServicePoint 'ACCT-1' was not found.")));
+            .GetServicePointAsync("ACCT-1", Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<ServicePoint>(new InvalidOperationException("ServicePoint 'ACCT-1' was not found.")));
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
     }
 
     [Fact]
-    public async Task ThrowsWhenMeterIdentifierIsPresentButCannotBeResolved()
+    public async Task ThrowsWhenMeterIdentifierCannotBeResolved()
     {
         _accountReadRepository
             .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new Account { Id = 10, Identifier = "ACCT-1" });
+            .Returns(new Account { Id = 10, Identifier = "814-REF" });
 
         _lookupService
-            .GetMeterId("MTR-1", Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<long?>(new InvalidOperationException("Meter 'MTR-1' was not found.")));
+            .GetServicePointAsync("ACCT-1", Arg.Any<CancellationToken>())
+            .Returns(new ServicePoint { Id = 20, Identifier = "SP-1", Meters = [] });
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));

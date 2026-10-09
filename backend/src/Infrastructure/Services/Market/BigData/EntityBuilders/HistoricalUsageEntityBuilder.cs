@@ -33,27 +33,28 @@ public class HistoricalUsageEntityBuilder(
         var transaction = Deserialize(transactionElement);
         var usage = transaction.Usage;
 
-        var commodityId = lookupService.GetCommodityId(transaction.Commodity ?? string.Empty);
-        var accountId = await GetAccountId(usage.TranNr814, ct);
-        var servicePointId = await lookupService.GetServicePointId(usage.UtilityAccountNumber, ct);
+        var commodityId = lookupService.GetCommodityId(transaction.Commodity);
+        var account = await GetAccountAsync(usage.TranNr814, ct);
+        var servicePoint = await lookupService.GetServicePointAsync(usage.UtilityAccountNumber, ct);
 
-        foreach (var meter in usage.UsageMeters)
+        foreach (var usageMeter in usage.UsageMeters)
         {
-            var meterId = await lookupService.GetMeterId(meter.MeterIdentifier, ct);
+            var meter = servicePoint.GetMeter(usageMeter.MeterIdentifier!)
+                ?? throw new InvalidOperationException($"Meter '{usageMeter.MeterIdentifier}' was not found.");
 
-            var periodStartDate = DateOnly.ParseExact(meter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
-            var periodEndDate = DateOnly.ParseExact(meter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
+            var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
+            var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
 
-            foreach (var quantity in meter.UsageQuantities)
+            foreach (var quantity in usageMeter.UsageQuantities)
             {
                 foreach (var read in quantity.UsageReads)
                 {
                     var historicalUsage = new HistoricalUsage
                     {
                         Identifier = item.ReferenceNumber,
-                        AccountId = accountId,
-                        ServicePointId = servicePointId,
-                        MeterId = meterId,
+                        AccountId = account.Id,
+                        ServicePointId = servicePoint.Id,
+                        MeterId = meter.Id,
                         PeriodStartDate = periodStartDate,
                         PeriodEndDate = periodEndDate,
                         Consumption = read.ReadConsumption,
@@ -83,18 +84,18 @@ public class HistoricalUsageEntityBuilder(
         return (UsageTransactionXml)serializer.Deserialize(reader)!;
     }
 
-    private async Task<long> GetAccountId(string? identifier, CancellationToken ct)
+    private async Task<Account> GetAccountAsync(string? originalReferenceNumber, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(identifier))
+        if (string.IsNullOrWhiteSpace(originalReferenceNumber))
         {
-            throw new InvalidOperationException("Usage transaction is missing 'TranNr814'.");
+            throw new InvalidOperationException("Usage transaction is missing original reference number.");
         }
 
         // TODO: this should get the service start by identifier and return the account id 
 
-        var account = await accountReadRepository.FirstOrDefaultAsync(new AccountByIdentifierSpec(identifier), ct)
-            ?? throw new InvalidOperationException($"Account '{identifier}' was not found.");
+        var account = await accountReadRepository.FirstOrDefaultAsync(new AccountByIdentifierSpec(originalReferenceNumber), ct)
+            ?? throw new InvalidOperationException($"Account '{originalReferenceNumber}' was not found.");
 
-        return account.Id;
+        return account;
     }
 }
