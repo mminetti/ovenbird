@@ -22,7 +22,7 @@ builder.UseWolverine(opts =>
 
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
-    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentImportResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentParserResolver>();
 });
 
 var cronSchedule = builder.Configuration["MarketDocumentImport:CronSchedule"] ?? "0 0 2 * * ?";

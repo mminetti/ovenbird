@@ -5,14 +5,13 @@ using Core.Market;
 using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;
-using UseCases.Interfaces.Secrets;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData;
 
-public class BigDataMarketDocumentProcessorReadTransactionsAsync
+public class BigDataMarketDocumentParserReadTransactionsAsync
 {
-    private static BigDataMarketDocumentImport CreateProcessor(IServiceProvider serviceProvider) =>
-        new(serviceProvider, Substitute.For<IConnectorFieldSecretResolver>(), TimeProvider.System);
+    private static BigDataMarketDocumentParser CreateParser(IServiceProvider serviceProvider) =>
+        new(serviceProvider);
 
     [Fact]
     public async Task DispatchesEachTransactionToTheReaderMatchingItsTransactionSet()
@@ -27,7 +26,7 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
         services.AddKeyedSingleton(UsageTransactionReader.Identifier, usageReader);
         services.AddKeyedSingleton(InvoiceTransactionReader.Identifier, invoiceReader);
 
-        var processor = CreateProcessor(services.BuildServiceProvider());
+        var parser = CreateParser(services.BuildServiceProvider());
 
         const string xml = """
             <Document>
@@ -48,7 +47,7 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
 
         using var content = new MemoryStream(Encoding.UTF8.GetBytes(xml));
 
-        var items = await processor.ReadTransactionsAsync(content, CancellationToken.None);
+        var items = await parser.ReadTransactionsAsync(content, CancellationToken.None);
 
         items.Count.ShouldBe(2);
 
@@ -70,7 +69,7 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
     public async Task PropagatesExceptionWhenTransactionSetCannotBeResolved()
     {
         var services = new ServiceCollection();
-        var processor = CreateProcessor(services.BuildServiceProvider());
+        var parser = CreateParser(services.BuildServiceProvider());
 
         const string xml = """
             <Document>
@@ -86,6 +85,6 @@ public class BigDataMarketDocumentProcessorReadTransactionsAsync
         using var content = new MemoryStream(Encoding.UTF8.GetBytes(xml));
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => processor.ReadTransactionsAsync(content, CancellationToken.None));
+            () => parser.ReadTransactionsAsync(content, CancellationToken.None));
     }
 }

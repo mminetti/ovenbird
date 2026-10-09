@@ -1,21 +1,21 @@
 using Core.Common.Constants;
 using Core.Settings;
-using Infrastructure.Services.Market.BigData;
+using Infrastructure.Services.Market;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 
-namespace UnitTests.Infrastructure.Services.Market.BigData;
+namespace UnitTests.Infrastructure.Services.Market;
 
-public class BigDataImportStrategyTests
+public class MarketDocumentTransportTests
 {
     private const string FtpImplementation = "TestFtpImplementation";
 
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
     private readonly IConnectorFieldSecretResolver _secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
-    private readonly BigDataMarketDocumentImport _strategy;
+    private readonly MarketDocumentTransport _transport;
 
-    public BigDataImportStrategyTests()
+    public MarketDocumentTransportTests()
     {
         var services = new ServiceCollection();
         services.AddKeyedSingleton(FtpImplementation, _ftpService);
@@ -24,7 +24,7 @@ public class BigDataImportStrategyTests
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataMarketDocumentImport(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
+        _transport = new MarketDocumentTransport(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class BigDataImportStrategyTests
                 Arg.Any<CancellationToken>())
             .Returns(["remote/dir/file1.csv"]);
 
-        var files = await _strategy.ListFilesAsync(configuration, CancellationToken.None);
+        var files = await _transport.ListFilesAsync(configuration, CancellationToken.None);
 
         files.ShouldBe(["remote/dir/file1.csv"]);
     }
@@ -56,7 +56,7 @@ public class BigDataImportStrategyTests
         _ftpService.ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>())
             .Returns([]);
 
-        await _strategy.ListFilesAsync(configuration, CancellationToken.None);
+        await _transport.ListFilesAsync(configuration, CancellationToken.None);
 
         await _ftpService.Received(1).ListAsync(Arg.Is<FtpOptions>(o => o.Port == 22), Arg.Any<CancellationToken>());
     }
@@ -69,7 +69,7 @@ public class BigDataImportStrategyTests
             remoteDirectory: "remote/dir");
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
+            () => _transport.ListFilesAsync(configuration, CancellationToken.None));
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class BigDataImportStrategyTests
             remoteDirectory: null);
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
+            () => _transport.ListFilesAsync(configuration, CancellationToken.None));
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class BigDataImportStrategyTests
         var configuration = new Configuration { Id = 1, Name = "edi.import" };
 
         await Should.ThrowAsync<InvalidOperationException>(
-            () => _strategy.ListFilesAsync(configuration, CancellationToken.None));
+            () => _transport.ListFilesAsync(configuration, CancellationToken.None));
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class BigDataImportStrategyTests
 
         _ftpService.ListAsync(Arg.Any<FtpOptions>(), Arg.Any<CancellationToken>()).Returns([]);
 
-        await _strategy.ListFilesAsync(configuration, CancellationToken.None);
+        await _transport.ListFilesAsync(configuration, CancellationToken.None);
 
         await _ftpService.Received(1).ListAsync(
             Arg.Is<FtpOptions>(o => o.Password == "resolved-password"), Arg.Any<CancellationToken>());

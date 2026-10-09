@@ -14,6 +14,7 @@ using Infrastructure.Data.Queries.Market;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Data.Queries.Settings;
 using Infrastructure.Services.Files;
+using Infrastructure.Services.Market;
 using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Readers;
 using Infrastructure.Services.Secrets;
@@ -97,8 +98,9 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFtpService, LocalFileSystemFtpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<IFileStorage, LocalFileSystemFileStorage>()
-            .AddScoped<IMarketDocumentImport, BigDataMarketDocumentImport>()
-            .AddScoped<MarketDocumentImportResolver>()
+            .AddScoped<IMarketDocumentTransport, MarketDocumentTransport>()
+            .AddScoped<IMarketDocumentParser, BigDataMarketDocumentParser>()
+            .AddScoped<MarketDocumentParserResolver>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));

@@ -3,6 +3,7 @@ using Core.Common.Constants;
 using Core.Market;
 using Core.Settings;
 using Core.Settings.Specifications;
+using Infrastructure.Services.Market;
 using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,7 +25,7 @@ public class ImportMarketDocumentItemHandlerHandle
     private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly TestFileStorage _fileStorage = new();
-    private readonly BigDataMarketDocumentImport _strategy;
+    private readonly MarketDocumentTransport _transport;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
 
@@ -42,9 +43,9 @@ public class ImportMarketDocumentItemHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _strategy = new BigDataMarketDocumentImport(serviceProvider, secretResolver, TimeProvider.System);
+        _transport = new MarketDocumentTransport(serviceProvider, secretResolver, TimeProvider.System);
 
-        var strategyResolver = new MarketDocumentImportResolver([_strategy]);
+        var parserResolver = new MarketDocumentParserResolver([new BigDataMarketDocumentParser(serviceProvider)]);
 
         _configuration = CreateConfiguration();
 
@@ -56,7 +57,8 @@ public class ImportMarketDocumentItemHandlerHandle
             _itemRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            strategyResolver);
+            _transport,
+            parserResolver);
     }
 
     [Fact]
@@ -152,7 +154,7 @@ public class ImportMarketDocumentItemHandlerHandle
     {
         using var content = new MemoryStream(Encoding.UTF8.GetBytes(xml));
 
-        var fileReference = await _strategy.UploadDocumentAsync(_configuration, content, "document.xml", CancellationToken.None);
+        var fileReference = await _transport.UploadDocumentAsync(_configuration, content, "document.xml", CancellationToken.None);
 
         return new MarketDocument
         {

@@ -4,7 +4,7 @@ using Core.Market;
 using Core.Market.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using Infrastructure.Services.Market.BigData;
+using Infrastructure.Services.Market;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
@@ -42,8 +42,7 @@ public class ImportMarketDocumentHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        var resolver = new MarketDocumentImportResolver(
-            [new BigDataMarketDocumentImport(services.BuildServiceProvider(), secretResolver, TimeProvider.System)]);
+        var transport = new MarketDocumentTransport(services.BuildServiceProvider(), secretResolver, TimeProvider.System);
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
@@ -53,7 +52,7 @@ public class ImportMarketDocumentHandlerHandle
             _documentRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            resolver,
+            transport,
             _bus);
     }
 

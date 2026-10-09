@@ -11,11 +11,9 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketDocumentImportResolver importResolver,
+    IMarketDocumentTransport transport,
     IMessageBus bus)
 {
-    private const string HandlerIdentifier = "handler";
-
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
@@ -29,9 +27,7 @@ public class ImportMarketDocumentHandler(
             {
                 var company = configuration.GetRequiredCompany();
 
-                var import = importResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
-
-                var remoteFilePaths = await import.ListFilesAsync(configuration, ct);
+                var remoteFilePaths = await transport.ListFilesAsync(configuration, ct);
 
                 foreach (var remoteFilePath in remoteFilePaths)
                 {
@@ -48,9 +44,9 @@ public class ImportMarketDocumentHandler(
                             continue;
                         }
 
-                        using var fileStream = await import.DownloadFileAsync(configuration, remoteFilePath, ct);
+                        using var fileStream = await transport.DownloadFileAsync(configuration, remoteFilePath, ct);
 
-                        var uploadedFileReference = await import.UploadDocumentAsync(configuration, fileStream, fileName, ct);
+                        var uploadedFileReference = await transport.UploadDocumentAsync(configuration, fileStream, fileName, ct);
 
                         var document = new MarketDocument
                         {

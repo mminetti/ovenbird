@@ -9,7 +9,8 @@ public class ImportMarketDocumentItemHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    MarketDocumentImportResolver importResolver)
+    IMarketDocumentTransport transport,
+    MarketDocumentParserResolver parserResolver)
 {
     private const string HandlerIdentifier = "handler";
 
@@ -22,11 +23,11 @@ public class ImportMarketDocumentItemHandler(
         var document = await documentReadRepository.GetByIdAsync(command.MarketDocumentId, ct)
             ?? throw new InvalidOperationException($"MarketDocument '{command.MarketDocumentId}' was not found.");
 
-        var import = importResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+        var parser = parserResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-        using var content = await import.OpenDocumentAsync(configuration, document.File, ct);
+        using var content = await transport.OpenDocumentAsync(configuration, document.File, ct);
 
-        var items = await import.ReadTransactionsAsync(content, ct);
+        var items = await parser.ReadTransactionsAsync(content, ct);
 
         var itemIds = new List<long>();
 
