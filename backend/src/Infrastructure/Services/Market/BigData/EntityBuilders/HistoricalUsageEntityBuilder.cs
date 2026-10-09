@@ -3,7 +3,6 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using Core.Market;
 using Core.Service;
-using Core.Service.Specifications;
 using Core.Subscription;
 using Core.Subscription.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -13,8 +12,7 @@ namespace Infrastructure.Services.Market.BigData.EntityBuilders;
 
 public class HistoricalUsageEntityBuilder(
     IReadRepository<Account> accountReadRepository,
-    IReadRepository<ServicePoint> servicePointReadRepository,
-    IReadRepository<Meter> meterReadRepository,
+    IBigDataLookupService lookupService,
     IRepository<HistoricalUsage> historicalUsageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
     : IMarketDocumentEntityBuilder
@@ -33,18 +31,15 @@ public class HistoricalUsageEntityBuilder(
         }
 
         var transaction = Deserialize(transactionElement);
-        var commodityId = EdiCodeMappings.ResolveCommodityId(transaction.Commodity ?? string.Empty);
-
         var usage = transaction.Usage;
 
-        var accountId = await ResolveAccountId(usage.UtilityAccountNumber, ct);
-        var servicePointId = await ResolveServicePointId(item.ServicePointIdentifier, ct);
-
-        var readIndex = 0;
+        var commodityId = lookupService.GetCommodityId(transaction.Commodity ?? string.Empty);
+        var accountId = await GetAccountId(usage.TranNr814, ct);
+        var servicePointId = await lookupService.GetServicePointId(usage.UtilityAccountNumber, ct);
 
         foreach (var meter in usage.UsageMeters)
         {
-            var meterId = await ResolveMeterId(meter.MeterIdentifier, ct);
+            var meterId = await lookupService.GetMeterId(meter.MeterIdentifier, ct);
 
             var periodStartDate = DateOnly.ParseExact(meter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
             var periodEndDate = DateOnly.ParseExact(meter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
@@ -55,7 +50,7 @@ public class HistoricalUsageEntityBuilder(
                 {
                     var historicalUsage = new HistoricalUsage
                     {
-                        Identifier = $"{item.ReferenceNumber}-{readIndex++}",
+                        Identifier = item.ReferenceNumber,
                         AccountId = accountId,
                         ServicePointId = servicePointId,
                         MeterId = meterId,
@@ -63,7 +58,7 @@ public class HistoricalUsageEntityBuilder(
                         PeriodEndDate = periodEndDate,
                         Consumption = read.ReadConsumption,
                         CommodityId = commodityId,
-                        UnitOfMeasureId = EdiCodeMappings.ResolveUnitOfMeasureId(read.ReadUOM),
+                        UnitOfMeasureId = lookupService.GetUnitOfMeasureId(read.ReadUOM),
                     };
 
                     var created = await historicalUsageRepository.AddAsync(historicalUsage, ct);
@@ -88,42 +83,18 @@ public class HistoricalUsageEntityBuilder(
         return (UsageTransactionXml)serializer.Deserialize(reader)!;
     }
 
-    private async Task<long> ResolveAccountId(string? identifier, CancellationToken ct)
+    private async Task<long> GetAccountId(string? identifier, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new InvalidOperationException("Usage transaction is missing 'UtilityAccountNumber'.");
+            throw new InvalidOperationException("Usage transaction is missing 'TranNr814'.");
         }
+
+        // TODO: this should get the service start by identifier and return the account id 
 
         var account = await accountReadRepository.FirstOrDefaultAsync(new AccountByIdentifierSpec(identifier), ct)
             ?? throw new InvalidOperationException($"Account '{identifier}' was not found.");
 
         return account.Id;
-    }
-
-    private async Task<long> ResolveServicePointId(string? identifier, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(identifier))
-        {
-            throw new InvalidOperationException("Usage transaction is missing its ServicePoint identifier.");
-        }
-
-        var servicePoint = await servicePointReadRepository.FirstOrDefaultAsync(new ServicePointByIdentifierSpec(identifier), ct)
-            ?? throw new InvalidOperationException($"ServicePoint '{identifier}' was not found.");
-
-        return servicePoint.Id;
-    }
-
-    private async Task<long?> ResolveMeterId(string? identifier, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(identifier))
-        {
-            return null;
-        }
-
-        var meter = await meterReadRepository.FirstOrDefaultAsync(new MeterByIdentifierSpec(identifier), ct)
-            ?? throw new InvalidOperationException($"Meter '{identifier}' was not found.");
-
-        return meter.Id;
     }
 }

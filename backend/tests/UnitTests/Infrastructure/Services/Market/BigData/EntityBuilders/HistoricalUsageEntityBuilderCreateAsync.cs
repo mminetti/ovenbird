@@ -1,7 +1,6 @@
-﻿using Core.Common.Constants;
+using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
-using Core.Service.Specifications;
 using Core.Subscription;
 using Core.Subscription.Specifications;
 using Infrastructure.Services.Market.BigData.EntityBuilders;
@@ -11,8 +10,7 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.EntityBuilders;
 public class HistoricalUsageEntityBuilderCreateAsync
 {
     private readonly IReadRepository<Account> _accountReadRepository = Substitute.For<IReadRepository<Account>>();
-    private readonly IReadRepository<ServicePoint> _servicePointReadRepository = Substitute.For<IReadRepository<ServicePoint>>();
-    private readonly IReadRepository<Meter> _meterReadRepository = Substitute.For<IReadRepository<Meter>>();
+    private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
     private readonly IRepository<HistoricalUsage> _historicalUsageRepository = Substitute.For<IRepository<HistoricalUsage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly HistoricalUsageEntityBuilder _builder;
@@ -21,10 +19,14 @@ public class HistoricalUsageEntityBuilderCreateAsync
     {
         _builder = new HistoricalUsageEntityBuilder(
             _accountReadRepository,
-            _servicePointReadRepository,
-            _meterReadRepository,
+            _lookupService,
             _historicalUsageRepository,
             _referenceRepository);
+
+        _lookupService.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
+        _lookupService.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
+        _lookupService.GetServicePointId("ACCT-1", Arg.Any<CancellationToken>()).Returns(20L);
+        _lookupService.GetMeterId("MTR-1", Arg.Any<CancellationToken>()).Returns((long?)30);
     }
 
     private const string Xml = """
@@ -34,6 +36,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
           <Commodity>E</Commodity>
           <Usage>
             <UtilityAccountNumber>ACCT-1</UtilityAccountNumber>
+            <TranNr814>814-REF</TranNr814>
             <UsageMeterList>
               <UsageMeter>
                 <MeterIdentifier>MTR-1</MeterIdentifier>
@@ -75,7 +78,6 @@ public class HistoricalUsageEntityBuilderCreateAsync
         Set = "867",
         SubSet = "02",
         ReferenceNumber = "REF-1",
-        ServicePointIdentifier = "SP-1",
         Raw = Xml,
     };
 
@@ -85,14 +87,6 @@ public class HistoricalUsageEntityBuilderCreateAsync
         _accountReadRepository
             .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns(new Account { Id = 10, Identifier = "ACCT-1" });
-
-        _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new ServicePoint { Id = 20, Identifier = "SP-1" });
-
-        _meterReadRepository
-            .FirstOrDefaultAsync(Arg.Any<MeterByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new Meter { Id = 30, Identifier = "MTR-1" });
 
         long nextUsageId = 100;
         var createdUsages = new List<HistoricalUsage>();
@@ -153,9 +147,9 @@ public class HistoricalUsageEntityBuilderCreateAsync
             .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns(new Account { Id = 10, Identifier = "ACCT-1" });
 
-        _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServicePoint?)null);
+        _lookupService
+            .GetServicePointId("ACCT-1", Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<long>(new InvalidOperationException("ServicePoint 'ACCT-1' was not found.")));
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
@@ -168,13 +162,9 @@ public class HistoricalUsageEntityBuilderCreateAsync
             .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns(new Account { Id = 10, Identifier = "ACCT-1" });
 
-        _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new ServicePoint { Id = 20, Identifier = "SP-1" });
-
-        _meterReadRepository
-            .FirstOrDefaultAsync(Arg.Any<MeterByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((Meter?)null);
+        _lookupService
+            .GetMeterId("MTR-1", Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<long?>(new InvalidOperationException("Meter 'MTR-1' was not found.")));
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));

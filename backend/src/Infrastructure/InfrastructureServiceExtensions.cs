@@ -103,6 +103,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IMarketDocumentParser, BigDataMarketDocumentParser>()
             .AddScoped<MarketDocumentParserResolver>()
             .AddScoped<MarketDocumentEntityBuilderResolver>()
+            .AddScoped<IBigDataLookupService, BigDataLookupService>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));
