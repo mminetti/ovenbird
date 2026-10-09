@@ -108,8 +108,10 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedTransient<IFtpService, LocalFileSystemFtpService>(nameof(LocalFileSystemFtpService));
         services.AddKeyedTransient<IFileStorage, AzureBlobFileStorage>(nameof(AzureBlobFileStorage));
         services.AddKeyedTransient<IFileStorage, LocalFileSystemFileStorage>(nameof(LocalFileSystemFileStorage));
-        services.AddKeyedTransient<IMarketDocumentTransactionReader, UsageTransactionReader>(UsageTransactionReader.Identifier);
-        services.AddKeyedTransient<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.Identifier);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, UsageTransactionReader>(UsageTransactionReader.Set);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.Set);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceOrderTransactionReader>(ServiceOrderTransactionReader.Set);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceRequestTransactionReader>(ServiceRequestTransactionReader.Set);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

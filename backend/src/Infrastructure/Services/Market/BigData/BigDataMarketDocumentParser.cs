@@ -23,7 +23,7 @@ public class BigDataMarketDocumentParser(IServiceProvider serviceProvider) : IMa
             var set = transaction.Element("TransactionSet")?.Value ?? string.Empty;
             var subSet = transaction.Element("TransactionSubSet")?.Value ?? string.Empty;
 
-            var reader = ResolveReader($"{set}_{subSet}");
+            var reader = GetRequiredReader(set);
             var item = reader.Read(transaction);
 
             item.Set = set;
@@ -37,7 +37,7 @@ public class BigDataMarketDocumentParser(IServiceProvider serviceProvider) : IMa
         return items;
     }
 
-    private IMarketDocumentTransactionReader ResolveReader(string set)
+    private IMarketDocumentTransactionReader GetRequiredReader(string set)
     {
         try
         {

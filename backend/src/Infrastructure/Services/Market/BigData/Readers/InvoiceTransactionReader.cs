@@ -1,11 +1,11 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using Core.Market;
 
 namespace Infrastructure.Services.Market.BigData.Readers;
 
 public class InvoiceTransactionReader : IMarketDocumentTransactionReader
 {
-    public const string Identifier = "810_02";
+    public const string Set = "810";
 
     public MarketDocumentItem Read(XElement transactionElement)
     {

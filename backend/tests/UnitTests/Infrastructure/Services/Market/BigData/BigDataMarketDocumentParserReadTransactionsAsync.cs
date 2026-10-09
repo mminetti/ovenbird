@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using System.Xml.Linq;
 using Core.Common.Constants;
 using Core.Market;
@@ -23,8 +23,8 @@ public class BigDataMarketDocumentParserReadTransactionsAsync
         invoiceReader.Read(Arg.Any<XElement>()).Returns(_ => new MarketDocumentItem());
 
         var services = new ServiceCollection();
-        services.AddKeyedSingleton(UsageTransactionReader.Identifier, usageReader);
-        services.AddKeyedSingleton(InvoiceTransactionReader.Identifier, invoiceReader);
+        services.AddKeyedSingleton(UsageTransactionReader.Set, usageReader);
+        services.AddKeyedSingleton(InvoiceTransactionReader.Set, invoiceReader);
 
         var parser = CreateParser(services.BuildServiceProvider());
 
