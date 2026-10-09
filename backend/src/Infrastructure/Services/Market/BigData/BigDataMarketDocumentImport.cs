@@ -1,18 +1,18 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 using Core.Market;
 using Core.Settings;
+using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
-using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
-namespace UseCases.Market.MarketDocuments.Import.BigData;
+namespace Infrastructure.Services.Market.BigData;
 
 public class BigDataMarketDocumentImport(
-    IServiceProvider serviceProvider, 
-    IConnectorFieldSecretResolver secretResolver, 
+    IServiceProvider serviceProvider,
+    IConnectorFieldSecretResolver secretResolver,
     TimeProvider timeProvider)
     : IMarketDocumentImport
 {

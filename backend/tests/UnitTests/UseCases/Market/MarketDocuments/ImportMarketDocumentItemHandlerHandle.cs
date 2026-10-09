@@ -3,13 +3,13 @@ using Core.Common.Constants;
 using Core.Market;
 using Core.Settings;
 using Core.Settings.Specifications;
+using Infrastructure.Services.Market.BigData;
+using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
-using UseCases.Market.MarketDocuments.Import.BigData;
-using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;

@@ -14,6 +14,8 @@ using Infrastructure.Data.Queries.Market;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Data.Queries.Settings;
 using Infrastructure.Services.Files;
+using Infrastructure.Services.Market.BigData;
+using Infrastructure.Services.Market.BigData.Readers;
 using Infrastructure.Services.Secrets;
 using UseCases.Auditing.List;
 using UseCases.Common;
@@ -28,9 +30,7 @@ using UseCases.Security.Users;
 using UseCases.Security.Users.List;
 using UseCases.Market.Markets.List;
 using UseCases.Common.DataLists.Get;
-using UseCases.Market.MarketDocuments.Import.BigData;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
 namespace Infrastructure;
 

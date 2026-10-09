@@ -1,7 +1,7 @@
 using System.Xml.Linq;
 using Core.Market;
 
-namespace UseCases.Market.MarketDocuments.Import.BigData.Readers;
+namespace Infrastructure.Services.Market.BigData.Readers;
 
 public interface IMarketDocumentTransactionReader
 {

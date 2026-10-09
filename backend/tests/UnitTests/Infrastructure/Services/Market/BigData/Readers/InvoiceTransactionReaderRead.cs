@@ -1,7 +1,7 @@
-﻿using System.Xml.Linq;
-using UseCases.Market.MarketDocuments.Import.BigData.Readers;
+using System.Xml.Linq;
+using Infrastructure.Services.Market.BigData.Readers;
 
-namespace UnitTests.UseCases.Market.MarketDocuments;
+namespace UnitTests.Infrastructure.Services.Market.BigData.Readers;
 
 public class InvoiceTransactionReaderRead
 {

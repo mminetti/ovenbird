@@ -4,12 +4,12 @@ using Core.Market;
 using Core.Market.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
+using Infrastructure.Services.Market.BigData;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
-using UseCases.Market.MarketDocuments.Import.BigData;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 

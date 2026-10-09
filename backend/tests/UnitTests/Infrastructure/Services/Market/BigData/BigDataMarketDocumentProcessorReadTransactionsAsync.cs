@@ -1,13 +1,13 @@
-﻿using System.Text;
+using System.Text;
 using System.Xml.Linq;
 using Core.Common.Constants;
 using Core.Market;
+using Infrastructure.Services.Market.BigData;
+using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Secrets;
-using UseCases.Market.MarketDocuments.Import.BigData;
-using UseCases.Market.MarketDocuments.Import.BigData.Readers;
 
-namespace UnitTests.UseCases.Market.MarketDocuments;
+namespace UnitTests.Infrastructure.Services.Market.BigData;
 
 public class BigDataMarketDocumentProcessorReadTransactionsAsync
 {

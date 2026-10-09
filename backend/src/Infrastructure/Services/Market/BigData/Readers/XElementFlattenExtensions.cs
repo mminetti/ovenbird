@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 
-namespace UseCases.Market.MarketDocuments.Import.BigData.Readers;
+namespace Infrastructure.Services.Market.BigData.Readers;
 
 public static class XElementFlattenExtensions
 {

@@ -1,11 +1,11 @@
-﻿using Core.Common.Constants;
+using Core.Common.Constants;
 using Core.Settings;
+using Infrastructure.Services.Market.BigData;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
-using UseCases.Market.MarketDocuments.Import.BigData;
 
-namespace UnitTests.UseCases.Market.MarketDocuments;
+namespace UnitTests.Infrastructure.Services.Market.BigData;
 
 public class BigDataImportStrategyTests
 {
