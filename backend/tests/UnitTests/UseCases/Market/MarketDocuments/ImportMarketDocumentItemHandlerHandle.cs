@@ -12,6 +12,7 @@ using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
+using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -25,6 +26,7 @@ public class ImportMarketDocumentItemHandlerHandle
     private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly TestFileStorage _fileStorage = new();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly MarketDocumentTransport _transport;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
@@ -58,7 +60,8 @@ public class ImportMarketDocumentItemHandlerHandle
             _documentReadRepository,
             _configurationReadRepository,
             _transport,
-            parserResolver);
+            parserResolver,
+            _bus);
     }
 
     [Fact]

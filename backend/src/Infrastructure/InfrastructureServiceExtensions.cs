@@ -16,6 +16,7 @@ using Infrastructure.Data.Queries.Settings;
 using Infrastructure.Services.Files;
 using Infrastructure.Services.Market;
 using Infrastructure.Services.Market.BigData;
+using Infrastructure.Services.Market.BigData.EntityBuilders;
 using Infrastructure.Services.Market.BigData.Readers;
 using Infrastructure.Services.Secrets;
 using UseCases.Auditing.List;
@@ -101,6 +102,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IMarketDocumentTransport, MarketDocumentTransport>()
             .AddScoped<IMarketDocumentParser, BigDataMarketDocumentParser>()
             .AddScoped<MarketDocumentParserResolver>()
+            .AddScoped<MarketDocumentEntityBuilderResolver>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));
@@ -112,6 +114,7 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedTransient<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.Set);
         services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceOrderTransactionReader>(ServiceOrderTransactionReader.Set);
         services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceRequestTransactionReader>(ServiceRequestTransactionReader.Set);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsageEntityBuilder>(HistoricalUsageEntityBuilder.Key);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

@@ -10,7 +10,8 @@ public class ImportMarketDocumentItemHandler(
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
     IMarketDocumentTransport transport,
-    MarketDocumentParserResolver parserResolver)
+    MarketDocumentParserResolver parserResolver,
+    IMessageBus bus)
 {
     private const string HandlerIdentifier = "handler";
 
@@ -37,7 +38,7 @@ public class ImportMarketDocumentItemHandler(
 
             var created = await itemRepository.AddAsync(item, ct);
 
-            // trigger service entity creation based on impl
+            await bus.InvokeAsync(new MarketDocumentEntityBuilderCommand(created.Id), ct);
 
             itemIds.Add(created.Id);
         }
