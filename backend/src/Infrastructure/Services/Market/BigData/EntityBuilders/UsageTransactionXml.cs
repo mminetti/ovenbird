@@ -39,7 +39,7 @@ public class UsageMeterXml
     public string? UsageType { get; set; }
     public string ServicePeriodBeginDate { get; set; } = string.Empty;
     public string ServicePeriodEndDate { get; set; } = string.Empty;
-    public string? MeterIdentifier { get; set; }
+    public string MeterIdentifier { get; set; } = string.Empty;
     public string? MeterExchangeDate { get; set; }
     public string? MeterUOM { get; set; }
     public string? IntervalType { get; set; }

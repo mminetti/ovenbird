@@ -39,7 +39,7 @@ public class HistoricalUsageEntityBuilder(
 
         foreach (var usageMeter in usage.UsageMeters)
         {
-            var meter = servicePoint.GetMeter(usageMeter.MeterIdentifier!)
+            var meter = servicePoint.GetMeter(usageMeter.MeterIdentifier)
                 ?? throw new InvalidOperationException($"Meter '{usageMeter.MeterIdentifier}' was not found.");
 
             var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
