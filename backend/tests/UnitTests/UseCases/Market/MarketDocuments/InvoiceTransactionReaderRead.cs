@@ -21,7 +21,6 @@ public class InvoiceTransactionReaderRead
               <Invoice>
                 <BillDate>20260702</BillDate>
                 <BillNumber>97X1260702220427505973</BillNumber>
-                <OriginalBillNumber>970631306720260702205530734744</OriginalBillNumber>
                 <BillActionCode>PR</BillActionCode>
                 <BillPurpose>00</BillPurpose>
                 <LDCAccountNumber>10204049751086976</LDCAccountNumber>
@@ -32,31 +31,7 @@ public class InvoiceTransactionReaderRead
 
         var item = _reader.Read(transaction);
 
-        item.Purpose.ShouldBe("ORIGINAL");
-        item.SubPurpose.ShouldBe("MONTH");
-        item.TrackingNumber.ShouldBe("97X1260702220427505973");
-        item.OriginalTrackingNumber.ShouldBe("970631306720260702205530734744");
+        item.ReferenceNumber.ShouldBe("97X1260702220427505973");
         item.ServicePointIdentifier.ShouldBe("10204049751086976");
-    }
-
-    [Fact]
-    public void TreatsMissingCrossRefNumberAsNull()
-    {
-        var transaction = XElement.Parse("""
-            <Transaction>
-              <TransactionSet>810</TransactionSet>
-              <TransactionSubSet>02</TransactionSubSet>
-              <Invoice>
-                <BillNumber>97X1260702220427505973</BillNumber>
-                <BillActionCode>PR</BillActionCode>
-                <BillPurpose>00</BillPurpose>
-                <LDCAccountNumber>10204049751086976</LDCAccountNumber>
-              </Invoice>
-            </Transaction>
-            """);
-
-        var item = _reader.Read(transaction);
-
-        item.OriginalTrackingNumber.ShouldBeNull();
     }
 }

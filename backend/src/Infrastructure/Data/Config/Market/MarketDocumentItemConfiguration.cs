@@ -14,16 +14,7 @@ public class MarketDocumentItemConfiguration : BaseEntityTypeConfiguration<Marke
         builder.Property(x => x.SubSet)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
-        builder.Property(x => x.Purpose)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.SubPurpose)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.TrackingNumber)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.OriginalTrackingNumber)
+        builder.Property(x => x.ReferenceNumber)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.Property(x => x.ServicePointIdentifier)
@@ -43,11 +34,5 @@ public class MarketDocumentItemConfiguration : BaseEntityTypeConfiguration<Marke
             .WithMany()
             .HasForeignKey(x => x.MarketDocumentItemStatusId)
             .OnDelete(DeleteBehavior.NoAction);
-
-        // Cascade: field rows are owned by the item, delete with it.
-        builder.HasMany(x => x.Fields)
-            .WithOne(x => x.MarketDocumentItem)
-            .HasForeignKey(x => x.MarketDocumentItemId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

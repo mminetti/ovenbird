@@ -11,37 +11,10 @@ public class UsageTransactionReader : IMarketDocumentTransactionReader
     {
         var transaction = transactionElement.Element("Usage");
 
-        var purposeCode = transaction?.Element("PurposeCode")?.Value ?? string.Empty;
-        var purpose = purposeCode switch
-        {
-            "01" => "CANCEL",
-            "05" => "REPLACE",
-            "07" => "DUPLICATE",
-            _ => "ORIGINAL",
-        };
-
-        var reportType = transaction?.Element("ReportType")?.Value ?? string.Empty;
-        var subPurpose = reportType switch
-        {
-            "C1" => "INTERVAL",
-            _ => "NONINTERVAL",
-        };
-
-        var fields = transaction?.Flatten("Usage") ?? [];
-
         return new MarketDocumentItem
         {
-            Purpose = purpose,
-            SubPurpose = subPurpose,
-            TrackingNumber = transaction?.Element("TransactionReferenceNumber")?.Value ?? string.Empty,
-            OriginalTrackingNumber = transaction?.Element("OriginalTransactionNumber")?.Value,
+            ReferenceNumber = transaction?.Element("TransactionReferenceNumber")?.Value ?? string.Empty,
             ServicePointIdentifier = transaction?.Element("UtilityAccountNumber")?.Value ?? string.Empty,
-            Fields = [.. fields.Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                .Select(x => new MarketDocumentItemField 
-                { 
-                    FieldName = x.Name, 
-                    FieldValue = x.Value 
-                })],
         };
     }
 }

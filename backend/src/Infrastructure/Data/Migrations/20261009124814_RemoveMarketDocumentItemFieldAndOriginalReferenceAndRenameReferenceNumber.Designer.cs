@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261008204849_AddMarketDocumentItemField")]
-    partial class AddMarketDocumentItemField
+    [Migration("20261009124814_RemoveMarketDocumentItemFieldAndOriginalReferenceAndRenameReferenceNumber")]
+    partial class RemoveMarketDocumentItemFieldAndOriginalReferenceAndRenameReferenceNumber
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -224,18 +224,14 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("MarketDocumentItemStatusId")
                         .HasColumnType("int");
 
-                    b.Property<string>("OriginalTrackingNumber")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("Purpose")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.Property<string>("Raw")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReferenceNumber")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("ServicePointIdentifier")
                         .IsRequired()
@@ -247,17 +243,7 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("SubPurpose")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.Property<string>("SubSet")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("TrackingNumber")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
@@ -269,48 +255,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("MarketDocumentItemStatusId");
 
                     b.ToTable("MarketDocumentItem");
-                });
-
-            modelBuilder.Entity("Core.Market.MarketDocumentItemField", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("FieldName")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("FieldValue")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long>("MarketDocumentItemId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MarketDocumentItemId");
-
-                    b.ToTable("MarketDocumentItemField");
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocumentItemStatus", b =>
@@ -1093,17 +1037,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("MarketDocumentItemStatus");
                 });
 
-            modelBuilder.Entity("Core.Market.MarketDocumentItemField", b =>
-                {
-                    b.HasOne("Core.Market.MarketDocumentItem", "MarketDocumentItem")
-                        .WithMany("Fields")
-                        .HasForeignKey("MarketDocumentItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MarketDocumentItem");
-                });
-
             modelBuilder.Entity("Core.Security.Permission", b =>
                 {
                     b.HasOne("Core.Security.PermissionModule", "Module")
@@ -1221,11 +1154,6 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Market.Market", b =>
                 {
                     b.Navigation("Companies");
-                });
-
-            modelBuilder.Entity("Core.Market.MarketDocumentItem", b =>
-                {
-                    b.Navigation("Fields");
                 });
 
             modelBuilder.Entity("Core.Security.PermissionModule", b =>

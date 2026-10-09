@@ -11,40 +11,10 @@ public class InvoiceTransactionReader : IMarketDocumentTransactionReader
     {
         var transaction = transactionElement.Element("Invoice");
 
-        var billPurpose = transaction?.Element("BillPurpose")?.Value ?? string.Empty;
-        var purpose = billPurpose switch
-        {
-            "01" => "CANCEL",
-            "05" => "REPLACE",
-            "07" => "DUPLICATE",
-            _ => "ORIGINAL",
-        };
-
-        var billActionCode = transaction?.Element("BillActionCode")?.Value ?? string.Empty;
-        var subPurpose = billActionCode switch
-        {
-            "26" => "CHARGES",
-            "FE" or "FB" => "FINAL",
-            "A5" => "TAMPERING",
-            "BD" => "BALANCE_DUE",
-            _ => "MONTH",
-        };
-
-        var fields = transaction?.Flatten("Invoice") ?? [];
-
         return new MarketDocumentItem
         {
-            Purpose = purpose,
-            SubPurpose = subPurpose,
-            TrackingNumber = transaction?.Element("BillNumber")?.Value ?? string.Empty,
-            OriginalTrackingNumber = transaction?.Element("OriginalBillNumber")?.Value,
+            ReferenceNumber = transaction?.Element("BillNumber")?.Value ?? string.Empty,
             ServicePointIdentifier = transaction?.Element("LDCAccountNumber")?.Value ?? string.Empty,
-            Fields = [.. fields.Where(x => !string.IsNullOrWhiteSpace(x.Value))
-                .Select(x => new MarketDocumentItemField
-                {
-                    FieldName = x.Name,
-                    FieldValue = x.Value
-                })],
         };
     }
 }

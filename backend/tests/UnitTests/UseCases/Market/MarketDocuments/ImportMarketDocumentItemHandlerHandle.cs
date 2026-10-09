@@ -115,12 +115,12 @@ public class ImportMarketDocumentItemHandlerHandle
 
         created[0].MarketDocumentId.ShouldBe(document.Id);
         created[0].Set.ShouldBe("867");
-        created[0].TrackingNumber.ShouldBe("REF-1");
+        created[0].ReferenceNumber.ShouldBe("REF-1");
         created[0].ServicePointIdentifier.ShouldBe("ACCT-1");
 
         created[1].MarketDocumentId.ShouldBe(document.Id);
         created[1].Set.ShouldBe("810");
-        created[1].TrackingNumber.ShouldBe("BILL-1");
+        created[1].ReferenceNumber.ShouldBe("BILL-1");
         created[1].ServicePointIdentifier.ShouldBe("LDC-1");
     }
 
