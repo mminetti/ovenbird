@@ -1,4 +1,4 @@
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 using Core.Service;
 using Core.Service.Specifications;
 using Infrastructure.Services.Market.BigData.EntityBuilders;
@@ -45,7 +45,7 @@ public class BigDataLookupServiceTests
         var servicePoint = new ServicePoint { Id = 20, Identifier = "SP-1" };
 
         _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns(servicePoint);
 
         var result = await _service.GetServicePointAsync("SP-1", CancellationToken.None);
@@ -57,7 +57,7 @@ public class BigDataLookupServiceTests
     public async Task GetServicePointAsyncThrowsWhenNotFound()
     {
         _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns((ServicePoint?)null);
 
         await Should.ThrowAsync<InvalidOperationException>(

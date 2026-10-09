@@ -31,7 +31,7 @@ public class BigDataLookupService(
     public async Task<ServicePoint> GetServicePointAsync(string identifier, CancellationToken ct)
     {
         return await servicePointReadRepository.FirstOrDefaultAsync(
-            new ServicePointByIdentifierSpec(identifier), ct)
+            new ServicePointWithMetersByIdentifierSpec(identifier), ct)
             ?? throw new InvalidOperationException($"Service Point '{identifier}' was not found.");
     }
 }
