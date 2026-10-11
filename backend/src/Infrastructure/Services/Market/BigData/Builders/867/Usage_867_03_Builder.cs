@@ -1,7 +1,7 @@
-﻿using Core.Market;
+﻿using Core.Common.Constants;
+using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
@@ -20,7 +20,7 @@ public class Usage_867_03_Builder(
     private bool _isFinal;
     private long? _originalUsageId;
 
-    protected override int ReferenceTypeId => CoreConstants.MarketDocumentReferenceTypes.Usage;
+    protected override int ReferenceTypeId => Constants.MarketDocumentReferenceTypes.Usage;
 
     protected override IEnumerable<UsageMeterXml> SelectUsageMeters(IEnumerable<UsageMeterXml> usageMeters) =>
         usageMeters.Where(x => x.UsageType == DetailUsageType);
@@ -39,7 +39,7 @@ public class Usage_867_03_Builder(
         IsFinal = _isFinal,
         StartRead = read.StartMeterRead ?? 0,
         EndRead = read.EndMeterRead ?? 0,
-        UsageStatusId = CoreConstants.UsageStatuses.New,
+        UsageStatusId = Constants.UsageStatuses.New,
     };
 
     private async Task<long?> GetOriginalUsageIdAsync(string? originalTransactionNumber, CancellationToken ct)

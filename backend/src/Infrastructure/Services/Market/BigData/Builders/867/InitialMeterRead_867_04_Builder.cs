@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
+using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
@@ -37,7 +37,7 @@ public class InitialMeterRead_867_04_Builder(
                         ServiceStartId = serviceStart.Id,
                         Identifier = item.ReferenceNumber,
                         ServiceDate = serviceDate,
-                        ServiceActionId = CoreConstants.ServiceActions.Complete,
+                        ServiceActionId = Constants.ServiceActions.Complete,
                     };
 
                     var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
@@ -45,7 +45,7 @@ public class InitialMeterRead_867_04_Builder(
                     var reference = new MarketDocumentReference
                     {
                         MarketDocumentItemId = item.Id,
-                        ReferenceTypeId = CoreConstants.MarketDocumentReferenceTypes.ServiceStart,
+                        ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
                         ReferenceId = created.Id,
                     };
 

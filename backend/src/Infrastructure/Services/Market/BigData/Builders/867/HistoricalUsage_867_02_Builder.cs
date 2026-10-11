@@ -1,6 +1,6 @@
-﻿using Core.Market;
+﻿using Core.Common.Constants;
+using Core.Market;
 using Core.Service;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
@@ -12,7 +12,7 @@ public class HistoricalUsage_867_02_Builder(
 {
     public const string Key = "867_02";
 
-    protected override int ReferenceTypeId => CoreConstants.MarketDocumentReferenceTypes.HistoricalUsage;
+    protected override int ReferenceTypeId => Constants.MarketDocumentReferenceTypes.HistoricalUsage;
 
     protected override HistoricalUsage CreateUsage(UsageReadXml read) => new();
 }

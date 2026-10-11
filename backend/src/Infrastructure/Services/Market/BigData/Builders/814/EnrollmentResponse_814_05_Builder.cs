@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
+using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
@@ -30,12 +30,12 @@ public class EnrollmentResponse_814_05_Builder(
                 ?? throw new InvalidOperationException($"MarketDocumentItem '{item.Id}' has no CustomerAgreementDate.");
 
             var actionId = service.ActionCode == "A" ?
-                    CoreConstants.ServiceActions.Confirm :
-                    CoreConstants.ServiceActions.Reject;
+                    Constants.ServiceActions.Confirm :
+                    Constants.ServiceActions.Reject;
 
             string? description = null;
 
-            if (actionId == CoreConstants.ServiceActions.Reject)
+            if (actionId == Constants.ServiceActions.Reject)
             {
                 description = $"{service.RejectCode} - {service.RejectReason}";
             }
@@ -54,7 +54,7 @@ public class EnrollmentResponse_814_05_Builder(
             var reference = new MarketDocumentReference
             {
                 MarketDocumentItemId = item.Id,
-                ReferenceTypeId = CoreConstants.MarketDocumentReferenceTypes.ServiceStart,
+                ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
                 ReferenceId = created.Id,
             };
 
