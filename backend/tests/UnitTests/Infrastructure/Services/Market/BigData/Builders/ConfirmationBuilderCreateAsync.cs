@@ -1,13 +1,11 @@
 ﻿using Core.Market;
 using Core.Service;
-using Core.Service.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class ConfirmationBuilderCreateAsync
 {
-    private readonly IReadRepository<ServiceStart> _serviceStartReadRepository = Substitute.For<IReadRepository<ServiceStart>>();
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly EnrollmentResponse_814_05_Builder _builder;
@@ -15,7 +13,6 @@ public class ConfirmationBuilderCreateAsync
     public ConfirmationBuilderCreateAsync()
     {
         _builder = new EnrollmentResponse_814_05_Builder(
-            _serviceStartReadRepository,
             _serviceStartItemRepository,
             _referenceRepository);
     }
@@ -96,21 +93,20 @@ public class ConfirmationBuilderCreateAsync
     };
 
     [Fact]
-    public async Task ThrowsBecauseAccountResolutionIsNotYetImplemented()
+    public async Task ThrowsBecauseServiceStartResolutionIsNotYetImplemented()
     {
-        // Account resolution for 814 transactions is an explicit TODO (ServiceRequestReaderBase.GetAccountAsync) -
+        // ServiceStart resolution for 814 transactions is an explicit TODO (EnrollmentResponse_814_05_Builder.GetServiceStartAsync) -
         // this documents that CreateAsync currently cannot complete until that is implemented.
         await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
     }
 
     [Fact]
-    public async Task NeverCallsServiceStartOrPersistenceBeforeAccountIsResolved()
+    public async Task NeverCallsPersistenceBeforeServiceStartIsResolved()
     {
         await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
 
-        await _serviceStartReadRepository.DidNotReceive().FirstOrDefaultAsync(Arg.Any<ServiceStartByAccountIdSpec>(), Arg.Any<CancellationToken>());
         await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }

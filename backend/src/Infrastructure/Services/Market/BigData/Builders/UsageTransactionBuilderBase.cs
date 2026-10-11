@@ -9,10 +9,10 @@ public abstract class UsageTransactionBuilderBase<TUsage>(
     IBigDataLookupService lookupService,
     IRepository<TUsage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : IMarketDocumentEntityBuilder
+    : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
     where TUsage : UsageBase
 {
-    protected const string DateFormat = UsageTransactionXmlReader.DateFormat;
+    protected override string RequiredElementName => "Usage";
 
     protected IBigDataLookupService LookupService => lookupService;
 
@@ -20,7 +20,7 @@ public abstract class UsageTransactionBuilderBase<TUsage>(
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        var transaction = UsageTransactionXmlReader.DeserializeTransaction(item);
+        var transaction = DeserializeTransaction(item);
         var usage = transaction.Usage;
 
         var commodityId = lookupService.GetCommodityId(transaction.Commodity);

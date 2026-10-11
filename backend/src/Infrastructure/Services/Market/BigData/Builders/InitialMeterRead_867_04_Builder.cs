@@ -1,31 +1,28 @@
 ﻿using System.Globalization;
 using Core.Market;
 using Core.Service;
-using Core.Service.Specifications;
-using Core.Subscription;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class InitialMeterRead_867_04_Builder(
-    IReadRepository<Account> accountReadRepository,
-    IReadRepository<ServiceStart> serviceStartReadRepository,
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionReaderBase(accountReadRepository), IMarketDocumentEntityBuilder
+    : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "867_04";
 
     private const string InitialUsageType = "INT";
+
+    protected override string RequiredElementName => "Usage";
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
         var transaction = DeserializeTransaction(item);
         var usage = transaction.Usage;
 
-        var account = await GetAccountAsync(usage.TranNr814, ct);
-        var serviceStart = await GetServiceStartAsync(account, ct);
+        var serviceStart = await GetServiceStartAsync(usage.TranNr814, ct);
 
         foreach (var usageMeter in usage.UsageMeters.Where(x => x.UsageType == InitialUsageType))
         {
@@ -58,11 +55,7 @@ public class InitialMeterRead_867_04_Builder(
         }
     }
 
-    private async Task<ServiceStart> GetServiceStartAsync(Account account, CancellationToken ct)
-    {
-        // TODO: figure out the correct matching logic for selecting the right ServiceStart once an account can have more than one.
-
-        return await serviceStartReadRepository.FirstOrDefaultAsync(new ServiceStartByAccountIdSpec(account.Id), ct)
-            ?? throw new InvalidOperationException($"ServiceStart for account '{account.Identifier}' was not found.");
-    }
+    // TODO: resolve ServiceStart 
+    private static Task<ServiceStart> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct) =>
+        throw new NotImplementedException("ServiceStart resolution for 867_04 transactions is not yet implemented.");
 }

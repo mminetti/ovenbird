@@ -1,28 +1,26 @@
 ﻿using System.Globalization;
 using Core.Market;
 using Core.Service;
-using Core.Service.Specifications;
-using Core.Subscription;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class EnrollmentResponse_814_05_Builder(
-    IReadRepository<ServiceStart> serviceStartReadRepository,
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : ServiceRequestReaderBase, IMarketDocumentEntityBuilder
+    : TransactionXmlReaderBase<ServiceRequestXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "814_05";
+
+    protected override string RequiredElementName => "AccountMaint";
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
         var transaction = DeserializeTransaction(item);
         var accountMaint = transaction.AccountMaint;
 
-        var account = await GetAccountAsync(accountMaint, ct);
-        var serviceStart = await GetServiceStartAsync(account, ct);
+        var serviceStart = await GetServiceStartAsync(accountMaint.ProcessTrackingNumber, ct);
 
         foreach (var service in accountMaint.Services)
         {
@@ -31,15 +29,15 @@ public class EnrollmentResponse_814_05_Builder(
                 .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
                 ?? throw new InvalidOperationException($"MarketDocumentItem '{item.Id}' has no CustomerAgreementDate.");
 
-            var actionId = service.ActionCode == "A" ? 
-                    CoreConstants.ServiceActions.Confirm : 
+            var actionId = service.ActionCode == "A" ?
+                    CoreConstants.ServiceActions.Confirm :
                     CoreConstants.ServiceActions.Reject;
 
             string? description = null;
 
             if (actionId == CoreConstants.ServiceActions.Reject)
             {
-                description = $"{service.RejectCode} - {service.RejectReason}"; 
+                description = $"{service.RejectCode} - {service.RejectReason}";
             }
 
             var serviceStartItem = new ServiceStartItem
@@ -64,11 +62,7 @@ public class EnrollmentResponse_814_05_Builder(
         }
     }
 
-    private async Task<ServiceStart> GetServiceStartAsync(Account account, CancellationToken ct)
-    {
-        // TODO: figure out the correct matching logic for selecting the right ServiceStart once an account can have more than one.
-
-        return await serviceStartReadRepository.FirstOrDefaultAsync(new ServiceStartByAccountIdSpec(account.Id), ct)
-            ?? throw new InvalidOperationException($"ServiceStart for account '{account.Identifier}' was not found.");
-    }
+    // TODO: resolve ServiceStart 
+    private static Task<ServiceStart> GetServiceStartAsync(string? trackingNumber, CancellationToken ct) =>
+        throw new NotImplementedException("ServiceStart resolution for 814 transactions is not yet implemented.");
 }
