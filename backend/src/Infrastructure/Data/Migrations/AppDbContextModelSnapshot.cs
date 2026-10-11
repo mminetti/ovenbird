@@ -945,7 +945,7 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("ServiceActionId")
                         .HasColumnType("int");
 
-                    b.Property<DateOnly>("ServiceDate")
+                    b.Property<DateOnly?>("ServiceDate")
                         .HasColumnType("date");
 
                     b.Property<long>("ServiceStartId")

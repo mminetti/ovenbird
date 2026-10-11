@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -22,8 +21,6 @@ public class MoveInReject_814_17_Builder(
 
         var serviceStart = await GetServiceStartAsync(accountMaint.ProcessTrackingNumber, ct);
 
-        var serviceDate = DateOnly.ParseExact(accountMaint.DateStampReceived ?? string.Empty, DateFormat, CultureInfo.InvariantCulture);
-
         foreach (var service in accountMaint.Services)
         {
             var rejectReason = service.ServiceRejectReasons.FirstOrDefault();
@@ -32,7 +29,6 @@ public class MoveInReject_814_17_Builder(
             {
                 ServiceStartId = serviceStart.Id,
                 Identifier = item.ReferenceNumber,
-                ServiceDate = serviceDate,
                 ServiceActionId = Constants.ServiceActions.Reject,
                 Description = $"{rejectReason?.RejectCode} - {rejectReason?.RejectReason}",
             };
