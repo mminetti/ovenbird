@@ -118,7 +118,9 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsage_867_02_Builder>(HistoricalUsage_867_02_Builder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, Usage_867_03_Builder>(Usage_867_03_Builder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, InitialMeterRead_867_04_Builder>(InitialMeterRead_867_04_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentResponse_814_05_Builder>(EnrollmentResponse_814_05_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, SwitchReject_814_02_Builder>(SwitchReject_814_02_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentNotification_814_05_Builder>(EnrollmentNotification_814_05_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, MoveInReject_814_17_Builder>(MoveInReject_814_17_Builder.Key);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

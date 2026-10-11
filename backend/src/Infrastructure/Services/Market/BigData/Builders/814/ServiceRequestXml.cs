@@ -62,12 +62,14 @@ public class ServiceXml
     public string? SpecialNeedsInfo { get; set; }
     public string? Indicator814 { get; set; }
     public string? PermitIndicator { get; set; }
-    public string? RejectCode { get; set; }
-    public string? RejectReason { get; set; }
 
     [XmlArray("ServiceChangeReasonList")]
     [XmlArrayItem("ServiceChangeReason")]
     public List<ServiceChangeReasonXml> ServiceChangeReasons { get; set; } = [];
+
+    [XmlArray("ServiceRejectReasonList")]
+    [XmlArrayItem("ServiceRejectReason")]
+    public List<ServiceRejectReasonXml> ServiceRejectReasons { get; set; } = [];
 
     [XmlArray("ServiceDateList")]
     [XmlArrayItem("ServiceDate")]
@@ -85,6 +87,12 @@ public class ServiceXml
 public class ServiceChangeReasonXml
 {
     public string? ChangeReason { get; set; }
+}
+
+public class ServiceRejectReasonXml
+{
+    public string? RejectCode { get; set; }
+    public string? RejectReason { get; set; }
 }
 
 public class ServiceDateXml

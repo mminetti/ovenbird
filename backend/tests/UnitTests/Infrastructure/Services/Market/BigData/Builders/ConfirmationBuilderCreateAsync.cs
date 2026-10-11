@@ -8,11 +8,11 @@ public class ConfirmationBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly EnrollmentResponse_814_05_Builder _builder;
+    private readonly EnrollmentNotification_814_05_Builder _builder;
 
     public ConfirmationBuilderCreateAsync()
     {
-        _builder = new EnrollmentResponse_814_05_Builder(
+        _builder = new EnrollmentNotification_814_05_Builder(
             _serviceStartItemRepository,
             _referenceRepository);
     }
@@ -95,7 +95,7 @@ public class ConfirmationBuilderCreateAsync
     [Fact]
     public async Task ThrowsBecauseServiceStartResolutionIsNotYetImplemented()
     {
-        // ServiceStart resolution for 814 transactions is an explicit TODO (EnrollmentResponse_814_05_Builder.GetServiceStartAsync) -
+        // ServiceStart resolution for 814 transactions is an explicit TODO (EnrollmentNotification_814_05_Builder.GetServiceStartAsync) -
         // this documents that CreateAsync currently cannot complete until that is implemented.
         await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
