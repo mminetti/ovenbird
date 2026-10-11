@@ -1,9 +1,9 @@
 ﻿using Core.Common.Constants;
 using Core.Service;
 using Core.Service.Specifications;
-using Infrastructure.Services.Market.BigData.EntityBuilders;
+using Infrastructure.Services.Market.BigData.Builders;
 
-namespace UnitTests.Infrastructure.Services.Market.BigData.EntityBuilders;
+namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class BigDataLookupServiceTests
 {

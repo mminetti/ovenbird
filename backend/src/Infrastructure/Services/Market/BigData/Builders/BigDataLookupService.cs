@@ -2,7 +2,7 @@
 using Core.Service.Specifications;
 using CoreConstants = Core.Common.Constants.Constants;
 
-namespace Infrastructure.Services.Market.BigData.EntityBuilders;
+namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class BigDataLookupService(
     IReadRepository<ServicePoint> servicePointReadRepository)
@@ -18,6 +18,13 @@ public class BigDataLookupService(
         ["KH"] = CoreConstants.UnitOfMeasures.KilowattHour,
     };
 
+    private static readonly Dictionary<string, int> _usageTypeIdsByPurposeCode = new()
+    {
+        ["00"] = CoreConstants.UsageTypes.Original,
+        ["01"] = CoreConstants.UsageTypes.Cancel,
+        ["05"] = CoreConstants.UsageTypes.Replace,
+    };
+
     public int GetCommodityId(string code) =>
         _commodityIdsByCode.TryGetValue(code, out var id)
             ? id
@@ -27,6 +34,11 @@ public class BigDataLookupService(
         _unitOfMeasureIdsByCode.TryGetValue(code, out var id)
             ? id
             : throw new InvalidOperationException($"Unmapped unit of measure code '{code}'.");
+
+    public int GetUsageTypeId(string purposeCode) =>
+        _usageTypeIdsByPurposeCode.TryGetValue(purposeCode, out var id)
+            ? id
+            : throw new InvalidOperationException($"Unmapped usage purpose code '{purposeCode}'.");
 
     public async Task<ServicePoint> GetServicePointAsync(string identifier, CancellationToken ct)
     {

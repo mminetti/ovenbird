@@ -831,6 +831,150 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Core.Service.Usage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("CommodityId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Consumption")
+                        .HasColumnType("float");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EndRead")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("IsFinal")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long?>("MeterId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("OriginalUsageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateOnly>("PeriodEndDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("PeriodStartDate")
+                        .HasColumnType("date");
+
+                    b.Property<long>("ServicePointId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("StartRead")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UnitOfMeasureId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsageStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsageTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("CommodityId");
+
+                    b.HasIndex("MeterId");
+
+                    b.HasIndex("OriginalUsageId");
+
+                    b.HasIndex("ServicePointId");
+
+                    b.HasIndex("UnitOfMeasureId");
+
+                    b.HasIndex("UsageStatusId");
+
+                    b.HasIndex("UsageTypeId");
+
+                    b.ToTable("Usage");
+                });
+
+            modelBuilder.Entity("Core.Service.UsageStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UsageStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "New"
+                        });
+                });
+
+            modelBuilder.Entity("Core.Service.UsageType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UsageType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Original"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Cancel"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Replace"
+                        });
+                });
+
             modelBuilder.Entity("Core.Settings.Company", b =>
                 {
                     b.Property<int>("Id")
@@ -1416,6 +1560,71 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ServicePoint");
+                });
+
+            modelBuilder.Entity("Core.Service.Usage", b =>
+                {
+                    b.HasOne("Core.Subscription.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.Commodity", "Commodity")
+                        .WithMany()
+                        .HasForeignKey("CommodityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.Meter", "Meter")
+                        .WithMany()
+                        .HasForeignKey("MeterId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Core.Service.Usage", "OriginalUsage")
+                        .WithMany()
+                        .HasForeignKey("OriginalUsageId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Core.Service.ServicePoint", "ServicePoint")
+                        .WithMany()
+                        .HasForeignKey("ServicePointId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.UnitOfMeasure", "UnitOfMeasure")
+                        .WithMany()
+                        .HasForeignKey("UnitOfMeasureId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.UsageStatus", "UsageStatus")
+                        .WithMany()
+                        .HasForeignKey("UsageStatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.UsageType", "UsageType")
+                        .WithMany()
+                        .HasForeignKey("UsageTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Commodity");
+
+                    b.Navigation("Meter");
+
+                    b.Navigation("OriginalUsage");
+
+                    b.Navigation("ServicePoint");
+
+                    b.Navigation("UnitOfMeasure");
+
+                    b.Navigation("UsageStatus");
+
+                    b.Navigation("UsageType");
                 });
 
             modelBuilder.Entity("Core.Settings.Company", b =>

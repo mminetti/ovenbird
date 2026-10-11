@@ -1,11 +1,11 @@
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
 using Core.Subscription;
 using Core.Subscription.Specifications;
-using Infrastructure.Services.Market.BigData.EntityBuilders;
+using Infrastructure.Services.Market.BigData.Builders;
 
-namespace UnitTests.Infrastructure.Services.Market.BigData.EntityBuilders;
+namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class HistoricalUsageEntityBuilderCreateAsync
 {
@@ -13,11 +13,11 @@ public class HistoricalUsageEntityBuilderCreateAsync
     private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
     private readonly IRepository<HistoricalUsage> _historicalUsageRepository = Substitute.For<IRepository<HistoricalUsage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly HistoricalUsageEntityBuilder _builder;
+    private readonly HistoricalUsageBuilder _builder;
 
     public HistoricalUsageEntityBuilderCreateAsync()
     {
-        _builder = new HistoricalUsageEntityBuilder(
+        _builder = new HistoricalUsageBuilder(
             _accountReadRepository,
             _lookupService,
             _historicalUsageRepository,

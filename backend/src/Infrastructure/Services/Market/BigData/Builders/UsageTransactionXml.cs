@@ -1,6 +1,6 @@
 ﻿using System.Xml.Serialization;
 
-namespace Infrastructure.Services.Market.BigData.EntityBuilders;
+namespace Infrastructure.Services.Market.BigData.Builders;
 
 [XmlRoot("Transaction")]
 public class UsageTransactionXml
@@ -68,7 +68,7 @@ public class UsageReadXml
     public string ReadUOM { get; set; } = string.Empty;
     public string? ReadFlag { get; set; }
     public string? TOU { get; set; }
-    public double? StartMeterRead { get; set; }
-    public double? EndMeterRead { get; set; }
+    public int? StartMeterRead { get; set; }
+    public int? EndMeterRead { get; set; }
     public double? Multiplier { get; set; }
 }
