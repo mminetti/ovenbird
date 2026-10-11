@@ -46,8 +46,8 @@ public class UsageBuilderCreateAsync
 
     private const string Xml = """
         <Transaction>
-          <SupplierDUNS>1890692841000</SupplierDUNS>
-          <UtilityDUNS>1039940674000</UtilityDUNS>
+          <SupplierDUNS>1234567890123</SupplierDUNS>
+          <UtilityDUNS>123456789</UtilityDUNS>
           <TransactionSet>867</TransactionSet>
           <TransactionSubSet>03</TransactionSubSet>
           <State>TX</State>
@@ -56,8 +56,8 @@ public class UsageBuilderCreateAsync
             <PurposeCode>00</PurposeCode>
             <ReportType>DD</ReportType>
             <TransactionReferenceNumber>8670300Z82062258318491Z004</TransactionReferenceNumber>
-            <UtilityName>ONCOR</UtilityName>
-            <EGSName>1890692841000 - YOUNG ENERGY LLC DBA PAYLESS POWER 1</EGSName>
+            <UtilityName>ACME UTILITY CO</UtilityName>
+            <EGSName>ACME ENERGY SUPPLIER</EGSName>
             <CreateDateTime>20260707000000</CreateDateTime>
             <TimestampReceived>20260706213742</TimestampReceived>
             <UtilityAccountNumber>10443720004239415</UtilityAccountNumber>

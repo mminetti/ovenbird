@@ -21,18 +21,18 @@ using Infrastructure.Services.Market.BigData.Readers;
 using Infrastructure.Services.Secrets;
 using UseCases.Auditing.List;
 using UseCases.Common;
-using UseCases.Settings.Companies.List;
-using UseCases.Settings.Configurations.List;
-using UseCases.Settings.Connectors.List;
+using UseCases.Common.DataLists.Get;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
+using UseCases.Market.Markets.List;
 using UseCases.Security.Permissions.List;
 using UseCases.Security.Roles.List;
 using UseCases.Security.Users;
 using UseCases.Security.Users.List;
-using UseCases.Market.Markets.List;
-using UseCases.Common.DataLists.Get;
-using UseCases.Market.MarketDocuments.Import.Interfaces;
+using UseCases.Settings.Companies.List;
+using UseCases.Settings.Configurations.List;
+using UseCases.Settings.Connectors.List;
 
 namespace Infrastructure;
 
@@ -118,6 +118,7 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsage_867_02_Builder>(HistoricalUsage_867_02_Builder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, Usage_867_03_Builder>(Usage_867_03_Builder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, InitialMeterRead_867_04_Builder>(InitialMeterRead_867_04_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentResponse_814_05_Builder>(EnrollmentResponse_814_05_Builder.Key);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

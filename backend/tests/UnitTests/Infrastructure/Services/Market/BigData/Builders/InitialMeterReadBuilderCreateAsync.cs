@@ -35,8 +35,8 @@ public class InitialMeterReadBuilderCreateAsync
 
     private const string Xml = """
         <Transaction>
-          <SupplierDUNS>1890692841000</SupplierDUNS>
-          <UtilityDUNS>957877905</UtilityDUNS>
+          <SupplierDUNS>1234567890123</SupplierDUNS>
+          <UtilityDUNS>123456789</UtilityDUNS>
           <TransactionSet>867</TransactionSet>
           <TransactionSubSet>04</TransactionSubSet>
           <State>TX</State>
@@ -44,8 +44,8 @@ public class InitialMeterReadBuilderCreateAsync
           <Usage>
             <PurposeCode>SU</PurposeCode>
             <TransactionReferenceNumber>8670420251112000471536499</TransactionReferenceNumber>
-            <UtilityName>CENTERPOINT ENERGY HOUSTON ELEC LLC</UtilityName>
-            <EGSName>YE LLC DBA PAYLESS POWER 1</EGSName>
+            <UtilityName>ACME UTILITY CO</UtilityName>
+            <EGSName>ACME ENERGY SUPPLIER</EGSName>
             <CreateDateTime>20251112000000</CreateDateTime>
             <TimestampReceived>20251112132945</TimestampReceived>
             <UtilityAccountNumber>1008901010186127443100</UtilityAccountNumber>
