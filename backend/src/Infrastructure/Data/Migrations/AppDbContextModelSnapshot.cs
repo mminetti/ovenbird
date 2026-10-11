@@ -679,7 +679,7 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
+                    b.Property<long?>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("CommodityId")
@@ -874,7 +874,7 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
+                    b.Property<long?>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
@@ -1074,7 +1074,7 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
+                    b.Property<long?>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("CommodityId")
@@ -1749,8 +1749,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Core.Service.Commodity", "Commodity")
                         .WithMany()
@@ -1802,8 +1801,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Core.Service.ServiceStartType", "ServiceStartType")
                         .WithMany()
@@ -1848,8 +1846,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Core.Service.Commodity", "Commodity")
                         .WithMany()

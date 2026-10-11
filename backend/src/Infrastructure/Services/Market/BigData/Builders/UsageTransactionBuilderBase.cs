@@ -1,30 +1,29 @@
 using System.Globalization;
 using Core.Market;
 using Core.Service;
-using Core.Subscription;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public abstract class UsageTransactionBuilderBase<TUsage>(
-    IReadRepository<Account> accountReadRepository,
     IBigDataLookupService lookupService,
     IRepository<TUsage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionReaderBase(accountReadRepository), IMarketDocumentEntityBuilder
+    : IMarketDocumentEntityBuilder
     where TUsage : UsageBase
 {
+    protected const string DateFormat = UsageTransactionXmlReader.DateFormat;
+
     protected IBigDataLookupService LookupService => lookupService;
 
     protected abstract int ReferenceTypeId { get; }
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        var transaction = DeserializeTransaction(item);
+        var transaction = UsageTransactionXmlReader.DeserializeTransaction(item);
         var usage = transaction.Usage;
 
         var commodityId = lookupService.GetCommodityId(transaction.Commodity);
-        var account = await GetAccountAsync(usage.TranNr814, ct);
         var servicePoint = await lookupService.GetServicePointAsync(usage.UtilityAccountNumber, ct);
 
         await PrepareAsync(usage, ct);
@@ -43,7 +42,6 @@ public abstract class UsageTransactionBuilderBase<TUsage>(
                 {
                     var usageEntity = CreateUsage(read);
                     usageEntity.Identifier = item.ReferenceNumber;
-                    usageEntity.AccountId = account.Id;
                     usageEntity.ServicePointId = servicePoint.Id;
                     usageEntity.MeterId = meter.Id;
                     usageEntity.PeriodStartDate = periodStartDate;

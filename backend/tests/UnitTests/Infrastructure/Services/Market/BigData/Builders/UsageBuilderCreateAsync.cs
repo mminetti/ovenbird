@@ -2,15 +2,12 @@
 using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
-using Core.Subscription;
-using Core.Subscription.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class UsageBuilderCreateAsync
 {
-    private readonly IReadRepository<Account> _accountReadRepository = Substitute.For<IReadRepository<Account>>();
     private readonly IReadRepository<Usage> _usageReadRepository = Substitute.For<IReadRepository<Usage>>();
     private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
     private readonly IRepository<Usage> _usageRepository = Substitute.For<IRepository<Usage>>();
@@ -20,7 +17,6 @@ public class UsageBuilderCreateAsync
     public UsageBuilderCreateAsync()
     {
         _builder = new Usage_867_03_Builder(
-            _accountReadRepository,
             _usageReadRepository,
             _lookupService,
             _usageRepository,
@@ -38,10 +34,6 @@ public class UsageBuilderCreateAsync
         };
 
         _lookupService.GetServicePointAsync("10443720004239415", Arg.Any<CancellationToken>()).Returns(servicePoint);
-
-        _accountReadRepository
-            .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new Account { Id = 10, Identifier = "814-REF" });
     }
 
     private const string Xml = """
@@ -151,7 +143,6 @@ public class UsageBuilderCreateAsync
 
         var usage = createdUsages[0];
         usage.Identifier.ShouldBe(item.ReferenceNumber);
-        usage.AccountId.ShouldBe(10);
         usage.ServicePointId.ShouldBe(20);
         usage.MeterId.ShouldBe(30);
         usage.UsageTypeId.ShouldBe(Constants.UsageTypes.Original);
@@ -215,17 +206,6 @@ public class UsageBuilderCreateAsync
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(item, CancellationToken.None));
-    }
-
-    [Fact]
-    public async Task ThrowsWhenAccountCannotBeResolved()
-    {
-        _accountReadRepository
-            .FirstOrDefaultAsync(Arg.Any<AccountByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((Account?)null);
-
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
     }
 
     [Fact]

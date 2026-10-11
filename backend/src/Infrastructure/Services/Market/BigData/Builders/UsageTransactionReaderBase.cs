@@ -1,5 +1,3 @@
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using Core.Market;
 using Core.Subscription;
 using Core.Subscription.Specifications;
@@ -8,23 +6,10 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 
 public abstract class UsageTransactionReaderBase(IReadRepository<Account> accountReadRepository)
 {
-    protected const string DateFormat = "yyyyMMdd";
+    protected const string DateFormat = UsageTransactionXmlReader.DateFormat;
 
-    protected static UsageTransactionXml DeserializeTransaction(MarketDocumentItem item)
-    {
-        var transactionElement = XElement.Parse(item.Raw);
-
-        if (transactionElement.Element("Usage") is null)
-        {
-            throw new InvalidOperationException($"MarketDocumentItem '{item.Id}' has no 'Usage' element.");
-        }
-
-        var serializer = new XmlSerializer(typeof(UsageTransactionXml));
-
-        using var reader = transactionElement.CreateReader();
-
-        return (UsageTransactionXml)serializer.Deserialize(reader)!;
-    }
+    protected static UsageTransactionXml DeserializeTransaction(MarketDocumentItem item) =>
+        UsageTransactionXmlReader.DeserializeTransaction(item);
 
     protected async Task<Account> GetAccountAsync(string? originalReferenceNumber, CancellationToken ct)
     {

@@ -1,18 +1,16 @@
 ﻿using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
-using Core.Subscription;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class Usage_867_03_Builder(
-    IReadRepository<Account> accountReadRepository,
     IReadRepository<Usage> usageReadRepository,
     IBigDataLookupService lookupService,
     IRepository<Usage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionBuilderBase<Usage>(accountReadRepository, lookupService, usageRepository, referenceRepository)
+    : UsageTransactionBuilderBase<Usage>(lookupService, usageRepository, referenceRepository)
 {
     public const string Key = "867_03";
 
