@@ -1,11 +1,11 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using Infrastructure.Services.Market.BigData.Readers;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Readers;
 
 public class InvoiceTransactionReaderRead
 {
-    private readonly InvoiceTransactionReader _reader = new();
+    private readonly Invoice_810_TransactionReader _reader = new();
 
     [Fact]
     public void MapsAllFieldsWhenPresent()

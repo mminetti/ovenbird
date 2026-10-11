@@ -23,8 +23,8 @@ public class BigDataMarketDocumentParserReadTransactionsAsync
         invoiceReader.Read(Arg.Any<XElement>()).Returns(_ => new MarketDocumentItem());
 
         var services = new ServiceCollection();
-        services.AddKeyedSingleton(UsageTransactionReader.Set, usageReader);
-        services.AddKeyedSingleton(InvoiceTransactionReader.Set, invoiceReader);
+        services.AddKeyedSingleton(Usage_867_TransactionReader.Set, usageReader);
+        services.AddKeyedSingleton(Invoice_810_TransactionReader.Set, invoiceReader);
 
         var parser = CreateParser(services.BuildServiceProvider());
 

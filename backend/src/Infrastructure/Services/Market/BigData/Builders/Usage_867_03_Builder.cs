@@ -1,4 +1,4 @@
-using Core.Market;
+﻿using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
 using Core.Subscription;
@@ -6,7 +6,7 @@ using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class UsageBuilder(
+public class Usage_867_03_Builder(
     IReadRepository<Account> accountReadRepository,
     IReadRepository<Usage> usageReadRepository,
     IBigDataLookupService lookupService,

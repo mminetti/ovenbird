@@ -1,4 +1,4 @@
-﻿using Core.Common.Constants;
+using Core.Common.Constants;
 using Core.Service;
 using Core.Service.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;

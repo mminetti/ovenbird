@@ -1,10 +1,7 @@
 using System.Globalization;
-using System.Xml.Linq;
-using System.Xml.Serialization;
 using Core.Market;
 using Core.Service;
 using Core.Subscription;
-using Core.Subscription.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
@@ -14,11 +11,9 @@ public abstract class UsageTransactionBuilderBase<TUsage>(
     IBigDataLookupService lookupService,
     IRepository<TUsage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : IMarketDocumentEntityBuilder
+    : UsageTransactionReaderBase(accountReadRepository), IMarketDocumentEntityBuilder
     where TUsage : UsageBase
 {
-    private const string DateFormat = "yyyyMMdd";
-
     protected IBigDataLookupService LookupService => lookupService;
 
     protected abstract int ReferenceTypeId { get; }
@@ -80,35 +75,4 @@ public abstract class UsageTransactionBuilderBase<TUsage>(
 
     /// <summary>Creates the entity for a single meter read, populated with its type-specific fields. Shared fields are filled in by the base class.</summary>
     protected abstract TUsage CreateUsage(UsageReadXml read);
-
-    private static UsageTransactionXml DeserializeTransaction(MarketDocumentItem item)
-    {
-        var transactionElement = XElement.Parse(item.Raw);
-
-        if (transactionElement.Element("Usage") is null)
-        {
-            throw new InvalidOperationException($"MarketDocumentItem '{item.Id}' has no 'Usage' element.");
-        }
-
-        var serializer = new XmlSerializer(typeof(UsageTransactionXml));
-
-        using var reader = transactionElement.CreateReader();
-
-        return (UsageTransactionXml)serializer.Deserialize(reader)!;
-    }
-
-    private async Task<Account> GetAccountAsync(string? originalReferenceNumber, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(originalReferenceNumber))
-        {
-            throw new InvalidOperationException("Usage transaction is missing original reference number.");
-        }
-
-        // TODO: this should get the service start by identifier and return the account id
-
-        var account = await accountReadRepository.FirstOrDefaultAsync(new AccountByIdentifierSpec(originalReferenceNumber), ct)
-            ?? throw new InvalidOperationException($"Account '{originalReferenceNumber}' was not found.");
-
-        return account;
-    }
 }

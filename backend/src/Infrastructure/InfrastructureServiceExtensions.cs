@@ -111,12 +111,13 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedTransient<IFtpService, LocalFileSystemFtpService>(nameof(LocalFileSystemFtpService));
         services.AddKeyedTransient<IFileStorage, AzureBlobFileStorage>(nameof(AzureBlobFileStorage));
         services.AddKeyedTransient<IFileStorage, LocalFileSystemFileStorage>(nameof(LocalFileSystemFileStorage));
-        services.AddKeyedTransient<IMarketDocumentTransactionReader, UsageTransactionReader>(UsageTransactionReader.Set);
-        services.AddKeyedTransient<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.Set);
-        services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceOrderTransactionReader>(ServiceOrderTransactionReader.Set);
-        services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceRequestTransactionReader>(ServiceRequestTransactionReader.Set);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsageBuilder>(HistoricalUsageBuilder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, UsageBuilder>(UsageBuilder.Key);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, Usage_867_TransactionReader>(Usage_867_TransactionReader.Set);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, Invoice_810_TransactionReader>(Invoice_810_TransactionReader.Set);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceOrder_650_TransactionReader>(ServiceOrder_650_TransactionReader.Set);
+        services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceRequest_814_TransactionReader>(ServiceRequest_814_TransactionReader.Set);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsage_867_02_Builder>(HistoricalUsage_867_02_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, Usage_867_03_Builder>(Usage_867_03_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, InitialMeterRead_867_04_Builder>(InitialMeterRead_867_04_Builder.Key);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

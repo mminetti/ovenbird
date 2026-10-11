@@ -35,8 +35,8 @@ public class ImportMarketDocumentItemHandlerHandle
     {
         var services = new ServiceCollection();
         services.AddKeyedSingleton<IFileStorage>(FileStorageImplementation, _fileStorage);
-        services.AddKeyedSingleton<IMarketDocumentTransactionReader, UsageTransactionReader>(UsageTransactionReader.Set);
-        services.AddKeyedSingleton<IMarketDocumentTransactionReader, InvoiceTransactionReader>(InvoiceTransactionReader.Set);
+        services.AddKeyedSingleton<IMarketDocumentTransactionReader, Usage_867_TransactionReader>(Usage_867_TransactionReader.Set);
+        services.AddKeyedSingleton<IMarketDocumentTransactionReader, Invoice_810_TransactionReader>(Invoice_810_TransactionReader.Set);
 
         var serviceProvider = services.BuildServiceProvider();
 

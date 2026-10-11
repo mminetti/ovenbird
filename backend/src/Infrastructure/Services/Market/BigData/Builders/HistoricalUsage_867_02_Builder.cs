@@ -1,11 +1,11 @@
-using Core.Market;
+﻿using Core.Market;
 using Core.Service;
 using Core.Subscription;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class HistoricalUsageBuilder(
+public class HistoricalUsage_867_02_Builder(
     IReadRepository<Account> accountReadRepository,
     IBigDataLookupService lookupService,
     IRepository<HistoricalUsage> historicalUsageRepository,

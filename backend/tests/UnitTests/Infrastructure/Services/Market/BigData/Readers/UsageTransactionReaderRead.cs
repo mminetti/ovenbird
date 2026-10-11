@@ -1,11 +1,11 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using Infrastructure.Services.Market.BigData.Readers;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Readers;
 
 public class UsageTransactionReaderRead
 {
-    private readonly UsageTransactionReader _reader = new();
+    private readonly Usage_867_TransactionReader _reader = new();
 
     [Fact]
     public void MapsAllFieldsWhenPresent()

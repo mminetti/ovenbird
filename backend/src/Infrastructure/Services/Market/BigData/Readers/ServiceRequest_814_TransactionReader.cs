@@ -3,7 +3,7 @@ using Core.Market;
 
 namespace Infrastructure.Services.Market.BigData.Readers;
 
-public class ServiceRequestTransactionReader : IMarketDocumentTransactionReader
+public class ServiceRequest_814_TransactionReader : IMarketDocumentTransactionReader
 {
     public const string Set = "814";
 

@@ -1,4 +1,4 @@
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
@@ -15,11 +15,11 @@ public class UsageBuilderCreateAsync
     private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
     private readonly IRepository<Usage> _usageRepository = Substitute.For<IRepository<Usage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly UsageBuilder _builder;
+    private readonly Usage_867_03_Builder _builder;
 
     public UsageBuilderCreateAsync()
     {
-        _builder = new UsageBuilder(
+        _builder = new Usage_867_03_Builder(
             _accountReadRepository,
             _usageReadRepository,
             _lookupService,

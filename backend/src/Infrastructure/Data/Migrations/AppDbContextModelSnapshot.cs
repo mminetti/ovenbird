@@ -777,6 +777,63 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Meter");
                 });
 
+            modelBuilder.Entity("Core.Service.ServiceAction", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceAction");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Initiate"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Confirm"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Reject"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Complete"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Cancel"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Unexecute"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Error"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Change"
+                        });
+                });
+
             modelBuilder.Entity("Core.Service.ServicePoint", b =>
                 {
                     b.Property<long>("Id")
@@ -807,6 +864,184 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ServicePoint");
+                });
+
+            modelBuilder.Entity("Core.Service.ServiceStart", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("ServiceStartTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ServiceStatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("ServiceStartTypeId");
+
+                    b.HasIndex("ServiceStatusId");
+
+                    b.ToTable("ServiceStart");
+                });
+
+            modelBuilder.Entity("Core.Service.ServiceStartItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("ServiceActionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateOnly>("ServiceDate")
+                        .HasColumnType("date");
+
+                    b.Property<long>("ServiceStartId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServiceActionId");
+
+                    b.HasIndex("ServiceStartId");
+
+                    b.ToTable("ServiceStartItem");
+                });
+
+            modelBuilder.Entity("Core.Service.ServiceStartType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceStartType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "MoveIn"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Switch"
+                        });
+                });
+
+            modelBuilder.Entity("Core.Service.ServiceStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "New"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "InProgress"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Scheduled"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Cancelled"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Rejected"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Completed"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Unexecuted"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "Error"
+                        });
                 });
 
             modelBuilder.Entity("Core.Service.UnitOfMeasure", b =>
@@ -1562,6 +1797,52 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ServicePoint");
                 });
 
+            modelBuilder.Entity("Core.Service.ServiceStart", b =>
+                {
+                    b.HasOne("Core.Subscription.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.ServiceStartType", "ServiceStartType")
+                        .WithMany()
+                        .HasForeignKey("ServiceStartTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.ServiceStatus", "ServiceStatus")
+                        .WithMany()
+                        .HasForeignKey("ServiceStatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("ServiceStartType");
+
+                    b.Navigation("ServiceStatus");
+                });
+
+            modelBuilder.Entity("Core.Service.ServiceStartItem", b =>
+                {
+                    b.HasOne("Core.Service.ServiceAction", "ServiceAction")
+                        .WithMany()
+                        .HasForeignKey("ServiceActionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.ServiceStart", "ServiceStart")
+                        .WithMany("Items")
+                        .HasForeignKey("ServiceStartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ServiceAction");
+
+                    b.Navigation("ServiceStart");
+                });
+
             modelBuilder.Entity("Core.Service.Usage", b =>
                 {
                     b.HasOne("Core.Subscription.Account", "Account")
@@ -1743,6 +2024,11 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Service.ServicePoint", b =>
                 {
                     b.Navigation("Meters");
+                });
+
+            modelBuilder.Entity("Core.Service.ServiceStart", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Core.Settings.Company", b =>
