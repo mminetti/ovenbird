@@ -29,6 +29,8 @@ public class EnrollmentResponse_814_05_Builder(
                 .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x))
                 ?? throw new InvalidOperationException($"MarketDocumentItem '{item.Id}' has no CustomerAgreementDate.");
 
+            var serviceDate = DateOnly.ParseExact(customerAgreementDate, DateFormat, CultureInfo.InvariantCulture);
+
             var actionId = service.ActionCode == "A" ?
                     Constants.ServiceActions.Confirm :
                     Constants.ServiceActions.Reject;
@@ -44,7 +46,7 @@ public class EnrollmentResponse_814_05_Builder(
             {
                 ServiceStartId = serviceStart.Id,
                 Identifier = item.ReferenceNumber,
-                ServiceDate = DateOnly.ParseExact(customerAgreementDate, DateFormat, CultureInfo.InvariantCulture),
+                ServiceDate = serviceDate,
                 ServiceActionId = actionId,
                 Description = description
             };
@@ -59,6 +61,11 @@ public class EnrollmentResponse_814_05_Builder(
             };
 
             await referenceRepository.AddAsync(reference, ct);
+
+            serviceStart.ServiceDate = serviceDate;
+            serviceStart.ServiceStatusId = actionId == Constants.ServiceActions.Confirm ?
+                Constants.ServiceStatuses.Scheduled :
+                Constants.ServiceStatuses.Rejected;
         }
     }
 

@@ -52,6 +52,9 @@ public class InitialMeterRead_867_04_Builder(
                     await referenceRepository.AddAsync(reference, ct);
                 }
             }
+
+            serviceStart.ServiceDate = serviceDate;
+            serviceStart.ServiceStatusId = Constants.ServiceStatuses.Completed;
         }
     }
 
