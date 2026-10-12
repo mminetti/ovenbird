@@ -1493,6 +1493,11 @@ namespace Infrastructure.Data.Migrations
                         {
                             Id = 2,
                             Name = "EDI Import"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "EDI Export"
                         });
                 });
 

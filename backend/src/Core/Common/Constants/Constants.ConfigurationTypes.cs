@@ -6,5 +6,6 @@ public static partial class Constants
     {
         public const int System = 1;
         public const int EdiImport = 2;
+        public const int EdiExport = 3;
     }
 }

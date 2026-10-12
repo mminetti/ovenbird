@@ -2,6 +2,8 @@
 using Infrastructure;
 using Infrastructure.Data;
 using Quartz;
+using UseCases.Market.MarketDocuments.Export;
+using UseCases.Market.MarketDocuments.Export.Interfaces;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
@@ -23,9 +25,12 @@ builder.UseWolverine(opts =>
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentParserResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentGeneratorResolver>();
 });
 
 var cronSchedule = builder.Configuration["MarketDocumentImport:CronSchedule"] ?? "0 0 2 * * ?";
+var exportItemCronSchedule = builder.Configuration["ExportMarketDocumentItem:CronSchedule"] ?? "0 30 1 * * ?";
+var exportCronSchedule = builder.Configuration["ExportMarketDocument:CronSchedule"] ?? "0 0 3 * * ?";
 
 builder.Services.AddQuartz(q =>
 {
@@ -35,6 +40,18 @@ builder.Services.AddQuartz(q =>
             //.StartNow(),
             .WithCronSchedule(cronSchedule),
         job => job.WithIdentity("MarketDocumentImportJob"));
+
+    q.ScheduleJob<ExportMarketDocumentItemJob>(
+        trigger => trigger
+            .WithIdentity("ExportMarketDocumentItemTrigger")
+            .WithCronSchedule(exportItemCronSchedule),
+        job => job.WithIdentity("ExportMarketDocumentItemJob"));
+
+    q.ScheduleJob<ExportMarketDocumentJob>(
+        trigger => trigger
+            .WithIdentity("ExportMarketDocumentTrigger")
+            .WithCronSchedule(exportCronSchedule),
+        job => job.WithIdentity("ExportMarketDocumentJob"));
 });
 
 builder.Services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);

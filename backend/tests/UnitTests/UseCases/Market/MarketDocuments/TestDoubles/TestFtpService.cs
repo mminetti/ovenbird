@@ -11,6 +11,7 @@ public class TestFtpService : IFtpService
     private readonly Dictionary<string, byte[]> _files = new(StringComparer.OrdinalIgnoreCase);
 
     public List<string> DownloadedPaths { get; } = [];
+    public List<string> UploadedPaths { get; } = [];
 
     public TestFtpService SeedFile(string remotePath, string content)
     {
@@ -45,5 +46,9 @@ public class TestFtpService : IFtpService
         using var buffer = new MemoryStream();
         await content.CopyToAsync(buffer, ct);
         _files[remotePath] = buffer.ToArray();
+        UploadedPaths.Add(remotePath);
     }
+
+    public byte[]? GetUploadedContent(string remotePath) =>
+        _files.TryGetValue(remotePath, out var content) ? content : null;
 }

@@ -113,6 +113,25 @@ public class MarketDocumentTransportTests
             Arg.Is<FtpOptions>(o => o.Password == "resolved-password"), Arg.Any<CancellationToken>());
     }
 
+    [Fact]
+    public async Task UploadFileAsyncDelegatesToFtpServiceUsingIntegrationFieldsAndRootDirectory()
+    {
+        var configuration = CreateConfiguration(
+            CreateSftpIntegration("sftp.example.com", "2222", "user", "pass"),
+            remoteDirectory: "remote/dir");
+
+        using var content = new MemoryStream([1, 2, 3]);
+
+        await _transport.UploadFileAsync(configuration, content, "export.xml", CancellationToken.None);
+
+        await _ftpService.Received(1).UploadAsync(
+            Arg.Is<FtpOptions>(o =>
+                o.Host == "sftp.example.com" && o.Port == 2222 && o.Username == "user" && o.Password == "pass"),
+            content,
+            "remote/dir/export.xml",
+            Arg.Any<CancellationToken>());
+    }
+
     private static Configuration CreateConfiguration(Connector ftpIntegration, string? remoteDirectory)
     {
         var fields = new List<ConfigurationField>();

@@ -20,6 +20,11 @@ public class ConfigurationTypeConfiguration : IEntityTypeConfiguration<Configura
             {
                 Id = Constants.ConfigurationTypes.EdiImport,
                 Name = "EDI Import"
+            },
+            new ConfigurationType
+            {
+                Id = Constants.ConfigurationTypes.EdiExport,
+                Name = "EDI Export"
             }
         );
     }

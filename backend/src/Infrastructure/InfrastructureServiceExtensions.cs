@@ -24,6 +24,7 @@ using UseCases.Common;
 using UseCases.Common.DataLists.Get;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
+using UseCases.Market.MarketDocuments.Export.Interfaces;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using UseCases.Market.Markets.List;
 using UseCases.Security.Permissions.List;
@@ -103,6 +104,9 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IMarketDocumentParser, BigDataMarketDocumentParser>()
             .AddScoped<MarketDocumentParserResolver>()
             .AddScoped<MarketDocumentEntityBuilderResolver>()
+            .AddScoped<IMarketDocumentGenerator, BigDataMarketDocumentGenerator>()
+            .AddScoped<MarketDocumentGeneratorResolver>()
+            .AddScoped<MarketDocumentEntityGeneratorResolver>()
             .AddScoped<IBigDataLookupService, BigDataLookupService>()
             .AddScoped<CurrentUserService>();
 
@@ -121,6 +125,8 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, SwitchReject_814_02_Builder>(SwitchReject_814_02_Builder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentNotification_814_05_Builder>(EnrollmentNotification_814_05_Builder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, MoveInReject_814_17_Builder>(MoveInReject_814_17_Builder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityGenerator, SwitchRequest_814_01_Generator>(SwitchRequest_814_01_Generator.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityGenerator, MoveInRequest_814_16_Generator>(MoveInRequest_814_16_Generator.Key);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

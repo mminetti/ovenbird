@@ -51,6 +51,13 @@ public class MarketDocumentTransport(
         return await fileStorage.Service.OpenReadAsync(fileStorage.Options, fileReference, ct);
     }
 
+    public async Task UploadFileAsync(Configuration configuration, Stream content, string remoteFileName, CancellationToken ct)
+    {
+        var ftp = await ResolveFtp(configuration, ct);
+
+        await ftp.Service.UploadAsync(ftp.Options, content, $"{ftp.Options.RootDirectory}/{remoteFileName}", ct);
+    }
+
     private record FtpContext(FtpOptions Options, IFtpService Service);
 
     private record FileStorageContext(FileStorageOptions Options, IFileStorage Service);
