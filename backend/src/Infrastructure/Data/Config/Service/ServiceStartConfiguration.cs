@@ -1,4 +1,4 @@
-using Core.Service;
+﻿using Core.Service;
 
 namespace Infrastructure.Data.Config.Service;
 
@@ -23,7 +23,7 @@ public class ServiceStartConfiguration : BaseEntityTypeConfiguration<ServiceStar
         // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.ServiceStatus)
             .WithMany()
-            .HasForeignKey(x => x.ServiceStatusId)
+            .HasForeignKey(x => x.ServiceOrderStatusId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

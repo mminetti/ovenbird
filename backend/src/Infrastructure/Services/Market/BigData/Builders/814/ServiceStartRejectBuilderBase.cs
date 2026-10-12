@@ -42,7 +42,7 @@ public abstract class ServiceStartRejectBuilderBase(
 
             await referenceRepository.AddAsync(reference, ct);
 
-            serviceStart.ServiceStatusId = Constants.ServiceStatuses.Rejected;
+            serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Rejected;
         }
     }
 

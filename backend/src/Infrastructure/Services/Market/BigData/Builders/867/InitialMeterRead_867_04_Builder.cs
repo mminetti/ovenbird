@@ -54,7 +54,7 @@ public class InitialMeterRead_867_04_Builder(
             }
 
             serviceStart.ServiceDate = serviceDate;
-            serviceStart.ServiceStatusId = Constants.ServiceStatuses.Completed;
+            serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Completed;
         }
     }
 

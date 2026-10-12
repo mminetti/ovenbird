@@ -51,7 +51,7 @@ public class EnrollmentNotification_814_05_Builder(
             await referenceRepository.AddAsync(reference, ct);
 
             serviceStart.ServiceDate = serviceDate;
-            serviceStart.ServiceStatusId = Constants.ServiceStatuses.Scheduled;
+            serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Scheduled;
         }
     }
 

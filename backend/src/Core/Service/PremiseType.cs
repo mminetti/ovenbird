@@ -1,6 +1,6 @@
 ﻿namespace Core.Service;
 
-public class ServiceStatus : EntityBase<int>
+public class PremiseType : EntityBase<int>
 {
     public string Name { get; set; } = string.Empty;
 }
