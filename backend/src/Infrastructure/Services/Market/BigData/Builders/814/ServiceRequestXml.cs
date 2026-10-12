@@ -23,6 +23,8 @@ public class AccountMaintXml
     public string? UtilityName { get; set; }
     public string? ESPName { get; set; }
     public string? DateStampCreated { get; set; }
+    public string? TimeStampCreated { get; set; }
+    public string? CreatedTimeCode { get; set; }
     public string? DateStampReceived { get; set; }
     public string? TimeStampReceived { get; set; }
 
@@ -44,6 +46,10 @@ public class NameAddressXml
     public string? EntityState { get; set; }
     public string? EntityPostalCode { get; set; }
     public string? EntityCounty { get; set; }
+    public string? EntityTelephone { get; set; }
+    public string? EntityEmail { get; set; }
+    public string? EntityMobilePhone { get; set; }
+    public string? EntityContactName { get; set; }
 }
 
 public class ServiceXml
@@ -55,6 +61,9 @@ public class ServiceXml
     public string? LineTrackNumber { get; set; }
     public string? ActionCode { get; set; }
     public string UtilityAccountNumber { get; set; } = string.Empty;
+    public string? BillingOption { get; set; }
+    public string? BillCalculator { get; set; }
+    public string? PriorityCode { get; set; }
     public string? SwitchHoldInd { get; set; }
     public string? StdPointLocationCode { get; set; }
     public string? DistributionLoss { get; set; }
@@ -98,6 +107,10 @@ public class ServiceRejectReasonXml
 public class ServiceDateXml
 {
     public string? CustomerAgreementDate { get; set; }
+    public string? CustomerAgreementTime { get; set; }
+    public string? CustomerTimeZone { get; set; }
+    public string? MoveInDate { get; set; }
+    public string? SpecialMeterReadDate { get; set; }
     public string? MoveOutDate { get; set; }
     public string? ServiceEndDate { get; set; }
 }
