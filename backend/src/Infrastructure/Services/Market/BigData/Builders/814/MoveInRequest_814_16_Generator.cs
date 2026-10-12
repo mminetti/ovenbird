@@ -1,6 +1,7 @@
-namespace Infrastructure.Services.Market.BigData.Builders;
+﻿namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class MoveInRequest_814_16_Generator(TimeProvider timeProvider) : ServiceStartRequestGeneratorBase(timeProvider)
+public class MoveInRequest_814_16_Generator(TimeProvider timeProvider) 
+    : ServiceStartRequestGeneratorBase(timeProvider)
 {
     public const string Key = "814_16";
 

@@ -7,6 +7,8 @@ using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
+public record ImportMarketDocumentCommand();
+
 public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,

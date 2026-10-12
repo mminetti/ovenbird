@@ -8,6 +8,8 @@ using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Export;
 
+public record ExportMarketDocumentCommand();
+
 public class ExportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IRepository<MarketDocumentItem> itemRepository,

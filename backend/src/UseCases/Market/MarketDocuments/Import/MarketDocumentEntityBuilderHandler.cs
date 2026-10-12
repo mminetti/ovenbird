@@ -3,6 +3,8 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
+public record MarketDocumentEntityBuilderCommand(long MarketDocumentItemId);
+
 public class MarketDocumentEntityBuilderHandler(
     IReadRepository<MarketDocumentItem> itemReadRepository,
     MarketDocumentEntityBuilderResolver entityBuilderResolver)

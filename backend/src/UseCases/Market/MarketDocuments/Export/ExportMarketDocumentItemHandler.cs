@@ -1,10 +1,12 @@
-using Core.Market;
+﻿using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Export;
+
+public record ExportMarketDocumentItemCommand();
 
 public class ExportMarketDocumentItemHandler(
     IReadRepository<ServiceStartItem> serviceStartItemReadRepository,
@@ -39,12 +41,14 @@ public class ExportMarketDocumentItemHandler(
 
             var created = await itemRepository.AddAsync(item, ct);
 
-            await referenceRepository.AddAsync(new MarketDocumentReference
+            var reference = new MarketDocumentReference
             {
                 MarketDocumentItemId = created.Id,
                 ReferenceTypeId = CoreConstants.MarketDocumentReferenceTypes.ServiceStart,
                 ReferenceId = serviceStartItem.Id,
-            }, ct);
+            };
+
+            await referenceRepository.AddAsync(reference, ct);
 
             itemIds.Add(created.Id);
         }

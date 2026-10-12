@@ -5,6 +5,8 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
+public record ImportMarketDocumentItemCommand(int ConfigurationId, long MarketDocumentId);
+
 public class ImportMarketDocumentItemHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IReadRepository<MarketDocument> documentReadRepository,
