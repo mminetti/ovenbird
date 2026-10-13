@@ -1,4 +1,4 @@
-using Core.Market;
+﻿using Core.Market;
 using Core.Service;
 using Core.Subscription;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
@@ -8,26 +8,19 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider)
     : TransactionXmlWriterBase<ServiceRequestXml>, IMarketDocumentEntityGenerator
 {
+    private const string Set = "814";
     private const string TimeFormat = "HHmmss";
-
-    // NAESB standard commodity/product codes. Only Electricity is modeled today
-    // (Core.Service.Commodity), so these are fixed; extend when Gas support is added.
     private const string CommodityCode = "E";
     private const string ProductId = "EL";
+    private const string ResponseRequestFlag = "Q";
+    private const string ServiceRequested = "CE";
+    private const string SecondServiceRequested = "HU";
+    private const string BillingOption = "ESP";
+    private const string BillCalculator = "DUAL";
+    private const string State = "TX";
 
     protected abstract string SubSet { get; }
 
-    // Confirmed against real 814_01 (Switch) and 814_16 (Move In) samples - both use the
-    // same values for these fields.
-    protected abstract string ResponseRequestFlag { get; }
-    protected abstract string ServiceRequested { get; }
-    protected abstract string SecondServiceRequested { get; }
-    protected abstract string BillingOption { get; }
-    protected abstract string BillCalculator { get; }
-
-    // Differ between the two confirmed samples: ThirdServiceRequested ("SW") and
-    // SpecialMeterReadDate only appear on the Switch sample; PriorityCode and the
-    // CustomerAgreementDate/MoveInDate service date fields only appear on the Move In one.
     protected virtual string? ThirdServiceRequested => null;
     protected virtual string? PriorityCode => null;
 
@@ -37,8 +30,14 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
     {
         var serviceStart = serviceStartItem.ServiceStart;
         var account = serviceStart.Account;
-        var servicePoint = account?.ServicePoint;
-        var customer = account?.Customer;
+
+        if (account is null)
+        {
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        var servicePoint = account.ServicePoint;
+        var customer = account.Customer;
 
         var now = timeProvider.GetUtcNow();
         var requestedDate = (serviceStartItem.ServiceDate ?? serviceStart.ServiceDate).ToString(DateFormat);
@@ -52,22 +51,22 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
             // can be sent to a trading partner.
             SupplierDUNS = string.Empty,
             UtilityDUNS = string.Empty,
-            TransactionSet = "814",
+            TransactionSet = Set,
             TransactionSubSet = SubSet,
-            State = servicePoint?.Premise.State ?? string.Empty,
+            State = State,
             Commodity = CommodityCode,
             AccountMaint = new AccountMaintXml
             {
                 ResponseRequestFlag = ResponseRequestFlag,
                 TransactionNumber = serviceStartItem.Identifier,
-                UtilityName = servicePoint?.Utility.Name,
+                UtilityName = servicePoint.Utility.Name,
                 // TODO: ESPName is this company's own trading-partner-registered display
                 // name; not available to this generator (only the ServiceStartItem is
                 // passed in, not the Company/Configuration it will eventually ship through).
                 ESPName = null,
                 DateStampCreated = now.ToString(DateFormat),
                 TimeStampCreated = now.ToString(TimeFormat),
-                NameAddresses = BuildNameAddresses(customer, servicePoint?.Premise),
+                NameAddresses = BuildNameAddresses(customer, servicePoint.Premise),
                 Services =
                 [
                     new ServiceXml
@@ -77,7 +76,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
                         SecondServiceRequested = SecondServiceRequested,
                         ThirdServiceRequested = ThirdServiceRequested,
                         LineTrackNumber = "1",
-                        UtilityAccountNumber = account?.Identifier ?? string.Empty,
+                        UtilityAccountNumber = servicePoint?.Identifier ?? string.Empty,
                         BillingOption = BillingOption,
                         BillCalculator = BillCalculator,
                         PriorityCode = PriorityCode,
@@ -103,7 +102,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
     // The trading partner's samples repeat the same customer/address under three entity
     // types (8R, N1, PO) - we only model one party per account today, so all three entries
     // are built from the same Customer/Premise data.
-    private static List<NameAddressXml> BuildNameAddresses(Customer? customer, Premise? premise)
+    private static List<NameAddressXml> BuildNameAddresses(Customer customer, Premise premise)
     {
         if (customer is null || premise is null)
         {

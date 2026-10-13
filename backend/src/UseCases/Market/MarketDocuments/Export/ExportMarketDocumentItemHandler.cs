@@ -12,7 +12,8 @@ public class ExportMarketDocumentItemHandler(
     IReadRepository<ServiceStartItem> serviceStartItemReadRepository,
     IRepository<MarketDocumentItem> itemRepository,
     IRepository<MarketDocumentReference> referenceRepository,
-    MarketDocumentEntityGeneratorResolver generatorResolver)
+    MarketDocumentEntityGeneratorResolver generatorResolver,
+    IMessageBus bus)
 {
     public async Task<Result<IReadOnlyList<long>>> Handle(ExportMarketDocumentItemCommand command, CancellationToken ct)
     {
@@ -52,6 +53,8 @@ public class ExportMarketDocumentItemHandler(
 
             itemIds.Add(created.Id);
         }
+
+        _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(new ExportMarketDocumentCommand(), ct);
 
         return Result.Success<IReadOnlyList<long>>(itemIds);
     }

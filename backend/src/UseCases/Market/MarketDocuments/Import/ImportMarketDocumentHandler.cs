@@ -61,7 +61,7 @@ public class ImportMarketDocumentHandler(
 
                         var created = await documentRepository.AddAsync(document, ct);
 
-                        await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
+                        _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
                             new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
 
                         documentIds.Add(created.Id);

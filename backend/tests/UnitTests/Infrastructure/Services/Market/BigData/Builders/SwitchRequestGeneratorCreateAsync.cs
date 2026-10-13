@@ -17,11 +17,11 @@ public class SwitchRequestGeneratorCreateAsync
         var premise = new Premise { Id = 1, Address = "105 S ALAMO RD APT 15", City = "ALAMO", State = "TX", Zip = "78516" };
         var utility = new Utility { Id = 1, Name = "AEP Texas Central" };
         var customer = new Customer { Id = 1, FirstName = "Cynthia", LastName = "Alanis" };
-        var servicePoint = new ServicePoint { Id = 1, PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = false };
+        var servicePoint = new ServicePoint { Id = 1, Identifier = "10032789419071200", PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = false };
         var account = new Account
         {
             Id = 1,
-            Identifier = "10032789419071200",
+            Identifier = "ACCT-1",
             ServicePointId = servicePoint.Id,
             ServicePoint = servicePoint,
             CustomerId = customer.Id,

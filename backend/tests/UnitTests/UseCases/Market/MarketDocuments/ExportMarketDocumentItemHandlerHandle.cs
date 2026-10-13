@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
@@ -5,6 +6,7 @@ using Core.Service.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Market.MarketDocuments.Export;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
+using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -15,6 +17,14 @@ public class ExportMarketDocumentItemHandlerHandle
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository =
         Substitute.For<IRepository<MarketDocumentReference>>();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
+
+    public ExportMarketDocumentItemHandlerHandle()
+    {
+        _bus
+            .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ExportMarketDocumentCommand>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success<IReadOnlyList<long>>([]));
+    }
 
     [Fact]
     public async Task GeneratesAnOrphanMarketDocumentItemAndReferenceForEachPendingServiceStartItem()
@@ -86,7 +96,7 @@ public class ExportMarketDocumentItemHandlerHandle
             .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
         var handler = new ExportMarketDocumentItemHandler(
-            _serviceStartItemReadRepository, _itemRepository, _referenceRepository, resolver);
+            _serviceStartItemReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
 
         var result = await handler.Handle(new ExportMarketDocumentItemCommand(), CancellationToken.None);
 
@@ -143,7 +153,7 @@ public class ExportMarketDocumentItemHandlerHandle
             .Returns([item]);
 
         var handler = new ExportMarketDocumentItemHandler(
-            _serviceStartItemReadRepository, _itemRepository, _referenceRepository, resolver);
+            _serviceStartItemReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => handler.Handle(new ExportMarketDocumentItemCommand(), CancellationToken.None));

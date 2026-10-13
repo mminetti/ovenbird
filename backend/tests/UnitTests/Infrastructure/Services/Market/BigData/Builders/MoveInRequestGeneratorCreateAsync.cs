@@ -17,11 +17,11 @@ public class MoveInRequestGeneratorCreateAsync
         var premise = new Premise { Id = 2, Address = "22 Oak Ave", City = "Houston", State = "TX", Zip = "77002" };
         var utility = new Utility { Id = 2, Name = "CenterPoint Energy" };
         var customer = new Customer { Id = 2, FirstName = "John", LastName = "Smith" };
-        var servicePoint = new ServicePoint { Id = 2, PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = false };
+        var servicePoint = new ServicePoint { Id = 2, Identifier = "ACCT-456", PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = false };
         var account = new Account
         {
             Id = 2,
-            Identifier = "ACCT-456",
+            Identifier = "ACCOUNT-2",
             ServicePointId = servicePoint.Id,
             ServicePoint = servicePoint,
             CustomerId = customer.Id,
