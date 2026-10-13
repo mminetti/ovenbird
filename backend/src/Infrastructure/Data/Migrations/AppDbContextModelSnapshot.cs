@@ -1705,6 +1705,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -1755,6 +1758,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("CustomerId");
 
@@ -2372,6 +2377,12 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Subscription.Account", b =>
                 {
+                    b.HasOne("Core.Settings.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Core.Subscription.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
@@ -2407,6 +2418,8 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("ServiceSubStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Company");
 
                     b.Navigation("Customer");
 

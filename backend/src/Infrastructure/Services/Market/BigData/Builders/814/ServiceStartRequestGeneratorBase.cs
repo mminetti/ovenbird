@@ -1,5 +1,6 @@
 ﻿using Core.Market;
 using Core.Service;
+using Core.Settings;
 using Core.Subscription;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 
@@ -18,6 +19,8 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
     private const string BillingOption = "ESP";
     private const string BillCalculator = "DUAL";
     private const string State = "TX";
+    private const string CompanyMarketerName = "company.marketer.name";
+    private const string CompanyMarketerIdentifier = "company.marketer.identifier";
 
     protected abstract string SubSet { get; }
 
@@ -26,7 +29,8 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
 
     protected abstract ServiceDateXml BuildServiceDate(string requestedDate);
 
-    public Task<MarketDocumentItem> CreateAsync(ServiceStartItem serviceStartItem, CancellationToken ct)
+    public Task<MarketDocumentItem> CreateAsync(ServiceStartItem serviceStartItem, 
+        Configuration configuration, CancellationToken ct)
     {
         var serviceStart = serviceStartItem.ServiceStart;
         var account = serviceStart.Account;
@@ -39,18 +43,16 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
         var servicePoint = account.ServicePoint;
         var customer = account.Customer;
 
-        var now = timeProvider.GetUtcNow();
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration.GetRequiredCompany().TimeZoneId);
+
+        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
+
         var requestedDate = (serviceStartItem.ServiceDate ?? serviceStart.ServiceDate).ToString(DateFormat);
 
         var transaction = new ServiceRequestXml
         {
-            // TODO: SupplierDUNS (this company's own DUNS) and UtilityDUNS (the target
-            // utility's DUNS) are not stored anywhere in the domain model today - neither
-            // Core.Settings.Company nor Core.Service.Utility has a DUNS field. Must be
-            // filled in (e.g. by adding a DunsNumber field to Utility/Company) before this
-            // can be sent to a trading partner.
-            SupplierDUNS = string.Empty,
-            UtilityDUNS = string.Empty,
+            SupplierDUNS = configuration.GetRequiredValue(CompanyMarketerIdentifier),
+            UtilityDUNS = servicePoint.Utility.Identifier,
             TransactionSet = Set,
             TransactionSubSet = SubSet,
             State = State,
@@ -60,10 +62,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
                 ResponseRequestFlag = ResponseRequestFlag,
                 TransactionNumber = serviceStartItem.Identifier,
                 UtilityName = servicePoint.Utility.Name,
-                // TODO: ESPName is this company's own trading-partner-registered display
-                // name; not available to this generator (only the ServiceStartItem is
-                // passed in, not the Company/Configuration it will eventually ship through).
-                ESPName = null,
+                ESPName = configuration.GetRequiredValue(CompanyMarketerName),
                 DateStampCreated = now.ToString(DateFormat),
                 TimeStampCreated = now.ToString(TimeFormat),
                 NameAddresses = BuildNameAddresses(customer, servicePoint.Premise),
@@ -76,7 +75,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
                         SecondServiceRequested = SecondServiceRequested,
                         ThirdServiceRequested = ThirdServiceRequested,
                         LineTrackNumber = "1",
-                        UtilityAccountNumber = servicePoint?.Identifier ?? string.Empty,
+                        UtilityAccountNumber = servicePoint.Identifier,
                         BillingOption = BillingOption,
                         BillCalculator = BillCalculator,
                         PriorityCode = PriorityCode,

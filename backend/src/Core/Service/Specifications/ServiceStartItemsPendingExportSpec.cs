@@ -1,10 +1,10 @@
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 
 namespace Core.Service.Specifications;
 
 public class ServiceStartItemsPendingExportSpec : Specification<ServiceStartItem>
 {
-    public ServiceStartItemsPendingExportSpec() =>
+    public ServiceStartItemsPendingExportSpec(int companyId) =>
         Query
             .Include(x => x.ServiceStart)
                 .ThenInclude(x => x.Account)
@@ -19,5 +19,6 @@ public class ServiceStartItemsPendingExportSpec : Specification<ServiceStartItem
                         .ThenInclude(x => x.Utility)
             .Where(x =>
                 x.ServiceActionId == Constants.ServiceActions.Initiate &&
-                x.ServiceStart.ServiceOrderStatusId == Constants.ServiceOrderStatuses.New);
+                x.ServiceStart.ServiceOrderStatusId == Constants.ServiceOrderStatuses.New &&
+                x.ServiceStart.Account!.CompanyId == companyId);
 }

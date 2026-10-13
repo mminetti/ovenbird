@@ -1,6 +1,8 @@
 ﻿using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
+using Core.Settings;
+using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
@@ -10,48 +12,60 @@ public record ExportMarketDocumentItemCommand();
 
 public class ExportMarketDocumentItemHandler(
     IReadRepository<ServiceStartItem> serviceStartItemReadRepository,
+    IReadRepository<Configuration> configurationReadRepository,
     IRepository<MarketDocumentItem> itemRepository,
     IRepository<MarketDocumentReference> referenceRepository,
     MarketDocumentEntityGeneratorResolver generatorResolver,
     IMessageBus bus)
 {
-    public async Task<Result<IReadOnlyList<long>>> Handle(ExportMarketDocumentItemCommand command, CancellationToken ct)
+    public async Task<Result<IReadOnlyList<long>>> Handle(
+        ExportMarketDocumentItemCommand command, 
+        CancellationToken ct)
     {
         var itemIds = new List<long>();
 
-        var serviceStartItems = await serviceStartItemReadRepository.ListAsync(
-            new ServiceStartItemsPendingExportSpec(), ct);
+        var configurations = await configurationReadRepository.ListAsync(
+            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.EdiExport), ct);
 
-        foreach (var serviceStartItem in serviceStartItems)
+        foreach (var configuration in configurations)
         {
-            var (set, subSet) = serviceStartItem.ServiceStart.ServiceStartTypeId switch
+            var company = configuration.GetRequiredCompany();
+
+            var serviceStartItems = await serviceStartItemReadRepository.ListAsync(
+                new ServiceStartItemsPendingExportSpec(company.Id), ct);
+
+            foreach (var serviceStartItem in serviceStartItems)
             {
-                CoreConstants.ServiceStartTypes.Switch => ("814", "01"),
-                CoreConstants.ServiceStartTypes.MoveIn => ("814", "16"),
-                _ => throw new InvalidOperationException(
-                    $"ServiceStart '{serviceStartItem.ServiceStartId}' has an unsupported ServiceStartTypeId '{serviceStartItem.ServiceStart.ServiceStartTypeId}'.")
-            };
+                var (set, subSet) = serviceStartItem.ServiceStart.ServiceStartTypeId switch
+                {
+                    CoreConstants.ServiceStartTypes.Switch => ("814", "01"),
+                    CoreConstants.ServiceStartTypes.MoveIn => ("814", "16"),
+                    _ => throw new InvalidOperationException(
+                        $"ServiceStart '{serviceStartItem.ServiceStartId}' has an unsupported ServiceStartTypeId '{serviceStartItem.ServiceStart.ServiceStartTypeId}'.")
+                };
 
-            var generator = generatorResolver.Resolve($"{set}_{subSet}");
+                var generator = generatorResolver.Resolve($"{set}_{subSet}");
 
-            var item = await generator.CreateAsync(serviceStartItem, ct);
-            item.Set = set;
-            item.SubSet = subSet;
-            item.MarketDocumentId = null;
-            item.MarketDocumentItemStatusId = CoreConstants.MarketDocumentItemStatuses.New;
+                var item = await generator.CreateAsync(serviceStartItem, configuration, ct);
+                item.Set = set;
+                item.SubSet = subSet;
+                item.MarketDocumentId = null;
+                item.MarketDocumentItemStatusId = CoreConstants.MarketDocumentItemStatuses.New;
 
-            var created = await itemRepository.AddAsync(item, ct);
+                var created = await itemRepository.AddAsync(item, ct);
 
-            var reference = new MarketDocumentReference
-            {
-                MarketDocumentItemId = created.Id,
-                ReferenceTypeId = CoreConstants.MarketDocumentReferenceTypes.ServiceStart,
-                ReferenceId = serviceStartItem.Id,
-            };
+                var reference = new MarketDocumentReference
+                {
+                    MarketDocumentItemId = created.Id,
+                    ReferenceTypeId = CoreConstants.MarketDocumentReferenceTypes.ServiceStart,
+                    ReferenceId = serviceStartItem.Id,
+                };
 
-            await referenceRepository.AddAsync(reference, ct);
+                await referenceRepository.AddAsync(reference, ct);
 
-            itemIds.Add(created.Id);
+                itemIds.Add(created.Id);
+            }
+
         }
 
         _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(new ExportMarketDocumentCommand(), ct);

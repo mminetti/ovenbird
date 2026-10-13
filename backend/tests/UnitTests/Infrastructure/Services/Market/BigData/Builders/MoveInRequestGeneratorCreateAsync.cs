@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using Core.Common.Constants;
 using Core.Service;
+using Core.Settings;
 using Core.Subscription;
 using Infrastructure.Services.Market.BigData.Builders;
 using Infrastructure.Services.Market.BigData.Readers;
@@ -10,6 +11,17 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 public class MoveInRequestGeneratorCreateAsync
 {
     private readonly MoveInRequest_814_16_Generator _generator = new(TimeProvider.System);
+    private readonly Configuration _configuration = new()
+    {
+        Id = 1,
+        Name = "edi.export",
+        Company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" },
+        ConfigurationFields =
+        [
+            new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.name", Value = "Acme Energy" },
+            new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.identifier", Value = "123456789" },
+        ],
+    };
 
     [Fact]
     public async Task GeneratesA814_16TransactionThatRoundTripsThroughTheInboundReader()
@@ -44,12 +56,14 @@ public class MoveInRequestGeneratorCreateAsync
             ServiceActionId = Constants.ServiceActions.Initiate,
         };
 
-        var item = await _generator.CreateAsync(serviceStartItem, CancellationToken.None);
+        var item = await _generator.CreateAsync(serviceStartItem, _configuration, CancellationToken.None);
 
         item.ReferenceNumber.ShouldBe("TXN-2");
         item.ServicePointIdentifier.ShouldBe("ACCT-456");
         item.Raw.ShouldContain("<TransactionSubSet>16</TransactionSubSet>");
         item.Raw.ShouldContain("<UtilityName>CenterPoint Energy</UtilityName>");
+        item.Raw.ShouldContain("<ESPName>Acme Energy</ESPName>");
+        item.Raw.ShouldContain("<SupplierDUNS>123456789</SupplierDUNS>");
         item.Raw.ShouldContain("<CustomerAgreementDate>20260201</CustomerAgreementDate>");
         item.Raw.ShouldContain("<MoveInDate>20260201</MoveInDate>");
         item.Raw.ShouldContain("<PriorityCode>01</PriorityCode>");

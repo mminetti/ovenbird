@@ -3,6 +3,8 @@ using Core.Common.Constants;
 using Core.Market;
 using Core.Service;
 using Core.Service.Specifications;
+using Core.Settings;
+using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Market.MarketDocuments.Export;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
@@ -14,16 +16,33 @@ public class ExportMarketDocumentItemHandlerHandle
 {
     private readonly IReadRepository<ServiceStartItem> _serviceStartItemReadRepository =
         Substitute.For<IReadRepository<ServiceStartItem>>();
+    private readonly IReadRepository<Configuration> _configurationReadRepository =
+        Substitute.For<IReadRepository<Configuration>>();
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository =
         Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
+    private readonly Configuration _configuration = new()
+    {
+        Id = 1,
+        Name = "edi.export",
+        Company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" },
+        ConfigurationFields =
+        [
+            new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.name", Value = "Acme Energy" },
+            new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.identifier", Value = "123456789" },
+        ],
+    };
 
     public ExportMarketDocumentItemHandlerHandle()
     {
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ExportMarketDocumentCommand>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success<IReadOnlyList<long>>([]));
+
+        _configurationReadRepository
+            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
+            .Returns([_configuration]);
     }
 
     [Fact]
@@ -31,12 +50,12 @@ public class ExportMarketDocumentItemHandlerHandle
     {
         var switchGenerator = Substitute.For<IMarketDocumentEntityGenerator>();
         switchGenerator
-            .CreateAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>())
+            .CreateAsync(Arg.Any<ServiceStartItem>(), Arg.Any<Configuration>(), Arg.Any<CancellationToken>())
             .Returns(new MarketDocumentItem { ReferenceNumber = "SWITCH-1" });
 
         var moveInGenerator = Substitute.For<IMarketDocumentEntityGenerator>();
         moveInGenerator
-            .CreateAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>())
+            .CreateAsync(Arg.Any<ServiceStartItem>(), Arg.Any<Configuration>(), Arg.Any<CancellationToken>())
             .Returns(new MarketDocumentItem { ReferenceNumber = "MOVEIN-1" });
 
         var services = new ServiceCollection();
@@ -96,7 +115,7 @@ public class ExportMarketDocumentItemHandlerHandle
             .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
         var handler = new ExportMarketDocumentItemHandler(
-            _serviceStartItemReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
+            _serviceStartItemReadRepository, _configurationReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
 
         var result = await handler.Handle(new ExportMarketDocumentItemCommand(), CancellationToken.None);
 
@@ -124,8 +143,8 @@ public class ExportMarketDocumentItemHandlerHandle
         createdReferences[1].MarketDocumentItemId.ShouldBe(101);
         createdReferences[1].ReferenceId.ShouldBe(moveInItem.Id);
 
-        await switchGenerator.Received(1).CreateAsync(switchItem, Arg.Any<CancellationToken>());
-        await moveInGenerator.Received(1).CreateAsync(moveInItem, Arg.Any<CancellationToken>());
+        await switchGenerator.Received(1).CreateAsync(switchItem, _configuration, Arg.Any<CancellationToken>());
+        await moveInGenerator.Received(1).CreateAsync(moveInItem, _configuration, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -153,7 +172,7 @@ public class ExportMarketDocumentItemHandlerHandle
             .Returns([item]);
 
         var handler = new ExportMarketDocumentItemHandler(
-            _serviceStartItemReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
+            _serviceStartItemReadRepository, _configurationReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => handler.Handle(new ExportMarketDocumentItemCommand(), CancellationToken.None));

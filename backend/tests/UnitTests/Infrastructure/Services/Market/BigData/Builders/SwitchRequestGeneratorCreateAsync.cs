@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using Core.Common.Constants;
 using Core.Service;
+using Core.Settings;
 using Core.Subscription;
 using Infrastructure.Services.Market.BigData.Builders;
 using Infrastructure.Services.Market.BigData.Readers;
@@ -10,6 +11,17 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 public class SwitchRequestGeneratorCreateAsync
 {
     private readonly SwitchRequest_814_01_Generator _generator = new(TimeProvider.System);
+    private readonly Configuration _configuration = new()
+    {
+        Id = 1,
+        Name = "edi.export",
+        Company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" },
+        ConfigurationFields =
+        [
+            new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.name", Value = "Acme Energy" },
+            new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.identifier", Value = "123456789" },
+        ],
+    };
 
     [Fact]
     public async Task GeneratesA814_01TransactionThatRoundTripsThroughTheInboundReader()
@@ -44,13 +56,15 @@ public class SwitchRequestGeneratorCreateAsync
             ServiceActionId = Constants.ServiceActions.Initiate,
         };
 
-        var item = await _generator.CreateAsync(serviceStartItem, CancellationToken.None);
+        var item = await _generator.CreateAsync(serviceStartItem, _configuration, CancellationToken.None);
 
         item.ReferenceNumber.ShouldBe("TXN-1");
         item.ServicePointIdentifier.ShouldBe("10032789419071200");
         item.Raw.ShouldContain("<TransactionSubSet>01</TransactionSubSet>");
         item.Raw.ShouldContain("<State>TX</State>");
         item.Raw.ShouldContain("<UtilityName>AEP Texas Central</UtilityName>");
+        item.Raw.ShouldContain("<ESPName>Acme Energy</ESPName>");
+        item.Raw.ShouldContain("<SupplierDUNS>123456789</SupplierDUNS>");
         item.Raw.ShouldContain("<EntityType>8R</EntityType>");
         item.Raw.ShouldContain("<EntityType>N1</EntityType>");
         item.Raw.ShouldContain("<EntityType>PO</EntityType>");
@@ -100,7 +114,7 @@ public class SwitchRequestGeneratorCreateAsync
             ServiceActionId = Constants.ServiceActions.Initiate,
         };
 
-        var item = await _generator.CreateAsync(serviceStartItem, CancellationToken.None);
+        var item = await _generator.CreateAsync(serviceStartItem, _configuration, CancellationToken.None);
 
         item.Raw.ShouldContain("<SpecialNeedsInfo>Y</SpecialNeedsInfo>");
     }
