@@ -37,12 +37,12 @@ public class MoveInRequestGeneratorCreateAsync
             CustomerId = customer.Id,
             Customer = customer,
         };
-        account.Service = new Service { AccountId = account.Id, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
+        account.Service = new Service { AccountId = account.Id, Account = account, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
         var serviceStart = new ServiceStart
         {
             Id = 2,
-            AccountId = account.Id,
-            Account = account,
+            ServiceId = account.Service.Id,
+            Service = account.Service,
             ServiceStartTypeId = Constants.ServiceStartTypes.MoveIn,
             ServiceDate = new DateOnly(2026, 2, 1),
         };

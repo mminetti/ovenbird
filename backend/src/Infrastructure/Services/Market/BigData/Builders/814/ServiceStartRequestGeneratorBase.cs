@@ -33,14 +33,15 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
         Configuration configuration, CancellationToken ct)
     {
         var serviceStart = serviceStartItem.ServiceStart;
-        var account = serviceStart.Account;
+        var service = serviceStart.Service;
+        var account = service.Account;
 
         if (account is null)
         {
             throw new ArgumentNullException(nameof(account));
         }
 
-        var servicePoint = account.Service.ServicePoint;
+        var servicePoint = service.ServicePoint;
         var customer = account.Customer;
 
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration.GetRequiredCompany().TimeZoneId);

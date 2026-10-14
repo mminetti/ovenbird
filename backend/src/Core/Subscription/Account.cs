@@ -1,5 +1,4 @@
 ﻿using Core.Common;
-using Core.Service;
 using Core.Settings;
 
 namespace Core.Subscription;
@@ -14,5 +13,4 @@ public class Account : AuditableEntityBase<long>
     public Customer Customer { get; set; } = default!;
     public Company Company { get; set; } = default!;
     public Service Service { get; set; } = default!;
-    public ICollection<ServiceStart> ServiceStarts { get; set; } = [];
 }

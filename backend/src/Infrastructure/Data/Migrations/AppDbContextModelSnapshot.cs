@@ -1083,9 +1083,6 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -1103,6 +1100,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateOnly>("ServiceDate")
                         .HasColumnType("date");
 
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("ServiceOrderStatusId")
                         .HasColumnType("int");
 
@@ -1111,7 +1111,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("ServiceId");
 
                     b.HasIndex("ServiceOrderStatusId");
 
@@ -2273,9 +2273,9 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Service.ServiceStart", b =>
                 {
-                    b.HasOne("Core.Subscription.Account", "Account")
+                    b.HasOne("Core.Subscription.Service", "Service")
                         .WithMany("ServiceStarts")
-                        .HasForeignKey("AccountId")
+                        .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -2291,7 +2291,7 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Account");
+                    b.Navigation("Service");
 
                     b.Navigation("ServiceStartType");
 
@@ -2612,7 +2612,10 @@ namespace Infrastructure.Data.Migrations
                 {
                     b.Navigation("Service")
                         .IsRequired();
+                });
 
+            modelBuilder.Entity("Core.Subscription.Service", b =>
+                {
                     b.Navigation("ServiceStarts");
                 });
 #pragma warning restore 612, 618

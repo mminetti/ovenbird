@@ -37,12 +37,12 @@ public class SwitchRequestGeneratorCreateAsync
             CustomerId = customer.Id,
             Customer = customer,
         };
-        account.Service = new Service { AccountId = account.Id, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
+        account.Service = new Service { AccountId = account.Id, Account = account, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
         var serviceStart = new ServiceStart
         {
             Id = 1,
-            AccountId = account.Id,
-            Account = account,
+            ServiceId = account.Service.Id,
+            Service = account.Service,
             ServiceStartTypeId = Constants.ServiceStartTypes.Switch,
             ServiceDate = new DateOnly(2026, 1, 15),
         };
@@ -94,12 +94,12 @@ public class SwitchRequestGeneratorCreateAsync
             CustomerId = customer.Id,
             Customer = customer,
         };
-        account.Service = new Service { AccountId = account.Id, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
+        account.Service = new Service { AccountId = account.Id, Account = account, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
         var serviceStart = new ServiceStart
         {
             Id = 1,
-            AccountId = account.Id,
-            Account = account,
+            ServiceId = account.Service.Id,
+            Service = account.Service,
             ServiceStartTypeId = Constants.ServiceStartTypes.Switch,
             ServiceDate = new DateOnly(2026, 1, 15),
         };
