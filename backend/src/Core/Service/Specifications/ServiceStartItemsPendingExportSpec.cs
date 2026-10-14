@@ -8,7 +8,7 @@ public class ServiceStartItemsPendingExportSpec : Specification<ServiceStartItem
         Query
             .Include(x => x.ServiceStart)
                 .ThenInclude(x => x.Account)
-                    .ThenInclude(x => x!.Customer)
+                    .ThenInclude(x => x.Customer)
             .Include(x => x.ServiceStart)
                 .ThenInclude(x => x.Account)
                     .ThenInclude(x => x!.ServicePoint)
@@ -20,5 +20,5 @@ public class ServiceStartItemsPendingExportSpec : Specification<ServiceStartItem
             .Where(x =>
                 x.ServiceActionId == Constants.ServiceActions.Initiate &&
                 x.ServiceStart.ServiceOrderStatusId == Constants.ServiceOrderStatuses.New &&
-                x.ServiceStart.Account!.CompanyId == companyId);
+                x.ServiceStart.Account.CompanyId == companyId);
 }
