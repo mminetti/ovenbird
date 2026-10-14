@@ -8,10 +8,10 @@ public class PremiseConfiguration : BaseEntityTypeConfiguration<Premise, long>
     {
         base.Configure(builder);
 
-        builder.Property(x => x.Address)
+        builder.Property(x => x.AddressLine1)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
-        builder.Property(x => x.Address2)
+        builder.Property(x => x.AddressLine2)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.Property(x => x.City)
@@ -23,7 +23,19 @@ public class PremiseConfiguration : BaseEntityTypeConfiguration<Premise, long>
         builder.Property(x => x.Zip)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
-        builder.Property(x => x.County)
+        builder.Property(x => x.Zip4)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
+
+        builder.Property(x => x.Latitude)
+            .HasPrecision(9, 6);
+
+        builder.Property(x => x.Longitude)
+            .HasPrecision(9, 6);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.County)
+            .WithMany()
+            .HasForeignKey(x => x.CountyId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

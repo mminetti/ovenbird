@@ -26,7 +26,7 @@ public class SwitchRequestGeneratorCreateAsync
     [Fact]
     public async Task GeneratesA814_01TransactionThatRoundTripsThroughTheInboundReader()
     {
-        var premise = new Premise { Id = 1, Address = "105 S ALAMO RD APT 15", City = "ALAMO", State = "TX", Zip = "78516" };
+        var premise = new Premise { Id = 1, AddressLine1 = "105 S ALAMO RD APT 15", City = "ALAMO", State = "TX", Zip = "78516" };
         var utility = new Utility { Id = 1, Name = "AEP Texas Central" };
         var customer = new Customer { Id = 1, FirstName = "Cynthia", LastName = "Alanis" };
         var servicePoint = new ServicePoint { Id = 1, Identifier = "10032789419071200", PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = false };
@@ -83,7 +83,7 @@ public class SwitchRequestGeneratorCreateAsync
     [Fact]
     public async Task FlagsCriticalCareAccountsAsSpecialNeeds()
     {
-        var premise = new Premise { Id = 1, Address = "1 Main St", City = "Austin", State = "TX", Zip = "73301" };
+        var premise = new Premise { Id = 1, AddressLine1 = "1 Main St", City = "Austin", State = "TX", Zip = "73301" };
         var utility = new Utility { Id = 1, Name = "AEP Texas Central" };
         var customer = new Customer { Id = 1, FirstName = "Jane", LastName = "Doe" };
         var servicePoint = new ServicePoint { Id = 1, PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = true };

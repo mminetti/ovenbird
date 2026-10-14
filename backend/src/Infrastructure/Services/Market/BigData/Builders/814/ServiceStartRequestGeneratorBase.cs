@@ -115,7 +115,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
         {
             EntityType = entityType,
             EntityName = contactName,
-            EntityAddress1 = premise.Address,
+            EntityAddress1 = premise.AddressLine1,
             EntityCity = premise.City,
             EntityState = premise.State,
             EntityPostalCode = premise.Zip,

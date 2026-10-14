@@ -634,6 +634,24 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Core.Service.County", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("County");
+                });
+
             modelBuilder.Entity("Core.Service.CustomerClass", b =>
                 {
                     b.Property<int>("Id")
@@ -821,13 +839,12 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<string>("Address")
+                    b.Property<string>("AddressLine1")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("Address2")
-                        .IsRequired()
+                    b.Property<string>("AddressLine2")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -836,10 +853,8 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<string>("County")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                    b.Property<int?>("CountyId")
+                        .HasColumnType("int");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -855,6 +870,14 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<decimal?>("Latitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
+                    b.Property<decimal?>("Longitude")
+                        .HasPrecision(9, 6)
+                        .HasColumnType("decimal(9,6)");
+
                     b.Property<string>("State")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -865,7 +888,13 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
+                    b.Property<string>("Zip4")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("CountyId");
 
                     b.ToTable("Premise");
                 });
@@ -2173,7 +2202,7 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Core.Subscription.Service", "Service")
-                        .WithMany()
+                        .WithMany("HistoricalUsages")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -2210,6 +2239,16 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ServicePoint");
+                });
+
+            modelBuilder.Entity("Core.Service.Premise", b =>
+                {
+                    b.HasOne("Core.Service.County", "County")
+                        .WithMany()
+                        .HasForeignKey("CountyId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("County");
                 });
 
             modelBuilder.Entity("Core.Service.ServicePoint", b =>
@@ -2336,7 +2375,7 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Core.Subscription.Service", "Service")
-                        .WithMany()
+                        .WithMany("Usages")
                         .HasForeignKey("ServiceId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -2616,7 +2655,11 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Subscription.Service", b =>
                 {
+                    b.Navigation("HistoricalUsages");
+
                     b.Navigation("ServiceStarts");
+
+                    b.Navigation("Usages");
                 });
 #pragma warning restore 612, 618
         }

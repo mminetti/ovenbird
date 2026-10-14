@@ -26,7 +26,7 @@ public class MoveInRequestGeneratorCreateAsync
     [Fact]
     public async Task GeneratesA814_16TransactionThatRoundTripsThroughTheInboundReader()
     {
-        var premise = new Premise { Id = 2, Address = "22 Oak Ave", City = "Houston", State = "TX", Zip = "77002" };
+        var premise = new Premise { Id = 2, AddressLine1 = "22 Oak Ave", City = "Houston", State = "TX", Zip = "77002" };
         var utility = new Utility { Id = 2, Name = "CenterPoint Energy" };
         var customer = new Customer { Id = 2, FirstName = "John", LastName = "Smith" };
         var servicePoint = new ServicePoint { Id = 2, Identifier = "ACCT-456", PremiseId = premise.Id, Premise = premise, UtilityId = utility.Id, Utility = utility, IsCriticalCare = false };
