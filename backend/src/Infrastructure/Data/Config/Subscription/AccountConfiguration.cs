@@ -30,24 +30,6 @@ public class AccountConfiguration : BaseEntityTypeConfiguration<Account, long>
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
-        builder.HasOne(x => x.ServiceStatus)
-            .WithMany()
-            .HasForeignKey(x => x.ServiceStatusId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        // NoAction: protect the referenced row from accidental/cascading deletion.
-        builder.HasOne(x => x.ServiceSubStatus)
-            .WithMany()
-            .HasForeignKey(x => x.ServiceSubStatusId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        // NoAction: protect the referenced row from accidental/cascading deletion.
-        builder.HasOne(x => x.ServiceConnectionStatus)
-            .WithMany()
-            .HasForeignKey(x => x.ServiceConnectionStatusId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.ServiceStart)
             .WithMany()
             .HasForeignKey(x => x.ServiceStartId)

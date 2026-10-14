@@ -12,6 +12,6 @@ public class ServiceStart : AuditableEntityBase<long>
 
     public Account Account { get; set; } = default!;
     public ServiceStartType ServiceStartType { get; set; } = default!;
-    public ServiceOrderStatus ServiceStatus { get; set; } = default!;
+    public ServiceOrderStatus Status { get; set; } = default!;
     public ICollection<ServiceStartItem> Items { get; set; } = [];
 }

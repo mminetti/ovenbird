@@ -888,6 +888,66 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("ReadCycle");
                 });
 
+            modelBuilder.Entity("Core.Service.Service", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("AccountId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ConnectionStatusId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsProtected")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubStatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId")
+                        .IsUnique();
+
+                    b.HasIndex("ConnectionStatusId");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("SubStatusId");
+
+                    b.ToTable("Service");
+                });
+
             modelBuilder.Entity("Core.Service.ServiceAction", b =>
                 {
                     b.Property<int>("Id")
@@ -1767,12 +1827,6 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<bool>("IsServiceLocked")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsServiceProtected")
-                        .HasColumnType("bit");
-
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
 
@@ -1780,26 +1834,11 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("ServiceConnectionStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<DateOnly>("ServiceEndDate")
-                        .HasColumnType("date");
-
                     b.Property<long>("ServicePointId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateOnly>("ServiceStartDate")
-                        .HasColumnType("date");
-
                     b.Property<long>("ServiceStartId")
                         .HasColumnType("bigint");
-
-                    b.Property<int>("ServiceStatusId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ServiceSubStatusId")
-                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -1807,15 +1846,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.HasIndex("ServiceConnectionStatusId");
-
                     b.HasIndex("ServicePointId");
 
                     b.HasIndex("ServiceStartId");
-
-                    b.HasIndex("ServiceStatusId");
-
-                    b.HasIndex("ServiceSubStatusId");
 
                     b.ToTable("Account");
                 });
@@ -2184,6 +2217,41 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ServicePoint");
                 });
 
+            modelBuilder.Entity("Core.Service.Service", b =>
+                {
+                    b.HasOne("Core.Subscription.Account", "Account")
+                        .WithOne("Service")
+                        .HasForeignKey("Core.Service.Service", "AccountId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Subscription.ServiceConnectionStatus", "ConnectionStatus")
+                        .WithMany()
+                        .HasForeignKey("ConnectionStatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Subscription.ServiceStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Subscription.ServiceSubStatus", "SubStatus")
+                        .WithMany()
+                        .HasForeignKey("SubStatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("ConnectionStatus");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("SubStatus");
+                });
+
             modelBuilder.Entity("Core.Service.ServicePoint", b =>
                 {
                     b.HasOne("Core.Service.Commodity", "Commodity")
@@ -2251,7 +2319,7 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Service.ServiceOrderStatus", "ServiceStatus")
+                    b.HasOne("Core.Service.ServiceOrderStatus", "Status")
                         .WithMany()
                         .HasForeignKey("ServiceOrderStatusId")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -2267,7 +2335,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.Navigation("ServiceStartType");
 
-                    b.Navigation("ServiceStatus");
+                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Core.Service.ServiceStartItem", b =>
@@ -2452,12 +2520,6 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Subscription.ServiceConnectionStatus", "ServiceConnectionStatus")
-                        .WithMany()
-                        .HasForeignKey("ServiceConnectionStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Core.Service.ServicePoint", "ServicePoint")
                         .WithMany()
                         .HasForeignKey("ServicePointId")
@@ -2470,31 +2532,13 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Subscription.ServiceStatus", "ServiceStatus")
-                        .WithMany()
-                        .HasForeignKey("ServiceStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Core.Subscription.ServiceSubStatus", "ServiceSubStatus")
-                        .WithMany()
-                        .HasForeignKey("ServiceSubStatusId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Company");
 
                     b.Navigation("Customer");
 
-                    b.Navigation("ServiceConnectionStatus");
-
                     b.Navigation("ServicePoint");
 
                     b.Navigation("ServiceStart");
-
-                    b.Navigation("ServiceStatus");
-
-                    b.Navigation("ServiceSubStatus");
                 });
 
             modelBuilder.Entity("RolePermission", b =>
@@ -2575,6 +2619,12 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.Settings.ConnectorType", b =>
                 {
                     b.Navigation("ConnectorImplementations");
+                });
+
+            modelBuilder.Entity("Core.Subscription.Account", b =>
+                {
+                    b.Navigation("Service")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

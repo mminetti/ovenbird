@@ -1,0 +1,35 @@
+using Core.Service;
+
+namespace Infrastructure.Data.Config.Service;
+
+public class ServiceConfiguration : BaseEntityTypeConfiguration<Core.Service.Service, long>
+{
+    public override void Configure(EntityTypeBuilder<Core.Service.Service> builder)
+    {
+        base.Configure(builder);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.Account)
+            .WithOne(x => x.Service)
+            .HasForeignKey<Core.Service.Service>(x => x.AccountId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.Status)
+            .WithMany()
+            .HasForeignKey(x => x.StatusId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.SubStatus)
+            .WithMany()
+            .HasForeignKey(x => x.SubStatusId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.ConnectionStatus)
+            .WithMany()
+            .HasForeignKey(x => x.ConnectionStatusId)
+            .OnDelete(DeleteBehavior.NoAction);
+    }
+}
