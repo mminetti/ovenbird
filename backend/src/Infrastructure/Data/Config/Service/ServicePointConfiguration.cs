@@ -1,4 +1,4 @@
-using Core.Service;
+﻿using Core.Service;
 
 namespace Infrastructure.Data.Config.Service;
 
@@ -9,9 +9,6 @@ public class ServicePointConfiguration : BaseEntityTypeConfiguration<ServicePoin
         base.Configure(builder);
 
         builder.Property(x => x.Identifier)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.Cycle)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
@@ -27,9 +24,21 @@ public class ServicePointConfiguration : BaseEntityTypeConfiguration<ServicePoin
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
-        builder.HasOne(x => x.PremiseType)
+        builder.HasOne(x => x.ReadCycle)
             .WithMany()
-            .HasForeignKey(x => x.PremiseTypeId)
+            .HasForeignKey(x => x.ReadCycleId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.CustomerClass)
+            .WithMany()
+            .HasForeignKey(x => x.CustomerClassId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.LoadProfile)
+            .WithMany()
+            .HasForeignKey(x => x.LoadProfileId)
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.

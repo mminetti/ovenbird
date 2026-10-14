@@ -1,6 +1,6 @@
 ﻿namespace Core.Service;
 
-public class PremiseType : EntityBase<int>
+public class LoadProfile : EntityBase<int>
 {
     public string Name { get; set; } = string.Empty;
 }

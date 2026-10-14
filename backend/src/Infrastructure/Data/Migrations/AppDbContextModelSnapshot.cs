@@ -17,7 +17,7 @@ namespace Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -671,6 +671,24 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Core.Service.CustomerClass", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CustomerClass");
+                });
+
             modelBuilder.Entity("Core.Service.HistoricalUsage", b =>
                 {
                     b.Property<long>("Id")
@@ -679,7 +697,7 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long?>("AccountId")
+                    b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("CommodityId")
@@ -735,6 +753,24 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("UnitOfMeasureId");
 
                     b.ToTable("HistoricalUsage");
+                });
+
+            modelBuilder.Entity("Core.Service.LoadProfile", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LoadProfile");
                 });
 
             modelBuilder.Entity("Core.Service.Meter", b =>
@@ -834,7 +870,7 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Premise");
                 });
 
-            modelBuilder.Entity("Core.Service.PremiseType", b =>
+            modelBuilder.Entity("Core.Service.ReadCycle", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -849,7 +885,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PremiseType");
+                    b.ToTable("ReadCycle");
                 });
 
             modelBuilder.Entity("Core.Service.ServiceAction", b =>
@@ -984,15 +1020,16 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Cycle")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                    b.Property<int>("CustomerClassId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Identifier")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<bool>("IsAmsMeter")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsCriticalCare")
                         .HasColumnType("bit");
@@ -1004,13 +1041,16 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<int>("LoadProfileId")
+                        .HasColumnType("int");
+
                     b.Property<int>("MarketId")
                         .HasColumnType("int");
 
                     b.Property<long>("PremiseId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("PremiseTypeId")
+                    b.Property<int>("ReadCycleId")
                         .HasColumnType("int");
 
                     b.Property<int>("UtilityId")
@@ -1020,11 +1060,15 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("CommodityId");
 
+                    b.HasIndex("CustomerClassId");
+
+                    b.HasIndex("LoadProfileId");
+
                     b.HasIndex("MarketId");
 
                     b.HasIndex("PremiseId");
 
-                    b.HasIndex("PremiseTypeId");
+                    b.HasIndex("ReadCycleId");
 
                     b.HasIndex("UtilityId");
 
@@ -1039,7 +1083,7 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long?>("AccountId")
+                    b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
@@ -1182,7 +1226,7 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long?>("AccountId")
+                    b.Property<long>("AccountId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("CommodityId")
@@ -2092,7 +2136,8 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Core.Service.Commodity", "Commodity")
                         .WithMany()
@@ -2147,6 +2192,18 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("Core.Service.CustomerClass", "CustomerClass")
+                        .WithMany()
+                        .HasForeignKey("CustomerClassId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.LoadProfile", "LoadProfile")
+                        .WithMany()
+                        .HasForeignKey("LoadProfileId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Core.Market.Market", "Market")
                         .WithMany()
                         .HasForeignKey("MarketId")
@@ -2159,9 +2216,9 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Service.PremiseType", "PremiseType")
+                    b.HasOne("Core.Service.ReadCycle", "ReadCycle")
                         .WithMany()
-                        .HasForeignKey("PremiseTypeId")
+                        .HasForeignKey("ReadCycleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -2173,11 +2230,15 @@ namespace Infrastructure.Data.Migrations
 
                     b.Navigation("Commodity");
 
+                    b.Navigation("CustomerClass");
+
+                    b.Navigation("LoadProfile");
+
                     b.Navigation("Market");
 
                     b.Navigation("Premise");
 
-                    b.Navigation("PremiseType");
+                    b.Navigation("ReadCycle");
 
                     b.Navigation("Utility");
                 });
@@ -2187,7 +2248,8 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Core.Service.ServiceOrderStatus", "ServiceStatus")
                         .WithMany()
@@ -2232,7 +2294,8 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.Account", "Account")
                         .WithMany()
                         .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Core.Service.Commodity", "Commodity")
                         .WithMany()
