@@ -12,9 +12,9 @@ public class UsageConfiguration : BaseEntityTypeConfiguration<Usage, long>
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
-        builder.HasOne(x => x.Account)
-            .WithMany()
-            .HasForeignKey(x => x.AccountId)
+        builder.HasOne(x => x.Service)
+            .WithMany(x => x.Usages)
+            .HasForeignKey(x => x.ServiceId)
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.

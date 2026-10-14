@@ -660,9 +660,6 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("CommodityId")
                         .HasColumnType("int");
 
@@ -697,6 +694,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateOnly>("PeriodStartDate")
                         .HasColumnType("date");
 
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("ServicePointId")
                         .HasColumnType("bigint");
 
@@ -705,11 +705,11 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
-
                     b.HasIndex("CommodityId");
 
                     b.HasIndex("MeterId");
+
+                    b.HasIndex("ServiceId");
 
                     b.HasIndex("ServicePointId");
 
@@ -1226,9 +1226,6 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("AccountId")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("CommodityId")
                         .HasColumnType("int");
 
@@ -1272,6 +1269,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateOnly>("PeriodStartDate")
                         .HasColumnType("date");
 
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("ServicePointId")
                         .HasColumnType("bigint");
 
@@ -1289,13 +1289,13 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
-
                     b.HasIndex("CommodityId");
 
                     b.HasIndex("MeterId");
 
                     b.HasIndex("OriginalUsageId");
+
+                    b.HasIndex("ServiceId");
 
                     b.HasIndex("ServicePointId");
 
@@ -2161,12 +2161,6 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Service.HistoricalUsage", b =>
                 {
-                    b.HasOne("Core.Subscription.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Core.Service.Commodity", "Commodity")
                         .WithMany()
                         .HasForeignKey("CommodityId")
@@ -2177,6 +2171,12 @@ namespace Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("MeterId")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Core.Subscription.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Core.Service.ServicePoint", "ServicePoint")
                         .WithMany()
@@ -2190,11 +2190,11 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Account");
-
                     b.Navigation("Commodity");
 
                     b.Navigation("Meter");
+
+                    b.Navigation("Service");
 
                     b.Navigation("ServicePoint");
 
@@ -2319,12 +2319,6 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Service.Usage", b =>
                 {
-                    b.HasOne("Core.Subscription.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Core.Service.Commodity", "Commodity")
                         .WithMany()
                         .HasForeignKey("CommodityId")
@@ -2340,6 +2334,12 @@ namespace Infrastructure.Data.Migrations
                         .WithMany()
                         .HasForeignKey("OriginalUsageId")
                         .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Core.Subscription.Service", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("Core.Service.ServicePoint", "ServicePoint")
                         .WithMany()
@@ -2365,13 +2365,13 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Account");
-
                     b.Navigation("Commodity");
 
                     b.Navigation("Meter");
 
                     b.Navigation("OriginalUsage");
+
+                    b.Navigation("Service");
 
                     b.Navigation("ServicePoint");
 

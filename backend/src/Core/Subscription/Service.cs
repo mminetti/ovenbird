@@ -21,4 +21,6 @@ public class Service : AuditableEntityBase<long>
     public ServiceSubStatus SubStatus { get; set; } = default!;
     public ServiceConnectionStatus ConnectionStatus { get; set; } = default!;
     public ICollection<ServiceStart> ServiceStarts { get; set; } = [];
+    public ICollection<Usage> Usages { get; set; } = [];
+    public ICollection<HistoricalUsage> HistoricalUsages { get; set; } = [];
 }
