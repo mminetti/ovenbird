@@ -28,11 +28,5 @@ public class AccountConfiguration : BaseEntityTypeConfiguration<Account, long>
             .WithMany()
             .HasForeignKey(x => x.ServicePointId)
             .OnDelete(DeleteBehavior.NoAction);
-
-        // NoAction: protect the referenced row from accidental/cascading deletion.
-        builder.HasOne(x => x.ServiceStart)
-            .WithMany()
-            .HasForeignKey(x => x.ServiceStartId)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

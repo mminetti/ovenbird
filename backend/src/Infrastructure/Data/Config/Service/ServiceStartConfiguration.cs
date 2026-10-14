@@ -10,7 +10,7 @@ public class ServiceStartConfiguration : BaseEntityTypeConfiguration<ServiceStar
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.Account)
-            .WithMany()
+            .WithMany(x => x.ServiceStarts)
             .HasForeignKey(x => x.AccountId)
             .OnDelete(DeleteBehavior.NoAction);
 

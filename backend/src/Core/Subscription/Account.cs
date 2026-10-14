@@ -11,11 +11,10 @@ public class Account : AuditableEntityBase<long>
     public int CompanyId { get; set; }
     public long ServicePointId { get; set; }
     public decimal Balance { get; set; }
-    public long ServiceStartId { get; set; }
 
     public Customer Customer { get; set; } = default!;
     public Company Company { get; set; } = default!;
     public ServicePoint ServicePoint { get; set; } = default!;
-    public ServiceStart ServiceStart { get; set; } = default!;
     public Service Service { get; set; } = default!;
+    public ICollection<ServiceStart> ServiceStarts { get; set; } = [];
 }
