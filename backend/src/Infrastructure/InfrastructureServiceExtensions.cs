@@ -1,9 +1,9 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Core.Market;
 using Core.Security;
 using Core.Security.Interfaces;
 using Core.Security.Services;
+using Core.Service;
 using Core.Settings;
 using Infrastructure.Data;
 using Infrastructure.Data.Interceptors;

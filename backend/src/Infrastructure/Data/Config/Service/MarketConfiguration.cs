@@ -1,8 +1,8 @@
-namespace Infrastructure.Data.Config.Market;
+namespace Infrastructure.Data.Config.Service;
 
-internal class MarketConfiguration : BaseEntityTypeConfiguration<Core.Market.Market, int>
+internal class MarketConfiguration : BaseEntityTypeConfiguration<Core.Service.Market, int>
 {
-    public override void Configure(EntityTypeBuilder<Core.Market.Market> builder)
+    public override void Configure(EntityTypeBuilder<Core.Service.Market> builder)
     {
         base.Configure(builder);
 

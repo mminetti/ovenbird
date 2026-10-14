@@ -1,7 +1,7 @@
-﻿using Core.Common;
+using Core.Common;
 using Core.Settings;
 
-namespace Core.Market;
+namespace Core.Service;
 
 public class Market : AuditableEntityBase<int>, IAudited, IHasDisplayName
 {

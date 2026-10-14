@@ -1,6 +1,6 @@
 ﻿namespace UseCases.Market.Markets.Delete;
 
-public class DeleteMarketHandler(IRepository<Core.Market.Market> repository)
+public class DeleteMarketHandler(IRepository<Core.Service.Market> repository)
 {
     public async Task<Result> Handle(DeleteMarketCommand command, CancellationToken ct)
     {

@@ -3,6 +3,7 @@ using Core.Auditing;
 using Core.Common;
 using Core.Market;
 using Core.Security;
+using Core.Service;
 using Core.Settings;
 using Infrastructure.Data.Queries.Auditing;
 

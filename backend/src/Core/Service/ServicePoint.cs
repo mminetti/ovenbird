@@ -21,7 +21,7 @@ public class ServicePoint : AuditableEntityBase<long>
     public CustomerClass CustomerClass { get; set; } = default!;
     public LoadProfile LoadProfile { get; set; } = default!;
     public Commodity Commodity { get; set; } = default!;
-    public Market.Market Market { get; set; } = default!;
+    public Market Market { get; set; } = default!;
 
     public ICollection<Meter> Meters { get; set; } = [];
 

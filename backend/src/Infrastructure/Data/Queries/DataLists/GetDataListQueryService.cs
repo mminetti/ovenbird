@@ -29,7 +29,7 @@ public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryServic
                 .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
                 .ToListAsync(ct),
 
-            DataListType.Markets => await db.Set<Core.Market.Market>()
+            DataListType.Markets => await db.Set<Core.Service.Market>()
                 .AsNoTracking()
                 .OrderBy(x => x.Name)
                 .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))

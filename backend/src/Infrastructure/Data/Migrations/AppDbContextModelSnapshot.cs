@@ -112,7 +112,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Market");
+                    b.ToTable("Market", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocument", b =>
@@ -163,7 +163,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("MarketDocument");
+                    b.ToTable("MarketDocument", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocumentDirection", b =>
@@ -178,7 +178,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketDocumentDirection");
+                    b.ToTable("MarketDocumentDirection", (string)null);
 
                     b.HasData(
                         new
@@ -251,7 +251,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("MarketDocumentItemStatusId");
 
-                    b.ToTable("MarketDocumentItem");
+                    b.ToTable("MarketDocumentItem", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocumentItemStatus", b =>
@@ -266,7 +266,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketDocumentItemStatus");
+                    b.ToTable("MarketDocumentItemStatus", (string)null);
 
                     b.HasData(
                         new
@@ -323,7 +323,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ReferenceTypeId");
 
-                    b.ToTable("MarketDocumentReference");
+                    b.ToTable("MarketDocumentReference", (string)null);
                 });
 
             modelBuilder.Entity("Core.Market.MarketDocumentReferenceType", b =>
@@ -338,7 +338,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketDocumentReferenceType");
+                    b.ToTable("MarketDocumentReferenceType", (string)null);
 
                     b.HasData(
                         new
@@ -385,7 +385,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MarketDocumentStatus");
+                    b.ToTable("MarketDocumentStatus", (string)null);
 
                     b.HasData(
                         new
@@ -427,7 +427,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ModuleId");
 
-                    b.ToTable("Permission");
+                    b.ToTable("Permission", (string)null);
 
                     b.HasData(
                         new
@@ -549,7 +549,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PermissionModule");
+                    b.ToTable("PermissionModule", (string)null);
 
                     b.HasData(
                         new
@@ -598,7 +598,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Role");
+                    b.ToTable("Role", (string)null);
                 });
 
             modelBuilder.Entity("Core.Security.User", b =>
@@ -646,7 +646,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("ExternalIdentifier")
                         .IsUnique();
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.Commodity", b =>
@@ -661,7 +661,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Commodity");
+                    b.ToTable("Commodity", (string)null);
 
                     b.HasData(
                         new
@@ -686,7 +686,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CustomerClass");
+                    b.ToTable("CustomerClass", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.HistoricalUsage", b =>
@@ -752,7 +752,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("UnitOfMeasureId");
 
-                    b.ToTable("HistoricalUsage");
+                    b.ToTable("HistoricalUsage", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.LoadProfile", b =>
@@ -770,7 +770,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LoadProfile");
+                    b.ToTable("LoadProfile", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.Meter", b =>
@@ -810,7 +810,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ServicePointId");
 
-                    b.ToTable("Meter");
+                    b.ToTable("Meter", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.Premise", b =>
@@ -867,7 +867,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Premise");
+                    b.ToTable("Premise", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.ReadCycle", b =>
@@ -885,7 +885,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ReadCycle");
+                    b.ToTable("ReadCycle", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.Service", b =>
@@ -945,7 +945,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("SubStatusId");
 
-                    b.ToTable("Service");
+                    b.ToTable("Service", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.ServiceAction", b =>
@@ -960,7 +960,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceAction");
+                    b.ToTable("ServiceAction", (string)null);
 
                     b.HasData(
                         new
@@ -1017,7 +1017,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceOrderStatus");
+                    b.ToTable("ServiceOrderStatus", (string)null);
 
                     b.HasData(
                         new
@@ -1132,7 +1132,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("UtilityId");
 
-                    b.ToTable("ServicePoint");
+                    b.ToTable("ServicePoint", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.ServiceStart", b =>
@@ -1177,7 +1177,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ServiceStartTypeId");
 
-                    b.ToTable("ServiceStart");
+                    b.ToTable("ServiceStart", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.ServiceStartItem", b =>
@@ -1226,7 +1226,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ServiceStartId");
 
-                    b.ToTable("ServiceStartItem");
+                    b.ToTable("ServiceStartItem", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.ServiceStartType", b =>
@@ -1241,7 +1241,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceStartType");
+                    b.ToTable("ServiceStartType", (string)null);
 
                     b.HasData(
                         new
@@ -1268,7 +1268,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UnitOfMeasure");
+                    b.ToTable("UnitOfMeasure", (string)null);
 
                     b.HasData(
                         new
@@ -1365,7 +1365,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("UsageTypeId");
 
-                    b.ToTable("Usage");
+                    b.ToTable("Usage", (string)null);
                 });
 
             modelBuilder.Entity("Core.Service.UsageStatus", b =>
@@ -1380,7 +1380,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UsageStatus");
+                    b.ToTable("UsageStatus", (string)null);
 
                     b.HasData(
                         new
@@ -1402,7 +1402,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UsageType");
+                    b.ToTable("UsageType", (string)null);
 
                     b.HasData(
                         new
@@ -1446,7 +1446,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("MarketId");
 
-                    b.ToTable("Utility");
+                    b.ToTable("Utility", (string)null);
                 });
 
             modelBuilder.Entity("Core.Settings.Company", b =>
@@ -1488,7 +1488,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("MarketId");
 
-                    b.ToTable("Company");
+                    b.ToTable("Company", (string)null);
                 });
 
             modelBuilder.Entity("Core.Settings.Configuration", b =>
@@ -1534,7 +1534,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConfigurationTypeId");
 
-                    b.ToTable("Configuration");
+                    b.ToTable("Configuration", (string)null);
                 });
 
             modelBuilder.Entity("Core.Settings.ConfigurationField", b =>
@@ -1575,7 +1575,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConfigurationId");
 
-                    b.ToTable("ConfigurationField");
+                    b.ToTable("ConfigurationField", (string)null);
                 });
 
             modelBuilder.Entity("Core.Settings.ConfigurationType", b =>
@@ -1594,7 +1594,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConfigurationType");
+                    b.ToTable("ConfigurationType", (string)null);
 
                     b.HasData(
                         new
@@ -1647,7 +1647,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConnectorImplementationId");
 
-                    b.ToTable("Connector");
+                    b.ToTable("Connector", (string)null);
                 });
 
             modelBuilder.Entity("Core.Settings.ConnectorField", b =>
@@ -1691,7 +1691,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConnectorId");
 
-                    b.ToTable("ConnectorField");
+                    b.ToTable("ConnectorField", (string)null);
                 });
 
             modelBuilder.Entity("Core.Settings.ConnectorImplementation", b =>
@@ -1720,7 +1720,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ConnectorTypeId");
 
-                    b.ToTable("ConnectorImplementation");
+                    b.ToTable("ConnectorImplementation", (string)null);
 
                     b.HasData(
                         new
@@ -1781,7 +1781,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ConnectorType");
+                    b.ToTable("ConnectorType", (string)null);
 
                     b.HasData(
                         new
@@ -1850,7 +1850,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasIndex("ServiceStartId");
 
-                    b.ToTable("Account");
+                    b.ToTable("Account", (string)null);
                 });
 
             modelBuilder.Entity("Core.Subscription.Customer", b =>
@@ -1892,7 +1892,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customer", (string)null);
                 });
 
             modelBuilder.Entity("Core.Subscription.ServiceConnectionStatus", b =>
@@ -1907,7 +1907,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceConnectionStatus");
+                    b.ToTable("ServiceConnectionStatus", (string)null);
 
                     b.HasData(
                         new
@@ -1944,7 +1944,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceStatus");
+                    b.ToTable("ServiceStatus", (string)null);
 
                     b.HasData(
                         new
@@ -1976,7 +1976,7 @@ namespace Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceSubStatus");
+                    b.ToTable("ServiceSubStatus", (string)null);
 
                     b.HasData(
                         new

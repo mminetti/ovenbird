@@ -8,6 +8,6 @@ public class Company : AuditableEntityBase<int>, IAudited, IHasDisplayName
     public int MarketId { get; set; }
     public string TimeZoneId { get; set; } = string.Empty;
 
-    public Market.Market Market { get; set; } = default!;
+    public Service.Market Market { get; set; } = default!;
     public ICollection<Configuration> Configurations { get; set; } = [];
 }

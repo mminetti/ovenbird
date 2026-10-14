@@ -1,6 +1,6 @@
 ﻿namespace UseCases.Market.Markets.Update;
 
-public class UpdateMarketHandler(IRepository<Core.Market.Market> repository)
+public class UpdateMarketHandler(IRepository<Core.Service.Market> repository)
 {
     public async Task<Result> Handle(UpdateMarketCommand command, CancellationToken ct)
     {

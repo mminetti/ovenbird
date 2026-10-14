@@ -1,7 +1,6 @@
 using Core.Common;
-using Core.Subscription;
 
-namespace Core.Service;
+namespace Core.Subscription;
 
 public class Service : AuditableEntityBase<long>
 {

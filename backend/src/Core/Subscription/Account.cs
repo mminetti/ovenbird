@@ -17,5 +17,5 @@ public class Account : AuditableEntityBase<long>
     public Company Company { get; set; } = default!;
     public ServicePoint ServicePoint { get; set; } = default!;
     public ServiceStart ServiceStart { get; set; } = default!;
-    public Service.Service Service { get; set; } = default!;
+    public Service Service { get; set; } = default!;
 }

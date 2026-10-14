@@ -1,17 +1,15 @@
-using Core.Service;
+namespace Infrastructure.Data.Config.Subscription;
 
-namespace Infrastructure.Data.Config.Service;
-
-public class ServiceConfiguration : BaseEntityTypeConfiguration<Core.Service.Service, long>
+public class ServiceConfiguration : BaseEntityTypeConfiguration<Core.Subscription.Service, long>
 {
-    public override void Configure(EntityTypeBuilder<Core.Service.Service> builder)
+    public override void Configure(EntityTypeBuilder<Core.Subscription.Service> builder)
     {
         base.Configure(builder);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.Account)
             .WithOne(x => x.Service)
-            .HasForeignKey<Core.Service.Service>(x => x.AccountId)
+            .HasForeignKey<Core.Subscription.Service>(x => x.AccountId)
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.

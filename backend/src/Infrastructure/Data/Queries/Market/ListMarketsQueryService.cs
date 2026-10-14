@@ -5,13 +5,13 @@ using UseCases.Market.Markets.List;
 
 namespace Infrastructure.Data.Queries.Market;
 
-public class ListMarketsQueryService(ReadDbContext db, IQueryPropertyMapper<Core.Market.Market> propertyMapper)
-    : PagedQueryServiceBase<Core.Market.Market, MarketDto>(propertyMapper), IListMarketsQueryService
+public class ListMarketsQueryService(ReadDbContext db, IQueryPropertyMapper<Core.Service.Market> propertyMapper)
+    : PagedQueryServiceBase<Core.Service.Market, MarketDto>(propertyMapper), IListMarketsQueryService
 {
-    protected override IQueryable<Core.Market.Market> GetQuery() => db.Set<Core.Market.Market>();
+    protected override IQueryable<Core.Service.Market> GetQuery() => db.Set<Core.Service.Market>();
 
-    protected override Expression<Func<Core.Market.Market, MarketDto>> GetProjection() =>
+    protected override Expression<Func<Core.Service.Market, MarketDto>> GetProjection() =>
         m => new MarketDto(m.Id, m.Name, m.Identifier, m.LastModifiedAtUtc, m.LastModifiedBy);
 
-    protected override string GetDefaultOrderBy() => nameof(Core.Market.Market.Id);
+    protected override string GetDefaultOrderBy() => nameof(Core.Service.Market.Id);
 }

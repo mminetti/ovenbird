@@ -2,7 +2,7 @@
 
 namespace UseCases.Market.Markets.Get;
 
-public class GetMarketHandler(IReadRepository<Core.Market.Market> repository)
+public class GetMarketHandler(IReadRepository<Core.Service.Market> repository)
 {
     public async Task<Result<MarketDto>> Handle(GetMarketQuery request, CancellationToken ct)
     {
