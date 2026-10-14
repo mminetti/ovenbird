@@ -34,11 +34,10 @@ public class MoveInRequestGeneratorCreateAsync
         {
             Id = 2,
             Identifier = "ACCOUNT-2",
-            ServicePointId = servicePoint.Id,
-            ServicePoint = servicePoint,
             CustomerId = customer.Id,
             Customer = customer,
         };
+        account.Service = new Service { AccountId = account.Id, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
         var serviceStart = new ServiceStart
         {
             Id = 2,

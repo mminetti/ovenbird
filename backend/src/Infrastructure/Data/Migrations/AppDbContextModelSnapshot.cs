@@ -1774,16 +1774,11 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<long>("ServicePointId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CompanyId");
 
                     b.HasIndex("CustomerId");
-
-                    b.HasIndex("ServicePointId");
 
                     b.ToTable("Account");
                 });
@@ -1867,6 +1862,9 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<long>("ServicePointId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateOnly>("StartDate")
                         .HasColumnType("date");
 
@@ -1882,6 +1880,8 @@ namespace Infrastructure.Data.Migrations
                         .IsUnique();
 
                     b.HasIndex("ConnectionStatusId");
+
+                    b.HasIndex("ServicePointId");
 
                     b.HasIndex("StatusId");
 
@@ -2480,17 +2480,9 @@ namespace Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Service.ServicePoint", "ServicePoint")
-                        .WithMany()
-                        .HasForeignKey("ServicePointId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Company");
 
                     b.Navigation("Customer");
-
-                    b.Navigation("ServicePoint");
                 });
 
             modelBuilder.Entity("Core.Subscription.Service", b =>
@@ -2504,6 +2496,12 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Subscription.ServiceConnectionStatus", "ConnectionStatus")
                         .WithMany()
                         .HasForeignKey("ConnectionStatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Service.ServicePoint", "ServicePoint")
+                        .WithMany()
+                        .HasForeignKey("ServicePointId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -2522,6 +2520,8 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Account");
 
                     b.Navigation("ConnectionStatus");
+
+                    b.Navigation("ServicePoint");
 
                     b.Navigation("Status");
 

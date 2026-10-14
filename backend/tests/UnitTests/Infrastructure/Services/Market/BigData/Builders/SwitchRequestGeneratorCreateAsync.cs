@@ -34,11 +34,10 @@ public class SwitchRequestGeneratorCreateAsync
         {
             Id = 1,
             Identifier = "ACCT-1",
-            ServicePointId = servicePoint.Id,
-            ServicePoint = servicePoint,
             CustomerId = customer.Id,
             Customer = customer,
         };
+        account.Service = new Service { AccountId = account.Id, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
         var serviceStart = new ServiceStart
         {
             Id = 1,
@@ -92,11 +91,10 @@ public class SwitchRequestGeneratorCreateAsync
         {
             Id = 1,
             Identifier = "ACCT-1",
-            ServicePointId = servicePoint.Id,
-            ServicePoint = servicePoint,
             CustomerId = customer.Id,
             Customer = customer,
         };
+        account.Service = new Service { AccountId = account.Id, ServicePointId = servicePoint.Id, ServicePoint = servicePoint };
         var serviceStart = new ServiceStart
         {
             Id = 1,

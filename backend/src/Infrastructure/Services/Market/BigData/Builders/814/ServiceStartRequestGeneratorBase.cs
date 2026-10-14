@@ -40,7 +40,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
             throw new ArgumentNullException(nameof(account));
         }
 
-        var servicePoint = account.ServicePoint;
+        var servicePoint = account.Service.ServicePoint;
         var customer = account.Customer;
 
         var timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration.GetRequiredCompany().TimeZoneId);

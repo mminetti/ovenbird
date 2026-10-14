@@ -13,6 +13,12 @@ public class ServiceConfiguration : BaseEntityTypeConfiguration<Core.Subscriptio
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.ServicePoint)
+            .WithMany()
+            .HasForeignKey(x => x.ServicePointId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.Status)
             .WithMany()
             .HasForeignKey(x => x.StatusId)

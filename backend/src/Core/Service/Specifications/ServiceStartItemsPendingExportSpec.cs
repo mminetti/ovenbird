@@ -11,12 +11,14 @@ public class ServiceStartItemsPendingExportSpec : Specification<ServiceStartItem
                     .ThenInclude(x => x.Customer)
             .Include(x => x.ServiceStart)
                 .ThenInclude(x => x.Account)
-                    .ThenInclude(x => x!.ServicePoint)
-                        .ThenInclude(x => x.Premise)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(x => x.ServicePoint)
+                            .ThenInclude(x => x.Premise)
             .Include(x => x.ServiceStart)
                 .ThenInclude(x => x.Account)
-                    .ThenInclude(x => x!.ServicePoint)
-                        .ThenInclude(x => x.Utility)
+                    .ThenInclude(x => x.Service)
+                        .ThenInclude(x => x.ServicePoint)
+                            .ThenInclude(x => x.Utility)
             .Where(x =>
                 x.ServiceActionId == Constants.ServiceActions.Initiate &&
                 x.ServiceStart.ServiceOrderStatusId == Constants.ServiceOrderStatuses.New &&
