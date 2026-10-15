@@ -48,7 +48,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
 
         var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
 
-        var requestedDate = (serviceStartItem.ServiceDate ?? serviceStart.ServiceDate).ToString(DateFormat);
+        var requestedDate = serviceStart.ServiceDate.ToString(DateFormat);
 
         var transaction = new ServiceRequestXml
         {

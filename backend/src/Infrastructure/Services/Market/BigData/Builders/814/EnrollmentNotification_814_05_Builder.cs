@@ -35,7 +35,6 @@ public class EnrollmentNotification_814_05_Builder(
             {
                 ServiceStartId = serviceStart.Id,
                 Identifier = item.ReferenceNumber,
-                ServiceDate = serviceDate,
                 ServiceActionId = Constants.ServiceActions.Confirm,
             };
 

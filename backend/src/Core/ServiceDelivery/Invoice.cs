@@ -1,8 +1,9 @@
-﻿using Core.Subscription;
+﻿using Core.Common;
+using Core.Subscription;
 
 namespace Core.ServiceDelivery;
 
-public class Invoice
+public class Invoice : AuditableEntityBase<long>
 {
     public string Identifier { get; set; } = string.Empty;
     public long ServiceId { get; set; }

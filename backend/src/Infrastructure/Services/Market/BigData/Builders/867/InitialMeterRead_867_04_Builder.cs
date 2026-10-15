@@ -36,7 +36,6 @@ public class InitialMeterRead_867_04_Builder(
                     {
                         ServiceStartId = serviceStart.Id,
                         Identifier = item.ReferenceNumber,
-                        ServiceDate = serviceDate,
                         ServiceActionId = Constants.ServiceActions.Complete,
                     };
 
