@@ -1,4 +1,4 @@
-using Core.Market;
+using Core.MarketExchange;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;

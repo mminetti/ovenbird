@@ -1,6 +1,6 @@
 using System.Text;
 using System.Xml.Linq;
-using Core.Market;
+using Core.MarketExchange;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData;

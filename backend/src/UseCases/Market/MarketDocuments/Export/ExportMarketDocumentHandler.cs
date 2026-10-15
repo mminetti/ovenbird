@@ -1,5 +1,5 @@
-﻿using Core.Market;
-using Core.Market.Specifications;
+﻿using Core.MarketExchange;
+using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Export.Interfaces;

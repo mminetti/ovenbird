@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using System.Xml.Linq;
 using Core.Common.Constants;
-using Core.Market;
+using Core.MarketExchange;
 using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;

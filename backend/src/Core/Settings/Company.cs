@@ -1,4 +1,5 @@
 ﻿using Core.Common;
+using Core.ServiceDelivery;
 
 namespace Core.Settings;
 
@@ -8,6 +9,6 @@ public class Company : AuditableEntityBase<int>, IAudited, IHasDisplayName
     public int MarketId { get; set; }
     public string TimeZoneId { get; set; } = string.Empty;
 
-    public Service.Market Market { get; set; } = default!;
+    public Market Market { get; set; } = default!;
     public ICollection<Configuration> Configurations { get; set; } = [];
 }

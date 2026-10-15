@@ -1,8 +1,8 @@
 using Ardalis.Result;
 using Core.Common.Constants;
-using Core.Market;
-using Core.Service;
-using Core.Service.Specifications;
+using Core.MarketExchange;
+using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;

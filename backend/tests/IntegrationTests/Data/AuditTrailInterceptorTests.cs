@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Core.Auditing;
 using Core.Common;
-using Core.Market;
+using Core.MarketExchange;
 using Core.Security;
-using Core.Service;
+using Core.ServiceDelivery;
 using Core.Settings;
 using Infrastructure.Data.Queries.Auditing;
 

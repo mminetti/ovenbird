@@ -1,4 +1,4 @@
-﻿using Core.Market;
+﻿using Core.MarketExchange;
 using Infrastructure;
 using Infrastructure.Data;
 using Quartz;

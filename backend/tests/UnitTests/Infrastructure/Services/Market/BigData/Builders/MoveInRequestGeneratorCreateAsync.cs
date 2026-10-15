@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 using Core.Common.Constants;
-using Core.Service;
+using Core.ServiceDelivery;
 using Core.Settings;
 using Core.Subscription;
 using Infrastructure.Services.Market.BigData.Builders;

@@ -1,6 +1,6 @@
 using System.Globalization;
-using Core.Market;
-using Core.Service;
+using Core.MarketExchange;
+using Core.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;

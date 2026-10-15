@@ -1,5 +1,5 @@
 using Core.Common;
-using Core.Service;
+using Core.ServiceDelivery;
 
 namespace Core.Subscription;
 

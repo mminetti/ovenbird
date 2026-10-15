@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-using Core.Market;
+using Core.MarketExchange;
 
 namespace Infrastructure.Services.Market.BigData.Readers;
 

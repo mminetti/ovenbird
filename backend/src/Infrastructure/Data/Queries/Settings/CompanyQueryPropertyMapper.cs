@@ -12,14 +12,14 @@ public class CompanyQueryPropertyMapper : IQueryPropertyMapper<Company>
     {
         ["id"] = nameof(Company.Id),
         ["name"] = nameof(Company.Name),
-        ["marketName"] = $"{nameof(Company.Market)}.{nameof(Core.Service.Market.Name)}",
+        ["marketName"] = $"{nameof(Company.Market)}.{nameof(Core.ServiceDelivery.Market.Name)}",
         ["timeZoneId"] = nameof(Company.TimeZoneId)
     };
 
     private static readonly string[] _searchableProperties =
     [
         nameof(Company.Name),
-        $"{nameof(Company.Market)}.{nameof(Core.Service.Market.Name)}"
+        $"{nameof(Company.Market)}.{nameof(Core.ServiceDelivery.Market.Name)}"
     ];
 
     public string? MapToEntityProperty(string dtoPropertyName) =>

@@ -1,5 +1,5 @@
 ﻿using System.Xml.Linq;
-using Core.Market;
+using Core.MarketExchange;
 using Infrastructure.Services.Market.BigData.Readers;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;

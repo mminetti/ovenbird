@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using Core.Market;
+using Core.MarketExchange;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 

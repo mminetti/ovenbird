@@ -1,4 +1,4 @@
-﻿using Core.Market;
+﻿using Core.MarketExchange;
 using Core.Security;
 using Core.Settings;
 using UseCases.Common.DataLists;
@@ -29,7 +29,7 @@ public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryServic
                 .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))
                 .ToListAsync(ct),
 
-            DataListType.Markets => await db.Set<Core.Service.Market>()
+            DataListType.Markets => await db.Set<Core.ServiceDelivery.Market>()
                 .AsNoTracking()
                 .OrderBy(x => x.Name)
                 .Select(x => new ValuePairDto(x.Id.ToString(), x.Name))

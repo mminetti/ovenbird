@@ -1,6 +1,6 @@
 ﻿using Core.Common.Constants;
-using Core.Market;
-using Core.Service;
+using Core.MarketExchange;
+using Core.ServiceDelivery;
 using Infrastructure.Services.Market.BigData.Builders;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;

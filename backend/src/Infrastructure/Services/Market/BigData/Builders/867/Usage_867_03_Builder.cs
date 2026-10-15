@@ -1,7 +1,7 @@
 ﻿using Core.Common.Constants;
-using Core.Market;
-using Core.Service;
-using Core.Service.Specifications;
+using Core.MarketExchange;
+using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 

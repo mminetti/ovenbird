@@ -1,4 +1,4 @@
-﻿using Core.Market;
+﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;

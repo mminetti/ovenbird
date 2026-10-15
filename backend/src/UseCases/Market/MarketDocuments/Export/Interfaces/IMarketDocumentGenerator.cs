@@ -1,4 +1,4 @@
-using Core.Market;
+using Core.MarketExchange;
 
 namespace UseCases.Market.MarketDocuments.Export.Interfaces;
 

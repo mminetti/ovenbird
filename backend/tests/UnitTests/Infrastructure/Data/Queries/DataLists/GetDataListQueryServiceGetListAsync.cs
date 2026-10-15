@@ -1,4 +1,4 @@
-﻿using Core.Market;
+﻿using Core.MarketExchange;
 using Core.Security;
 using Core.Settings;
 using Infrastructure.Data;

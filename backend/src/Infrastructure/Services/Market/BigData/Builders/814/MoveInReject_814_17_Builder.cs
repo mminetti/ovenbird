@@ -1,5 +1,5 @@
-﻿using Core.Market;
-using Core.Service;
+﻿using Core.MarketExchange;
+using Core.ServiceDelivery;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 

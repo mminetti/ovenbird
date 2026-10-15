@@ -1,5 +1,5 @@
-﻿using Core.Service;
-using Core.Service.Specifications;
+﻿using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
