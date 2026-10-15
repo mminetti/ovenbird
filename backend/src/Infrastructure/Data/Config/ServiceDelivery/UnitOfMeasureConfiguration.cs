@@ -9,10 +9,13 @@ public class UnitOfMeasureConfiguration : IEntityTypeConfiguration<UnitOfMeasure
     {
         builder.Property(x => x.Id).ValueGeneratedNever();
 
+        builder.Property(x => x.Identifier)
+            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
+
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.HasData(
-            new UnitOfMeasure { Id = Constants.UnitOfMeasures.KilowattHour, Name = "Kilowatt Hour" });
+            new UnitOfMeasure { Id = Constants.UnitOfMeasures.KilowattHour, Name = "Kilowatt Hour", Identifier = "KH" });
     }
 }

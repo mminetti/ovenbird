@@ -813,6 +813,135 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("Invoice");
                 });
 
+            modelBuilder.Entity("Core.ServiceDelivery.InvoiceCharge", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<double>("ChargeAmount")
+                        .HasColumnType("float");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("InvoiceChargeCodeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InvoiceChargeTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("InvoiceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<double>("TotalAmount")
+                        .HasColumnType("float");
+
+                    b.Property<int>("UnitOfMeasureId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceChargeCodeId");
+
+                    b.HasIndex("InvoiceChargeTypeId");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.HasIndex("UnitOfMeasureId");
+
+                    b.ToTable("InvoiceCharge");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.InvoiceChargeCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InvoiceChargeCode");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.InvoiceChargeType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InvoiceChargeType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Rate"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Account"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "B2B"
+                        });
+                });
+
             modelBuilder.Entity("Core.ServiceDelivery.InvoicePayment", b =>
                 {
                     b.Property<long>("Id")
@@ -1479,6 +1608,11 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
+                    b.Property<string>("Identifier")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -1492,6 +1626,7 @@ namespace Infrastructure.Data.Migrations
                         new
                         {
                             Id = 1,
+                            Identifier = "KH",
                             Name = "Kilowatt Hour"
                         });
                 });
@@ -2574,6 +2709,41 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Service");
 
                     b.Navigation("ServicePoint");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.InvoiceCharge", b =>
+                {
+                    b.HasOne("Core.ServiceDelivery.InvoiceChargeCode", "InvoiceChargeCode")
+                        .WithMany()
+                        .HasForeignKey("InvoiceChargeCodeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.ServiceDelivery.InvoiceChargeType", "InvoiceChargeType")
+                        .WithMany()
+                        .HasForeignKey("InvoiceChargeTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.ServiceDelivery.Invoice", "Invoice")
+                        .WithMany()
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.ServiceDelivery.UnitOfMeasure", "UnitOfMeasure")
+                        .WithMany()
+                        .HasForeignKey("UnitOfMeasureId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
+
+                    b.Navigation("InvoiceChargeCode");
+
+                    b.Navigation("InvoiceChargeType");
+
+                    b.Navigation("UnitOfMeasure");
                 });
 
             modelBuilder.Entity("Core.ServiceDelivery.InvoicePayment", b =>
