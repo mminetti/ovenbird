@@ -24,7 +24,7 @@ public class UsageBuilderCreateAsync
 
         _lookupService.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
         _lookupService.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
-        _lookupService.GetUsageTypeId(Arg.Any<string>()).Returns(Constants.UsageTypes.Original);
+        _lookupService.GetUsageTypeId(Arg.Any<string>()).Returns(Constants.UsagePurposes.Original);
 
         var servicePoint = new ServicePoint
         {
@@ -145,7 +145,7 @@ public class UsageBuilderCreateAsync
         usage.Identifier.ShouldBe(item.ReferenceNumber);
         usage.ServicePointId.ShouldBe(20);
         usage.MeterId.ShouldBe(30);
-        usage.UsageTypeId.ShouldBe(Constants.UsageTypes.Original);
+        usage.UsageTypeId.ShouldBe(Constants.UsagePurposes.Original);
         usage.OriginalUsageId.ShouldBeNull();
         usage.IsFinal.ShouldBeFalse();
         usage.PeriodStartDate.ShouldBe(new DateOnly(2026, 6, 4));
@@ -171,7 +171,7 @@ public class UsageBuilderCreateAsync
             "<PurposeCode>00</PurposeCode>",
             "<PurposeCode>05</PurposeCode>\n    <OriginalTransactionNumber>ORIG-1</OriginalTransactionNumber>");
 
-        _lookupService.GetUsageTypeId("05").Returns(Constants.UsageTypes.Replace);
+        _lookupService.GetUsageTypeId("05").Returns(Constants.UsagePurposes.Replace);
 
         _usageReadRepository
             .FirstOrDefaultAsync(Arg.Any<UsageByIdentifierSpec>(), Arg.Any<CancellationToken>())
@@ -188,7 +188,7 @@ public class UsageBuilderCreateAsync
         await _builder.CreateAsync(item, CancellationToken.None);
 
         await _usageRepository.Received(1).AddAsync(
-            Arg.Is<Usage>(u => u.OriginalUsageId == 999 && u.UsageTypeId == Constants.UsageTypes.Replace),
+            Arg.Is<Usage>(u => u.OriginalUsageId == 999 && u.UsageTypeId == Constants.UsagePurposes.Replace),
             Arg.Any<CancellationToken>());
     }
 

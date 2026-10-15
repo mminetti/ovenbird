@@ -4,8 +4,7 @@ public static partial class Constants
 {
     public static class UsageTypes
     {
-        public const int Original = 1;
-        public const int Cancel = 2;
-        public const int Replace = 3;
+        public const int NonInterval = 1;
+        public const int Interval = 2;
     }
 }

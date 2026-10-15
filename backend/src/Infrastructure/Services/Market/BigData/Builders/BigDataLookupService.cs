@@ -20,9 +20,9 @@ public class BigDataLookupService(
 
     private static readonly Dictionary<string, int> _usageTypeIdsByPurposeCode = new()
     {
-        ["00"] = CoreConstants.UsageTypes.Original,
-        ["01"] = CoreConstants.UsageTypes.Cancel,
-        ["05"] = CoreConstants.UsageTypes.Replace,
+        ["00"] = CoreConstants.UsagePurposes.Original,
+        ["01"] = CoreConstants.UsagePurposes.Cancel,
+        ["05"] = CoreConstants.UsagePurposes.Replace,
     };
 
     public int GetCommodityId(string code) =>

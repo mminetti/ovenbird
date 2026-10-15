@@ -1,4 +1,4 @@
-using Core.Common;
+﻿using Core.Common;
 using Core.ServiceDelivery;
 
 namespace Core.Subscription;
@@ -7,8 +7,8 @@ public class Service : AuditableEntityBase<long>
 {
     public long AccountId { get; set; }
     public long ServicePointId { get; set; }
-    public DateOnly StartDate { get; set; }
-    public DateOnly EndDate { get; set; }
+    public DateOnly? StartDate { get; set; }
+    public DateOnly? EndDate { get; set; }
     public int StatusId { get; set; } // pending, on, off
     public int SubStatusId { get; set; } // pending start, active, pending end, ended, closed
     public int ConnectionStatusId { get; set; } // pending disconnection, disconnected, pending connection, connected

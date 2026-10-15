@@ -1,4 +1,5 @@
 ﻿using Core.Common;
+using Core.Subscription;
 
 namespace Core.ServiceDelivery;
 
@@ -14,7 +15,7 @@ public abstract class UsageBase : AuditableEntityBase<long>
     public int CommodityId { get; set; }
     public int UnitOfMeasureId { get; set; }
 
-    public Subscription.Service Service { get; set; } = default!;
+    public Service Service { get; set; } = default!;
     public ServicePoint ServicePoint { get; set; } = default!;
     public Meter? Meter { get; set; }
     public Commodity Commodity { get; set; } = default!;

@@ -42,6 +42,12 @@ public class UsageConfiguration : BaseEntityTypeConfiguration<Usage, long>
             .OnDelete(DeleteBehavior.NoAction);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
+        builder.HasOne(x => x.UsagePurpose)
+            .WithMany()
+            .HasForeignKey(x => x.UsagePurposeId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.UsageType)
             .WithMany()
             .HasForeignKey(x => x.UsageTypeId)
