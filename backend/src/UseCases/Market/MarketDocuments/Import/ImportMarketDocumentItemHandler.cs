@@ -1,6 +1,7 @@
 ﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -11,7 +12,7 @@ public class ImportMarketDocumentItemHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    IMarketDocumentTransport transport,
+    IConnectorFileStorageTransport fileStorageTransport,
     MarketDocumentParserResolver parserResolver,
     IMessageBus bus)
 {
@@ -28,7 +29,7 @@ public class ImportMarketDocumentItemHandler(
 
         var parser = parserResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-        using var content = await transport.OpenDocumentAsync(configuration, document.File, ct);
+        using var content = await fileStorageTransport.OpenReadAsync(configuration, document.File, ct);
 
         var items = await parser.ReadTransactionsAsync(content, ct);
 

@@ -1,21 +1,21 @@
 using Core.Common.Constants;
 using Core.Settings;
-using Infrastructure.Services.Market;
+using Infrastructure.Services.Files;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 
-namespace UnitTests.Infrastructure.Services.Market;
+namespace UnitTests.Infrastructure.Services.Files;
 
-public class MarketDocumentTransportTests
+public class ConnectorFtpTransportTests
 {
     private const string FtpImplementation = "TestFtpImplementation";
 
     private readonly IFtpService _ftpService = Substitute.For<IFtpService>();
     private readonly IConnectorFieldSecretResolver _secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
-    private readonly MarketDocumentTransport _transport;
+    private readonly ConnectorFtpTransport _transport;
 
-    public MarketDocumentTransportTests()
+    public ConnectorFtpTransportTests()
     {
         var services = new ServiceCollection();
         services.AddKeyedSingleton(FtpImplementation, _ftpService);
@@ -24,7 +24,7 @@ public class MarketDocumentTransportTests
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _transport = new MarketDocumentTransport(services.BuildServiceProvider(), _secretResolver, TimeProvider.System);
+        _transport = new ConnectorFtpTransport(services.BuildServiceProvider(), _secretResolver);
     }
 
     [Fact]

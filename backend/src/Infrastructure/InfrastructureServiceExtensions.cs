@@ -14,7 +14,6 @@ using Infrastructure.Data.Queries.Markets;
 using Infrastructure.Data.Queries.Security;
 using Infrastructure.Data.Queries.Settings;
 using Infrastructure.Services.Files;
-using Infrastructure.Services.Market;
 using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Builders;
 using Infrastructure.Services.Market.BigData.Readers;
@@ -100,7 +99,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IFtpService, LocalFileSystemFtpService>()
             .AddScoped<IFileStorage, AzureBlobFileStorage>()
             .AddScoped<IFileStorage, LocalFileSystemFileStorage>()
-            .AddScoped<IMarketDocumentTransport, MarketDocumentTransport>()
+            .AddScoped<IConnectorFtpTransport, ConnectorFtpTransport>()
+            .AddScoped<IConnectorFileStorageTransport, ConnectorFileStorageTransport>()
             .AddScoped<IMarketDocumentParser, BigDataMarketDocumentParser>()
             .AddScoped<MarketDocumentParserResolver>()
             .AddScoped<MarketDocumentEntityBuilderResolver>()

@@ -2,8 +2,8 @@
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
-using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Export;
@@ -15,7 +15,8 @@ public class ExportMarketDocumentHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IReadRepository<MarketDocumentItem> itemReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    IMarketDocumentTransport transport,
+    IConnectorFtpTransport ftpTransport,
+    IConnectorFileStorageTransport fileStorageTransport,
     MarketDocumentGeneratorResolver generatorResolver,
     TimeProvider timeProvider)
 {
@@ -46,7 +47,7 @@ public class ExportMarketDocumentHandler(
 
             using var content = await generator.WriteTransactionsAsync(pendingItems, ct);
 
-            var uploadedFileReference = await transport.UploadDocumentAsync(configuration, content, fileName, ct);
+            var uploadedFileReference = await fileStorageTransport.UploadAsync(configuration, content, fileName, ct);
 
             var document = new MarketDocument
             {
@@ -67,7 +68,7 @@ public class ExportMarketDocumentHandler(
 
             content.Position = 0;
 
-            await transport.UploadFileAsync(configuration, content, fileName, ct);
+            await ftpTransport.UploadFileAsync(configuration, content, fileName, ct);
 
             documentIds.Add(created.Id);
         }

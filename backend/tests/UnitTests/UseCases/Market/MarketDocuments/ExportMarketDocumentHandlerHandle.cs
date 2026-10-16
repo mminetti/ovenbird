@@ -4,7 +4,7 @@ using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using Infrastructure.Services.Market;
+using Infrastructure.Services.Files;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
@@ -42,7 +42,9 @@ public class ExportMarketDocumentHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        var transport = new MarketDocumentTransport(services.BuildServiceProvider(), secretResolver, TimeProvider.System);
+        var serviceProvider = services.BuildServiceProvider();
+        var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
+        var fileStorageTransport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
 
         _generator.Identifier.Returns("BigData");
 
@@ -51,7 +53,8 @@ public class ExportMarketDocumentHandlerHandle
             _itemRepository,
             _itemReadRepository,
             _configurationReadRepository,
-            transport,
+            ftpTransport,
+            fileStorageTransport,
             new MarketDocumentGeneratorResolver([_generator]),
             TimeProvider.System);
     }

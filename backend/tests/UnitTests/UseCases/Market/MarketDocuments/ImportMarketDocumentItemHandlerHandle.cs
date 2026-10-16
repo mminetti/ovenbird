@@ -3,7 +3,7 @@ using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
-using Infrastructure.Services.Market;
+using Infrastructure.Services.Files;
 using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Readers;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +27,7 @@ public class ImportMarketDocumentItemHandlerHandle
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly TestFileStorage _fileStorage = new();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
-    private readonly MarketDocumentTransport _transport;
+    private readonly ConnectorFileStorageTransport _transport;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
 
@@ -45,7 +45,7 @@ public class ImportMarketDocumentItemHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        _transport = new MarketDocumentTransport(serviceProvider, secretResolver, TimeProvider.System);
+        _transport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
 
         var parserResolver = new MarketDocumentParserResolver([new BigDataMarketDocumentParser(serviceProvider)]);
 
@@ -157,7 +157,7 @@ public class ImportMarketDocumentItemHandlerHandle
     {
         using var content = new MemoryStream(Encoding.UTF8.GetBytes(xml));
 
-        var fileReference = await _transport.UploadDocumentAsync(_configuration, content, "document.xml", CancellationToken.None);
+        var fileReference = await _transport.UploadAsync(_configuration, content, "document.xml", CancellationToken.None);
 
         return new MarketDocument
         {

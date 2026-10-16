@@ -4,13 +4,12 @@ using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using Infrastructure.Services.Market;
+using Infrastructure.Services.Files;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
-using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
@@ -42,7 +41,9 @@ public class ImportMarketDocumentHandlerHandle
             .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
             .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
 
-        var transport = new MarketDocumentTransport(services.BuildServiceProvider(), secretResolver, TimeProvider.System);
+        var serviceProvider = services.BuildServiceProvider();
+        var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
+        var fileStorageTransport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
@@ -52,7 +53,8 @@ public class ImportMarketDocumentHandlerHandle
             _documentRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            transport,
+            ftpTransport,
+            fileStorageTransport,
             _bus);
     }
 

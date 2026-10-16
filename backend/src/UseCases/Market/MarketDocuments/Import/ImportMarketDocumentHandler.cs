@@ -2,7 +2,7 @@
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using UseCases.Market.MarketDocuments.Import.Interfaces;
+using UseCases.Interfaces.Files;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -13,7 +13,8 @@ public class ImportMarketDocumentHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<MarketDocument> documentReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    IMarketDocumentTransport transport,
+    IConnectorFtpTransport ftpTransport,
+    IConnectorFileStorageTransport fileStorageTransport,
     IMessageBus bus)
 {
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
@@ -29,7 +30,7 @@ public class ImportMarketDocumentHandler(
             {
                 var company = configuration.GetRequiredCompany();
 
-                var remoteFilePaths = await transport.ListFilesAsync(configuration, ct);
+                var remoteFilePaths = await ftpTransport.ListFilesAsync(configuration, ct);
 
                 foreach (var remoteFilePath in remoteFilePaths)
                 {
@@ -46,9 +47,9 @@ public class ImportMarketDocumentHandler(
                             continue;
                         }
 
-                        using var fileStream = await transport.DownloadFileAsync(configuration, remoteFilePath, ct);
+                        using var fileStream = await ftpTransport.DownloadFileAsync(configuration, remoteFilePath, ct);
 
-                        var uploadedFileReference = await transport.UploadDocumentAsync(configuration, fileStream, fileName, ct);
+                        var uploadedFileReference = await fileStorageTransport.UploadAsync(configuration, fileStream, fileName, ct);
 
                         var document = new MarketDocument
                         {
