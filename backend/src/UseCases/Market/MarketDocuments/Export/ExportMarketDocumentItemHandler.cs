@@ -18,6 +18,8 @@ public class ExportMarketDocumentItemHandler(
     MarketDocumentEntityGeneratorResolver generatorResolver,
     IMessageBus bus)
 {
+    private const string HandlerIdentifier = "handler";
+
     public async Task<Result<IReadOnlyList<long>>> Handle(
         ExportMarketDocumentItemCommand command, 
         CancellationToken ct)
@@ -25,11 +27,12 @@ public class ExportMarketDocumentItemHandler(
         var itemIds = new List<long>();
 
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.EdiExport), ct);
+            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
 
         foreach (var configuration in configurations)
         {
             var company = configuration.GetRequiredCompany();
+            var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
 
             var serviceStartItems = await serviceStartItemReadRepository.ListAsync(
                 new ServiceStartItemsPendingExportSpec(company.Id), ct);
@@ -44,7 +47,7 @@ public class ExportMarketDocumentItemHandler(
                         $"ServiceStart '{serviceStartItem.ServiceStartId}' has an unsupported ServiceStartTypeId '{serviceStartItem.ServiceStart.ServiceStartTypeId}'.")
                 };
 
-                var generator = generatorResolver.Resolve($"{set}_{subSet}");
+                var generator = generatorResolver.Resolve($"{handlerIdentifier}_{set}_{subSet}");
 
                 var item = await generator.CreateAsync(serviceStartItem, configuration, ct);
                 item.Set = set;

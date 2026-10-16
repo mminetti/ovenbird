@@ -3,7 +3,7 @@
 public class SwitchRequest_814_01_Generator(TimeProvider timeProvider) 
     : ServiceStartRequestGeneratorBase(timeProvider)
 {
-    public const string Key = "814_01";
+    public const string Key = "BigData_814_01";
 
     protected override string SubSet => "01";
     protected override string? ThirdServiceRequested => "SW";

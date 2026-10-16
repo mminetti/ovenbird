@@ -5,6 +5,7 @@ using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Infrastructure.Services.Files;
+using Infrastructure.Services.Market.BigData;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
@@ -45,6 +46,7 @@ public class ExportMarketDocumentHandlerHandle
         var serviceProvider = services.BuildServiceProvider();
         var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
         var fileStorageTransport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
+        var ediResolver = new EdiExportHandlerResolver([new BigDataEdiExportHandler(ftpTransport, fileStorageTransport)]);
 
         _generator.Identifier.Returns("BigData");
 
@@ -53,8 +55,7 @@ public class ExportMarketDocumentHandlerHandle
             _itemRepository,
             _itemReadRepository,
             _configurationReadRepository,
-            ftpTransport,
-            fileStorageTransport,
+            ediResolver,
             new MarketDocumentGeneratorResolver([_generator]),
             TimeProvider.System);
     }

@@ -28,6 +28,7 @@ public class ImportMarketDocumentItemHandlerHandle
     private readonly TestFileStorage _fileStorage = new();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly ConnectorFileStorageTransport _transport;
+    private readonly EdiImportHandlerResolver _ediResolver;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
 
@@ -47,6 +48,10 @@ public class ImportMarketDocumentItemHandlerHandle
 
         _transport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
 
+        var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
+        var ediHandler = new BigDataEdiImportHandler(ftpTransport, _transport, _documentReadRepository);
+        _ediResolver = new EdiImportHandlerResolver([ediHandler]);
+
         var parserResolver = new MarketDocumentParserResolver([new BigDataMarketDocumentParser(serviceProvider)]);
 
         _configuration = CreateConfiguration();
@@ -59,7 +64,7 @@ public class ImportMarketDocumentItemHandlerHandle
             _itemRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            _transport,
+            _ediResolver,
             parserResolver,
             _bus);
     }

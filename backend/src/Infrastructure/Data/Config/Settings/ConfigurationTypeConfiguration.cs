@@ -18,13 +18,8 @@ public class ConfigurationTypeConfiguration : IEntityTypeConfiguration<Configura
         builder.HasData(
             new ConfigurationType
             {
-                Id = Constants.ConfigurationTypes.EdiImport,
-                Name = "EDI Import"
-            },
-            new ConfigurationType
-            {
-                Id = Constants.ConfigurationTypes.EdiExport,
-                Name = "EDI Export"
+                Id = Constants.ConfigurationTypes.Edi,
+                Name = "EDI"
             }
         );
     }

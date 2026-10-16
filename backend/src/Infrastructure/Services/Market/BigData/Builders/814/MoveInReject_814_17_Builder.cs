@@ -8,5 +8,5 @@ public class MoveInReject_814_17_Builder(
     IRepository<MarketDocumentReference> referenceRepository)
     : ServiceStartRejectBuilderBase(serviceStartItemRepository, referenceRepository)
 {
-    public const string Key = "814_17";
+    public const string Key = "BigData_814_17";
 }

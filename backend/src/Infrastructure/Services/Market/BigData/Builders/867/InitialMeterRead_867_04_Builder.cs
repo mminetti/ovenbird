@@ -11,7 +11,7 @@ public class InitialMeterRead_867_04_Builder(
     IRepository<MarketDocumentReference> referenceRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
-    public const string Key = "867_04";
+    public const string Key = "BigData_867_04";
 
     private const string InitialUsageType = "INT";
 

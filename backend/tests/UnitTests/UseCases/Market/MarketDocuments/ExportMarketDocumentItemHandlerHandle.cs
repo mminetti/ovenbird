@@ -29,6 +29,7 @@ public class ExportMarketDocumentItemHandlerHandle
         Company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" },
         ConfigurationFields =
         [
+            new ConfigurationField { ConfigurationId = 1, Name = "handler", Value = "BigData" },
             new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.name", Value = "Acme Energy" },
             new ConfigurationField { ConfigurationId = 1, Name = "company.marketer.identifier", Value = "123456789" },
         ],
@@ -59,8 +60,8 @@ public class ExportMarketDocumentItemHandlerHandle
             .Returns(new MarketDocumentItem { ReferenceNumber = "MOVEIN-1" });
 
         var services = new ServiceCollection();
-        services.AddKeyedSingleton("814_01", switchGenerator);
-        services.AddKeyedSingleton("814_16", moveInGenerator);
+        services.AddKeyedSingleton("BigData_814_01", switchGenerator);
+        services.AddKeyedSingleton("BigData_814_16", moveInGenerator);
 
         var resolver = new MarketDocumentEntityGeneratorResolver(services.BuildServiceProvider());
 

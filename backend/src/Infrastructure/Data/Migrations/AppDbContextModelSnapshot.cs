@@ -1985,12 +1985,7 @@ namespace Infrastructure.Data.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "EDI Import"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "EDI Export"
+                            Name = "EDI"
                         });
                 });
 

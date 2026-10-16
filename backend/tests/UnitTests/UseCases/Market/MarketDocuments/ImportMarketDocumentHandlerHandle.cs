@@ -5,11 +5,13 @@ using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Infrastructure.Services.Files;
+using Infrastructure.Services.Market.BigData;
 using Microsoft.Extensions.DependencyInjection;
 using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
@@ -44,6 +46,8 @@ public class ImportMarketDocumentHandlerHandle
         var serviceProvider = services.BuildServiceProvider();
         var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
         var fileStorageTransport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
+        var ediHandler = new BigDataEdiImportHandler(ftpTransport, fileStorageTransport, _documentReadRepository);
+        var ediResolver = new EdiImportHandlerResolver([ediHandler]);
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
@@ -51,10 +55,8 @@ public class ImportMarketDocumentHandlerHandle
 
         _handler = new ImportMarketDocumentHandler(
             _documentRepository,
-            _documentReadRepository,
             _configurationReadRepository,
-            ftpTransport,
-            fileStorageTransport,
+            ediResolver,
             _bus);
     }
 

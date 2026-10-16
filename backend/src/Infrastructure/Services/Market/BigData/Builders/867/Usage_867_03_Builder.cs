@@ -12,7 +12,7 @@ public class Usage_867_03_Builder(
     IRepository<MarketDocumentReference> referenceRepository)
     : UsageTransactionBuilderBase<Usage>(lookupService, usageRepository, referenceRepository)
 {
-    public const string Key = "867_03";
+    public const string Key = "BigData_867_03";
 
     private const string DetailUsageType = "DET";
 

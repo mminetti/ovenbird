@@ -8,5 +8,5 @@ public class SwitchReject_814_02_Builder(
     IRepository<MarketDocumentReference> referenceRepository)
     : ServiceStartRejectBuilderBase(serviceStartItemRepository, referenceRepository)
 {
-    public const string Key = "814_02";
+    public const string Key = "BigData_814_02";
 }

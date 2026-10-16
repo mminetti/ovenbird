@@ -10,7 +10,7 @@ public class HistoricalUsage_867_02_Builder(
     IRepository<MarketDocumentReference> referenceRepository)
     : UsageTransactionBuilderBase<HistoricalUsage>(lookupService, historicalUsageRepository, referenceRepository)
 {
-    public const string Key = "867_02";
+    public const string Key = "BigData_867_02";
 
     protected override int ReferenceTypeId => Constants.MarketDocumentReferenceTypes.HistoricalUsage;
 

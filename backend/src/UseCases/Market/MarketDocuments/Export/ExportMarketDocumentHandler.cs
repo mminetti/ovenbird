@@ -2,7 +2,6 @@
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
@@ -15,8 +14,7 @@ public class ExportMarketDocumentHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IReadRepository<MarketDocumentItem> itemReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    IConnectorFtpTransport ftpTransport,
-    IConnectorFileStorageTransport fileStorageTransport,
+    EdiExportHandlerResolver ediResolver,
     MarketDocumentGeneratorResolver generatorResolver,
     TimeProvider timeProvider)
 {
@@ -28,7 +26,7 @@ public class ExportMarketDocumentHandler(
         var documentIds = new List<long>();
 
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.EdiExport), ct);
+            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
 
         foreach (var configuration in configurations)
         {
@@ -42,12 +40,13 @@ public class ExportMarketDocumentHandler(
 
             var company = configuration.GetRequiredCompany();
             var generator = generatorResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+            var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
             var fileName = $"{configuration.Name}_{timeProvider.GetUtcNow():yyyyMMddHHmmss}.xml";
 
             using var content = await generator.WriteTransactionsAsync(pendingItems, ct);
 
-            var uploadedFileReference = await fileStorageTransport.UploadAsync(configuration, content, fileName, ct);
+            var uploadedFileReference = await ediHandler.StoreTransactionAsync(configuration, content, fileName, ct);
 
             var document = new MarketDocument
             {
@@ -65,10 +64,6 @@ public class ExportMarketDocumentHandler(
                 item.MarketDocumentId = created.Id;
                 await itemRepository.UpdateAsync(item, ct);
             }
-
-            content.Position = 0;
-
-            await ftpTransport.UploadFileAsync(configuration, content, fileName, ct);
 
             documentIds.Add(created.Id);
         }

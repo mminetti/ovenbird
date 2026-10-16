@@ -1,7 +1,6 @@
 ﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
-using UseCases.Interfaces.Files;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -10,9 +9,9 @@ public record ImportMarketDocumentItemCommand(int ConfigurationId, long MarketDo
 
 public class ImportMarketDocumentItemHandler(
     IRepository<MarketDocumentItem> itemRepository,
-    IReadRepository<MarketDocument> documentReadRepository,
-    IReadRepository<Configuration> configurationReadRepository,
-    IConnectorFileStorageTransport fileStorageTransport,
+    IReadRepository<MarketDocument> documentRepository,
+    IReadRepository<Configuration> configurationRepository,
+    EdiImportHandlerResolver ediResolver,
     MarketDocumentParserResolver parserResolver,
     IMessageBus bus)
 {
@@ -20,16 +19,17 @@ public class ImportMarketDocumentItemHandler(
 
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentItemCommand command, CancellationToken ct)
     {
-        var configuration = await configurationReadRepository.FirstOrDefaultAsync(
+        var configuration = await configurationRepository.FirstOrDefaultAsync(
             new ConfigurationByIdSpec(command.ConfigurationId), ct)
             ?? throw new InvalidOperationException($"Configuration '{command.ConfigurationId}' was not found.");
 
-        var document = await documentReadRepository.GetByIdAsync(command.MarketDocumentId, ct)
+        var document = await documentRepository.GetByIdAsync(command.MarketDocumentId, ct)
             ?? throw new InvalidOperationException($"MarketDocument '{command.MarketDocumentId}' was not found.");
 
         var parser = parserResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+        var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-        using var content = await fileStorageTransport.OpenReadAsync(configuration, document.File, ct);
+        using var content = await ediHandler.OpenTransactionAsync(configuration, document.File, ct);
 
         var items = await parser.ReadTransactionsAsync(content, ct);
 
@@ -41,7 +41,7 @@ public class ImportMarketDocumentItemHandler(
 
             var created = await itemRepository.AddAsync(item, ct);
 
-            await bus.InvokeAsync(new MarketDocumentEntityBuilderCommand(created.Id), ct);
+            await bus.InvokeAsync(new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
 
             itemIds.Add(created.Id);
         }
