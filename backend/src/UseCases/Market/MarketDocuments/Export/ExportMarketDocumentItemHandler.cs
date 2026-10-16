@@ -68,7 +68,6 @@ public class ExportMarketDocumentItemHandler(
 
                 itemIds.Add(created.Id);
             }
-
         }
 
         _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(new ExportMarketDocumentCommand(), ct);

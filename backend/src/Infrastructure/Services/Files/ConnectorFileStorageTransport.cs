@@ -43,9 +43,7 @@ public class ConnectorFileStorageTransport(
     {
         var connector = configuration.GetRequiredConnector(CoreConstants.ConnectorTypes.FileStorage);
 
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration.GetRequiredCompany().TimeZoneId);
-
-        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
+        var now = configuration.GetRequiredCompany().GetLocalNow(timeProvider);
 
         return new FileStorageOptions
         {

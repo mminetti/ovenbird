@@ -11,4 +11,14 @@ public class Company : AuditableEntityBase<int>, IAudited, IHasDisplayName
 
     public Market Market { get; set; } = default!;
     public ICollection<Configuration> Configurations { get; set; } = [];
+
+    public DateTimeOffset GetLocalNow(TimeProvider timeProvider)
+    {
+        if (!TimeZoneInfo.TryFindSystemTimeZoneById(TimeZoneId, out var timeZone))
+        {
+            throw new InvalidOperationException($"Company '{Name}' has an unresolvable time zone '{TimeZoneId}'.");
+        }
+
+        return TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
+    }
 }

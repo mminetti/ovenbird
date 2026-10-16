@@ -42,7 +42,9 @@ public class ExportMarketDocumentHandler(
             var generator = generatorResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
             var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-            var fileName = $"{configuration.Name}_{timeProvider.GetUtcNow():yyyyMMddHHmmss}.xml";
+            var now = company.GetLocalNow(timeProvider);
+
+            var fileName = $"{configuration.Name}_{now:yyyyMMddHHmmss}.xml";
 
             using var content = await generator.WriteTransactionsAsync(pendingItems, ct);
 

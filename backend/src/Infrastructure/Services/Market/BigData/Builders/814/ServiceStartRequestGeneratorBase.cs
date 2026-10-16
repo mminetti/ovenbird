@@ -44,9 +44,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
         var servicePoint = service.ServicePoint;
         var customer = account.Customer;
 
-        var timeZone = TimeZoneInfo.FindSystemTimeZoneById(configuration.GetRequiredCompany().TimeZoneId);
-
-        var now = TimeZoneInfo.ConvertTime(timeProvider.GetUtcNow(), timeZone);
+        var now = configuration.GetRequiredCompany().GetLocalNow(timeProvider);
 
         var requestedDate = serviceStart.ServiceDate.ToString(DateFormat);
 
