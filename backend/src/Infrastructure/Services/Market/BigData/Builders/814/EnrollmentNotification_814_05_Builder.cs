@@ -9,7 +9,7 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 public class EnrollmentNotification_814_05_Builder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : TransactionXmlReaderBase<ServiceRequestXml>, IMarketDocumentEntityBuilder
+    : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "814_05";
 

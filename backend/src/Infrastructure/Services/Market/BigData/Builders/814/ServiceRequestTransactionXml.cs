@@ -3,7 +3,7 @@
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 [XmlRoot("Transaction")]
-public class ServiceRequestXml
+public class ServiceRequestTransactionXml
 {
     public string SupplierDUNS { get; set; } = string.Empty;
     public string UtilityDUNS { get; set; } = string.Empty;

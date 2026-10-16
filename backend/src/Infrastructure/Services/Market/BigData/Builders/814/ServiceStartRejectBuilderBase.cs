@@ -8,7 +8,7 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 public abstract class ServiceStartRejectBuilderBase(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : TransactionXmlReaderBase<ServiceRequestXml>, IMarketDocumentEntityBuilder
+    : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     protected override string RequiredElementName => "AccountMaint";
 

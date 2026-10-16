@@ -7,7 +7,7 @@ using UseCases.Market.MarketDocuments.Export.Interfaces;
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider)
-    : TransactionXmlWriterBase<ServiceRequestXml>, IMarketDocumentEntityGenerator
+    : TransactionXmlWriterBase<ServiceRequestTransactionXml>, IMarketDocumentEntityGenerator
 {
     private const string Set = "814";
     private const string TimeFormat = "HHmmss";
@@ -50,7 +50,7 @@ public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider
 
         var requestedDate = serviceStart.ServiceDate.ToString(DateFormat);
 
-        var transaction = new ServiceRequestXml
+        var transaction = new ServiceRequestTransactionXml
         {
             SupplierDUNS = configuration.GetRequiredValue(CompanyMarketerIdentifier),
             UtilityDUNS = servicePoint.Utility.Identifier,
