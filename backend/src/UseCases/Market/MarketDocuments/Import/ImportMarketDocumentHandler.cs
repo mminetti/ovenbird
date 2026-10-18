@@ -1,4 +1,5 @@
-﻿using Core.MarketExchange;
+﻿using Core.Assets;
+using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -44,12 +45,21 @@ public class ImportMarketDocumentHandler(
 
                 var document = new MarketDocument
                 {
-                    Name = stored.Name,
-                    File = stored.FileReference,
+                    Identifier = stored.Name,
                     CompanyId = company.Id,
                     DirectionId = CoreConstants.MarketDocumentDirections.Inbound,
                     StatusId = CoreConstants.MarketDocumentStatuses.New
                 };
+
+                if (stored.FileReference is not null)
+                {
+                    document.Asset = new Asset
+                    {
+                        FileName = stored.Name,
+                        Extension = Path.GetExtension(stored.Name),
+                        Reference = stored.FileReference
+                    };
+                }
 
                 var created = await documentRepository.AddAsync(document, ct);
 

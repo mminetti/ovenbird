@@ -1,4 +1,5 @@
 ﻿using Core.MarketExchange;
+using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -23,13 +24,16 @@ public class ImportMarketDocumentItemHandler(
             new ConfigurationByIdSpec(command.ConfigurationId), ct)
             ?? throw new InvalidOperationException($"Configuration '{command.ConfigurationId}' was not found.");
 
-        var document = await documentRepository.GetByIdAsync(command.MarketDocumentId, ct)
+        var document = await documentRepository.FirstOrDefaultAsync(new MarketDocumentByIdSpec(command.MarketDocumentId), ct)
             ?? throw new InvalidOperationException($"MarketDocument '{command.MarketDocumentId}' was not found.");
 
         var parser = parserResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
         var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-        using var content = await ediHandler.OpenTransactionAsync(configuration, document.File, ct);
+        var assetReference = document.Asset?.Reference
+            ?? throw new InvalidOperationException($"MarketDocument '{document.Id}' has no associated asset.");
+
+        using var content = await ediHandler.OpenTransactionAsync(configuration, assetReference, ct);
 
         var items = await parser.ReadTransactionsAsync(content, ct);
 

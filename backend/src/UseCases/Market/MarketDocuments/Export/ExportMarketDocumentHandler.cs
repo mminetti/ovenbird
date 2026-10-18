@@ -1,4 +1,5 @@
-﻿using Core.MarketExchange;
+﻿using Core.Assets;
+using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -52,11 +53,16 @@ public class ExportMarketDocumentHandler(
 
             var document = new MarketDocument
             {
-                Name = fileName,
-                File = uploadedFileReference,
+                Identifier = fileName,
                 CompanyId = company.Id,
                 DirectionId = CoreConstants.MarketDocumentDirections.Outbound,
                 StatusId = CoreConstants.MarketDocumentStatuses.New,
+                Asset = new Asset
+                {
+                    FileName = fileName,
+                    Extension = Path.GetExtension(fileName),
+                    Reference = uploadedFileReference
+                }
             };
 
             var created = await documentRepository.AddAsync(document, ct);

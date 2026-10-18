@@ -100,7 +100,8 @@ public class ExportMarketDocumentHandlerHandle
         created!.CompanyId.ShouldBe(company.Id);
         created.DirectionId.ShouldBe(Constants.MarketDocumentDirections.Outbound);
         created.StatusId.ShouldBe(Constants.MarketDocumentStatuses.New);
-        created.File.ShouldStartWith($"{RootDirectory}/");
+        created.Asset.ShouldNotBeNull();
+        created.Asset!.Reference.ShouldStartWith($"{RootDirectory}/");
 
         pendingItems[0].MarketDocumentId.ShouldBe(500L);
         pendingItems[1].MarketDocumentId.ShouldBe(500L);
@@ -116,7 +117,7 @@ public class ExportMarketDocumentHandlerHandle
         Encoding.UTF8.GetString(uploadedFtpContent!).ShouldBe(generatedContent);
 
         var fileStorageOptions = new FileStorageOptions { RootDirectory = RootDirectory };
-        await using var roundTripStream = await _fileStorage.OpenReadAsync(fileStorageOptions, created.File, CancellationToken.None);
+        await using var roundTripStream = await _fileStorage.OpenReadAsync(fileStorageOptions, created.Asset!.Reference, CancellationToken.None);
         using var reader = new StreamReader(roundTripStream);
         var roundTrippedContent = await reader.ReadToEndAsync(CancellationToken.None);
 

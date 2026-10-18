@@ -125,8 +125,7 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
 
         var document = new MarketDocument
         {
-            Name = "Doc",
-            File = "doc.pdf",
+            Identifier = "Doc",
             DirectionId = direction.Id,
             CompanyId = company.Id,
             StatusId = status.Id
@@ -134,7 +133,7 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         _dbContext.Add(document);
         await _dbContext.SaveChangesAsync(Ct);
 
-        document.Name = "Doc Updated";
+        document.Identifier = "Doc Updated";
         await _dbContext.SaveChangesAsync(Ct);
 
         _dbContext.Remove(document);

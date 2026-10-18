@@ -1,4 +1,4 @@
-﻿using Core.MarketExchange;
+using Core.MarketExchange;
 
 namespace Infrastructure.Data.Config.MarketExchange;
 
@@ -8,11 +8,8 @@ public class MarketDocumentConfiguration : BaseEntityTypeConfiguration<MarketDoc
     {
         base.Configure(builder);
 
-        builder.Property(x => x.Name)
+        builder.Property(x => x.Identifier)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.Name)
-            .HasMaxLength(500);
 
         // NoAction: protect the referenced row from accidental/cascading deletion.
         builder.HasOne(x => x.Company)
@@ -30,6 +27,12 @@ public class MarketDocumentConfiguration : BaseEntityTypeConfiguration<MarketDoc
         builder.HasOne(x => x.Status)
             .WithMany()
             .HasForeignKey(x => x.StatusId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        // NoAction: protect the referenced Asset row from accidental/cascading deletion.
+        builder.HasOne(x => x.Asset)
+            .WithMany()
+            .HasForeignKey(x => x.AssetId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

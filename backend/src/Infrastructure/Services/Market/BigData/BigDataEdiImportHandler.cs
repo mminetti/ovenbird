@@ -22,10 +22,10 @@ public class BigDataEdiImportHandler(
     public async Task<MarketDocument?> FindExistingTransactionAsync(Configuration configuration, string reference, CancellationToken ct)
     {
         var company = configuration.GetRequiredCompany();
-        var name = Path.GetFileName(reference);
+        var identifier = Path.GetFileName(reference);
 
         return await documentReadRepository.FirstOrDefaultAsync(
-            new MarketDocumentByNameAndCompanySpec(name, company.Id), ct);
+            new MarketDocumentByIdentifierAndCompanySpec(identifier, company.Id), ct);
     }
 
     public async Task<TransactionReference> StoreTransactionAsync(Configuration configuration, string reference, CancellationToken ct)

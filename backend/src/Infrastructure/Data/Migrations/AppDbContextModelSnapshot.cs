@@ -37,6 +37,53 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("ConfigurationConnector", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Assets.Asset", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Extension")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Reference")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("SizeBytes")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Asset");
+                });
+
             modelBuilder.Entity("Core.Auditing.AuditTrail", b =>
                 {
                     b.Property<long>("Id")
@@ -86,6 +133,9 @@ namespace Infrastructure.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
+                    b.Property<long?>("AssetId")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
@@ -99,9 +149,10 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("DirectionId")
                         .HasColumnType("int");
 
-                    b.Property<string>("File")
+                    b.Property<string>("Identifier")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTimeOffset>("LastModifiedAtUtc")
                         .HasColumnType("datetimeoffset");
@@ -110,15 +161,12 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
 
                     b.HasIndex("CompanyId");
 
@@ -2541,6 +2589,11 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.MarketExchange.MarketDocument", b =>
                 {
+                    b.HasOne("Core.Assets.Asset", "Asset")
+                        .WithMany()
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Core.Settings.Company", "Company")
                         .WithMany()
                         .HasForeignKey("CompanyId")
@@ -2558,6 +2611,8 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Asset");
 
                     b.Navigation("Company");
 

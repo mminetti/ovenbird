@@ -1,6 +1,8 @@
 ﻿using System.Text;
+using Core.Assets;
 using Core.Common.Constants;
 using Core.MarketExchange;
+using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Infrastructure.Services.Files;
@@ -101,7 +103,7 @@ public class ImportMarketDocumentItemHandlerHandle
         var document = await UploadDocumentAsync(xml);
 
         _documentReadRepository
-            .GetByIdAsync(document.Id, Arg.Any<CancellationToken>())
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(document);
 
         long nextId = 500;
@@ -151,7 +153,7 @@ public class ImportMarketDocumentItemHandlerHandle
         var document = await UploadDocumentAsync(xml);
 
         _documentReadRepository
-            .GetByIdAsync(document.Id, Arg.Any<CancellationToken>())
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(document);
 
         await Should.ThrowAsync<InvalidOperationException>(() => _handler.Handle(
@@ -167,8 +169,8 @@ public class ImportMarketDocumentItemHandlerHandle
         return new MarketDocument
         {
             Id = 1,
-            Name = "document.xml",
-            File = fileReference,
+            Identifier = "document.xml",
+            Asset = new Asset { FileName = "document.xml", Reference = fileReference },
             CompanyId = _configuration.CompanyId!.Value,
         };
     }

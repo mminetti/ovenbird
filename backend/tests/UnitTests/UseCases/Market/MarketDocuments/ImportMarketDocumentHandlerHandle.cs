@@ -75,10 +75,10 @@ public class ImportMarketDocumentHandlerHandle
             .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
             .Returns([configuration]);
 
-        var existingDocument = new MarketDocument { Id = 99, Name = "existingfile.csv", CompanyId = company.Id };
+        var existingDocument = new MarketDocument { Id = 99, Identifier = "existingfile.csv", CompanyId = company.Id };
 
         _documentReadRepository
-            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByNameAndCompanySpec>(), Arg.Any<CancellationToken>())
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdentifierAndCompanySpec>(), Arg.Any<CancellationToken>())
             .Returns(existingDocument, (MarketDocument?)null);
 
         long nextId = 100;
@@ -102,14 +102,15 @@ public class ImportMarketDocumentHandlerHandle
         _fileStorage.UploadedPaths.Count.ShouldBe(1);
 
         created.ShouldNotBeNull();
-        created!.Name.ShouldBe("newfile.csv");
+        created!.Identifier.ShouldBe("newfile.csv");
         created.CompanyId.ShouldBe(company.Id);
         created.DirectionId.ShouldBe(Constants.MarketDocumentDirections.Inbound);
         created.StatusId.ShouldBe(Constants.MarketDocumentStatuses.New);
-        created.File.ShouldStartWith($"{RootDirectory}/");
+        created.Asset.ShouldNotBeNull();
+        created.Asset!.Reference.ShouldStartWith($"{RootDirectory}/");
 
         var fileStorageOptions = new FileStorageOptions { RootDirectory = RootDirectory };
-        await using var roundTripStream = await _fileStorage.OpenReadAsync(fileStorageOptions, created.File, CancellationToken.None);
+        await using var roundTripStream = await _fileStorage.OpenReadAsync(fileStorageOptions, created.Asset!.Reference, CancellationToken.None);
         using var reader = new StreamReader(roundTripStream);
         var roundTrippedContent = await reader.ReadToEndAsync(CancellationToken.None);
 

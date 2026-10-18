@@ -1,4 +1,5 @@
-﻿using Core.Auditing;
+﻿using Core.Assets;
+using Core.Auditing;
 using Core.MarketExchange;
 using Core.Security;
 using Core.Settings;
@@ -16,6 +17,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Permission> Permission => Set<Permission>();
     public DbSet<Company> Company => Set<Company>();
     public DbSet<MarketDocument> MarketDocument => Set<MarketDocument>();
+    public DbSet<Asset> Asset => Set<Asset>();
     public DbSet<Connector> Connector => Set<Connector>();
     public DbSet<ConnectorField> ConnectorField => Set<ConnectorField>();
     public DbSet<ConnectorImplementation> ConnectorImplementation => Set<ConnectorImplementation>();
