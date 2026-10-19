@@ -1,51 +1,83 @@
-﻿using Core.Common.Constants;
+using System.Globalization;
+using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
 using Core.ServiceDelivery.Specifications;
+using Core.Subscription;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class Usage_867_03_ImportBuilder(
     IReadRepository<Usage> usageReadRepository,
-    IReadRepository<ServicePoint> servicePointReadRepository,
     IBigDataValueMapper valueMapper,
     IRepository<Usage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionImportBuilderBase<Usage>(valueMapper, usageRepository, referenceRepository)
+    : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_867_03";
 
     private const string DetailUsageType = "DET";
 
-    private int _usageTypeId;
-    private bool _isFinal;
-    private long? _originalUsageId;
+    protected override string RequiredElementName => "Usage";
 
-    protected override int ReferenceTypeId => Constants.MarketDocumentReferenceTypes.Usage;
-
-    protected override IEnumerable<UsageMeterXml> SelectUsageMeters(IEnumerable<UsageMeterXml> usageMeters) =>
-        usageMeters.Where(x => x.UsageType == DetailUsageType);
-
-    protected override async Task PrepareAsync(UsageXml usage, CancellationToken ct)
+    public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        _usageTypeId = ValueMapper.GetUsageTypeId(usage.PurposeCode ?? string.Empty);
-        _isFinal = usage.FinalIndicator == "F";
-        _originalUsageId = await GetOriginalUsageIdAsync(usage.OriginalTransactionNumber, ct);
+        var transaction = DeserializeTransaction(item);
+        var usageTransaction = transaction.Usage;
+
+        var commodityId = valueMapper.GetCommodityId(transaction.Commodity);
+
+        var service = await GetServiceAsync(usageTransaction.UtilityAccountNumber, ct);
+
+        var usageTypeId = valueMapper.GetUsageTypeId(usageTransaction.PurposeCode ?? string.Empty);
+        var isFinal = usageTransaction.FinalIndicator == "F";
+        var originalUsageId = await GetOriginalUsageIdAsync(usageTransaction.OriginalTransactionNumber, ct);
+
+        foreach (var usageMeter in usageTransaction.UsageMeters.Where(x => x.UsageType == DetailUsageType))
+        {
+            var meter = await GetMeter(service.ServicePoint, usageMeter.MeterIdentifier, ct);
+
+            var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
+            var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
+
+            foreach (var quantity in usageMeter.UsageQuantities)
+            {
+                foreach (var read in quantity.UsageReads)
+                {
+                    var usage = new Usage
+                    {
+                        UsageTypeId = usageTypeId,
+                        OriginalUsageId = originalUsageId,
+                        IsFinal = isFinal,
+                        StartRead = read.StartMeterRead ?? 0,
+                        EndRead = read.EndMeterRead ?? 0,
+                        UsageStatusId = Constants.UsageStatuses.New,
+                        ServiceId = service.Id,
+                        Identifier = item.ReferenceNumber,
+                        ServicePointId = service.ServicePointId,
+                        MeterId = meter?.Id,
+                        PeriodStartDate = periodStartDate,
+                        PeriodEndDate = periodEndDate,
+                        Consumption = read.ReadConsumption,
+                        CommodityId = commodityId,
+                        UnitOfMeasureId = valueMapper.GetUnitOfMeasureId(read.ReadUOM),
+                    };
+
+                    var created = await usageRepository.AddAsync(usage, ct);
+
+                    var reference = new MarketDocumentReference
+                    {
+                        MarketDocumentItemId = item.Id,
+                        ReferenceTypeId = Constants.MarketDocumentReferenceTypes.Usage,
+                        ReferenceId = created.Id,
+                    };
+
+                    await referenceRepository.AddAsync(reference, ct);
+                }
+            }
+        }
     }
-
-    protected override async Task<ServicePoint> GetServicePointAsync(string identifier, CancellationToken ct) =>
-        await servicePointReadRepository.FirstOrDefaultAsync(new ServicePointWithMetersByIdentifierSpec(identifier), ct)
-            ?? throw new InvalidOperationException($"Service Point '{identifier}' was not found.");
-
-    protected override Usage CreateUsage(UsageReadXml read) => new()
-    {
-        UsageTypeId = _usageTypeId,
-        OriginalUsageId = _originalUsageId,
-        IsFinal = _isFinal,
-        StartRead = read.StartMeterRead ?? 0,
-        EndRead = read.EndMeterRead ?? 0,
-        UsageStatusId = Constants.UsageStatuses.New,
-    };
 
     private async Task<long?> GetOriginalUsageIdAsync(string? originalTransactionNumber, CancellationToken ct)
     {
@@ -58,5 +90,16 @@ public class Usage_867_03_ImportBuilder(
             ?? throw new InvalidOperationException($"Original usage '{originalTransactionNumber}' was not found.");
 
         return originalUsage.Id;
+    }
+
+    private Task<Service> GetServiceAsync(string identifier, CancellationToken ct)
+    {
+        throw new NotImplementedException();
+    }
+
+    private Task<Meter?> GetMeter(ServicePoint servicePoint, string? meterIdentifier, CancellationToken ct)
+    {
+        //return servicePoint.GetMeter(meterIdentifier);
+        throw new NotImplementedException();
     }
 }

@@ -1,14 +1,12 @@
-﻿using Core.Common.Constants;
+using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class HistoricalUsageEntityBuilderCreateAsync
 {
-    private readonly IReadRepository<ServicePoint> _servicePointReadRepository = Substitute.For<IReadRepository<ServicePoint>>();
     private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
     private readonly IRepository<HistoricalUsage> _historicalUsageRepository = Substitute.For<IRepository<HistoricalUsage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
@@ -17,28 +15,12 @@ public class HistoricalUsageEntityBuilderCreateAsync
     public HistoricalUsageEntityBuilderCreateAsync()
     {
         _builder = new HistoricalUsage_867_02_ImportBuilder(
-            _servicePointReadRepository,
             _valueMapper,
             _historicalUsageRepository,
             _referenceRepository);
 
         _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
         _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
-
-        var servicePoint = new ServicePoint
-        {
-            Id = 20,
-            Identifier = "SP-1",
-            Meters =
-            [
-                new Meter { Id = 30, Identifier = "MTR-1" },
-                new Meter { Id = 31, Identifier = "MTR-2" },
-            ],
-        };
-
-        _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(servicePoint);
     }
 
     private const string Xml = """
@@ -95,67 +77,21 @@ public class HistoricalUsageEntityBuilderCreateAsync
     };
 
     [Fact]
-    public async Task CreatesOneHistoricalUsagePerMeterReadAndLinksItToTheItem()
+    public async Task ThrowsBecauseServiceResolutionIsNotYetImplemented()
     {
-        long nextUsageId = 100;
-        var createdUsages = new List<HistoricalUsage>();
-        _historicalUsageRepository
-            .AddAsync(Arg.Do<HistoricalUsage>(createdUsages.Add), Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
-            {
-                var usage = callInfo.Arg<HistoricalUsage>();
-                usage.Id = nextUsageId++;
-                return usage;
-            });
-
-        var createdReferences = new List<MarketDocumentReference>();
-        _referenceRepository
-            .AddAsync(Arg.Do<MarketDocumentReference>(createdReferences.Add), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
-
-        var item = CreateItem();
-
-        await _builder.CreateAsync(item, CancellationToken.None);
-
-        createdUsages.Count.ShouldBe(2);
-
-        createdUsages[0].ServicePointId.ShouldBe(20);
-        createdUsages[0].MeterId.ShouldBe(30);
-        createdUsages[0].PeriodStartDate.ShouldBe(new DateOnly(2026, 6, 1));
-        createdUsages[0].PeriodEndDate.ShouldBe(new DateOnly(2026, 6, 30));
-        createdUsages[0].Consumption.ShouldBe(100);
-        createdUsages[0].CommodityId.ShouldBe(Constants.Commodities.Electricity);
-        createdUsages[0].UnitOfMeasureId.ShouldBe(Constants.UnitOfMeasures.KilowattHour);
-
-        createdUsages[1].MeterId.ShouldBe(31);
-        createdUsages[1].Consumption.ShouldBe(200);
-
-        createdReferences.Count.ShouldBe(2);
-        createdReferences.ShouldAllBe(r =>
-            r.MarketDocumentItemId == item.Id && r.ReferenceTypeId == Constants.MarketDocumentReferenceTypes.HistoricalUsage);
-        createdReferences[0].ReferenceId.ShouldBe(createdUsages[0].Id);
-        createdReferences[1].ReferenceId.ShouldBe(createdUsages[1].Id);
-    }
-
-    [Fact]
-    public async Task ThrowsWhenServicePointCannotBeResolved()
-    {
-        _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServicePoint?)null);
-
-        await Should.ThrowAsync<InvalidOperationException>(
+        // Service resolution for 867_02 transactions is an explicit TODO (HistoricalUsage_867_02_ImportBuilder.GetServiceAsync) -
+        // this documents that CreateAsync currently cannot complete until that is implemented.
+        await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
     }
 
     [Fact]
-    public async Task ThrowsWhenMeterIdentifierCannotBeResolved()
+    public async Task NeverCallsPersistenceBeforeServiceIsResolved()
     {
-        _servicePointReadRepository
-            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new ServicePoint { Id = 20, Identifier = "SP-1", Meters = [] });
-
-        await Should.ThrowAsync<InvalidOperationException>(
+        await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
+
+        await _historicalUsageRepository.DidNotReceive().AddAsync(Arg.Any<HistoricalUsage>(), Arg.Any<CancellationToken>());
+        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }
 }
