@@ -1,4 +1,3 @@
-﻿using Core.Assets;
 using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -26,47 +25,25 @@ public class ImportMarketDocumentHandler(
 
         foreach (var configuration in configurations)
         {
-            var company = configuration.GetRequiredCompany();
             var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-            var transactions = await ediHandler.ListTransactionsAsync(configuration, ct);
+            var documents = await ediHandler.ExecuteImportAsync(configuration, ct);
 
-            foreach (var transaction in transactions)
+            foreach (var document in documents)
             {
-                var existing = await ediHandler.FindExistingTransactionAsync(configuration, transaction, ct);
-
-                if (existing is not null)
+                if (document.Id == 0)
                 {
-                    documentIds.Add(existing.Id);
-                    continue;
+                    var created = await documentRepository.AddAsync(document, ct);
+
+                    _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
+                        new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
+
+                    documentIds.Add(created.Id);
                 }
-
-                var stored = await ediHandler.StoreTransactionAsync(configuration, transaction, ct);
-
-                var document = new MarketDocument
+                else
                 {
-                    Identifier = stored.Name,
-                    CompanyId = company.Id,
-                    DirectionId = CoreConstants.MarketDocumentDirections.Inbound,
-                    StatusId = CoreConstants.MarketDocumentStatuses.New
-                };
-
-                if (stored.FileReference is not null)
-                {
-                    document.Asset = new Asset
-                    {
-                        FileName = stored.Name,
-                        Extension = Path.GetExtension(stored.Name),
-                        Reference = stored.FileReference
-                    };
+                    documentIds.Add(document.Id);
                 }
-
-                var created = await documentRepository.AddAsync(document, ct);
-
-                _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
-                    new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
-
-                documentIds.Add(created.Id);
             }
         }
 

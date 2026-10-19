@@ -6,7 +6,7 @@ using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData;
 
-public class BigDataMarketDocumentParser(IServiceProvider serviceProvider) : IMarketDocumentParser
+public class BigDataDocumentImportParser(IServiceProvider serviceProvider) : IMarketDocumentParser
 {
     public string Identifier => "BigData";
 

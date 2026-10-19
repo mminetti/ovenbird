@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData;
 
-public class BigDataMarketDocumentGeneratorWriteTransactionsAsync
+public class BigDataDocumentExportGeneratorWriteTransactionsAsync
 {
-    private readonly BigDataMarketDocumentGenerator _generator = new();
+    private readonly BigDataDocumentExportGenerator _generator = new();
 
     [Fact]
     public void IdentifierIsBigData()
@@ -41,7 +41,7 @@ public class BigDataMarketDocumentGeneratorWriteTransactionsAsync
         services.AddKeyedSingleton<IMarketDocumentTransactionReader, ServiceRequest_814_TransactionReader>(
             ServiceRequest_814_TransactionReader.Set);
 
-        var parser = new BigDataMarketDocumentParser(services.BuildServiceProvider());
+        var parser = new BigDataDocumentImportParser(services.BuildServiceProvider());
         var parsedItems = await parser.ReadTransactionsAsync(content, CancellationToken.None);
 
         parsedItems.Count.ShouldBe(2);

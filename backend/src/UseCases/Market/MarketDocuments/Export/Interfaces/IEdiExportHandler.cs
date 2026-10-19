@@ -6,5 +6,5 @@ public interface IEdiExportHandler
 {
     string Identifier { get; }
 
-    Task<string> StoreTransactionAsync(Configuration configuration, Stream content, string fileName, CancellationToken ct);
+    Task<MarketDocumentExportResult?> ExecuteExportAsync(Configuration configuration, CancellationToken ct);
 }

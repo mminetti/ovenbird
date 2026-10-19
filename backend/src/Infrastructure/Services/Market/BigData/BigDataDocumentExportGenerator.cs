@@ -5,7 +5,7 @@ using UseCases.Market.MarketDocuments.Export.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData;
 
-public class BigDataMarketDocumentGenerator : IMarketDocumentGenerator
+public class BigDataDocumentExportGenerator : IMarketDocumentGenerator
 {
     public string Identifier => "BigData";
 

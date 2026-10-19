@@ -1,15 +1,7 @@
-﻿using Ardalis.Result;
-using Core.Common.Constants;
+using Ardalis.Result;
 using Core.MarketExchange;
-using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using Infrastructure.Services.Files;
-using Infrastructure.Services.Market.BigData;
-using Microsoft.Extensions.DependencyInjection;
-using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
-using UseCases.Interfaces.Files;
-using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
@@ -18,36 +10,15 @@ namespace UnitTests.UseCases.Market.MarketDocuments;
 
 public class ImportMarketDocumentHandlerHandle
 {
-    private const string FtpImplementation = "TestFtp";
-    private const string FileStorageImplementation = "TestFileStorage";
-    private const string RemoteDirectory = "remote/dir";
-    private const string RootDirectory = "import-market-documents";
-    private const string FileStorageFolder = "edi/import";
-
     private readonly IRepository<MarketDocument> _documentRepository = Substitute.For<IRepository<MarketDocument>>();
-    private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
-    private readonly TestFtpService _ftpService = new();
-    private readonly TestFileStorage _fileStorage = new();
+    private readonly IEdiImportHandler _ediHandler = Substitute.For<IEdiImportHandler>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly ImportMarketDocumentHandler _handler;
 
     public ImportMarketDocumentHandlerHandle()
     {
-        var services = new ServiceCollection();
-        services.AddKeyedSingleton<IFtpService>(FtpImplementation, _ftpService);
-        services.AddKeyedSingleton<IFileStorage>(FileStorageImplementation, _fileStorage);
-
-        var secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
-        secretResolver
-            .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
-            .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
-
-        var serviceProvider = services.BuildServiceProvider();
-        var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
-        var fileStorageTransport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
-        var ediHandler = new BigDataEdiImportHandler(ftpTransport, fileStorageTransport, _documentReadRepository);
-        var ediResolver = new EdiImportHandlerResolver([ediHandler]);
+        _ediHandler.Identifier.Returns("BigData");
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
@@ -56,18 +27,13 @@ public class ImportMarketDocumentHandlerHandle
         _handler = new ImportMarketDocumentHandler(
             _documentRepository,
             _configurationReadRepository,
-            ediResolver,
+            new EdiImportHandlerResolver([_ediHandler]),
             _bus);
     }
 
     [Fact]
-    public async Task ImportsNewFilesAndSkipsAlreadyImportedFiles_RoundTrippingContentThroughFtpAndFileStorage()
+    public async Task PersistsNewDocumentsAndTriggersItemImport_ButSkipsAlreadyExistingDocuments()
     {
-        const string newFileContent = "A,B,C\n1,2,3";
-        _ftpService
-            .SeedFile($"{RemoteDirectory}/existingfile.csv", "already imported")
-            .SeedFile($"{RemoteDirectory}/newfile.csv", newFileContent);
-
         var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
         var configuration = CreateConfiguration(company);
 
@@ -76,10 +42,11 @@ public class ImportMarketDocumentHandlerHandle
             .Returns([configuration]);
 
         var existingDocument = new MarketDocument { Id = 99, Identifier = "existingfile.csv", CompanyId = company.Id };
+        var newDocument = new MarketDocument { Identifier = "newfile.csv", CompanyId = company.Id };
 
-        _documentReadRepository
-            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdentifierAndCompanySpec>(), Arg.Any<CancellationToken>())
-            .Returns(existingDocument, (MarketDocument?)null);
+        _ediHandler
+            .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
+            .Returns(new List<MarketDocument> { existingDocument, newDocument });
 
         long nextId = 100;
         MarketDocument? created = null;
@@ -97,81 +64,45 @@ public class ImportMarketDocumentHandlerHandle
         result.IsSuccess.ShouldBeTrue();
         result.Value.ShouldBe([existingDocument.Id, 100]);
 
-        // The already-imported file must never be re-downloaded or re-uploaded.
-        _ftpService.DownloadedPaths.ShouldBe([$"{RemoteDirectory}/newfile.csv"]);
-        _fileStorage.UploadedPaths.Count.ShouldBe(1);
+        created.ShouldBeSameAs(newDocument);
 
-        created.ShouldNotBeNull();
-        created!.Identifier.ShouldBe("newfile.csv");
-        created.CompanyId.ShouldBe(company.Id);
-        created.DirectionId.ShouldBe(Constants.MarketDocumentDirections.Inbound);
-        created.StatusId.ShouldBe(Constants.MarketDocumentStatuses.New);
-        created.Asset.ShouldNotBeNull();
-        created.Asset!.Reference.ShouldStartWith($"{RootDirectory}/");
-
-        var fileStorageOptions = new FileStorageOptions { RootDirectory = RootDirectory };
-        await using var roundTripStream = await _fileStorage.OpenReadAsync(fileStorageOptions, created.Asset!.Reference, CancellationToken.None);
-        using var reader = new StreamReader(roundTripStream);
-        var roundTrippedContent = await reader.ReadToEndAsync(CancellationToken.None);
-
-        roundTrippedContent.ShouldBe(newFileContent);
+        await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
+        await _bus.Received(1).InvokeAsync<Result<IReadOnlyList<long>>>(
+            Arg.Is<ImportMarketDocumentItemCommand>(c => c.ConfigurationId == configuration.Id && c.MarketDocumentId == 100),
+            Arg.Any<CancellationToken>());
     }
 
-    private static Configuration CreateConfiguration(Company company)
+    [Fact]
+    public async Task SkipsConfigurationWhenHandlerReturnsNoDocuments()
     {
-        var ftpConnector = new Connector
-        {
-            Id = 1,
-            Name = "Ftp",
-            ConnectorImplementation = new ConnectorImplementation
-            {
-                Id = 1,
-                Name = "Test FTP",
-                Identifier = FtpImplementation,
-                ConnectorTypeId = Constants.ConnectorTypes.Ftp,
-                ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.Ftp, Name = "FTP" },
-            },
-            ConnectorFields =
-            [
-                new ConnectorField { ConnectorId = 1, Name = "host", Value = "sftp.example.com" },
-                new ConnectorField { ConnectorId = 1, Name = "port", Value = "22" },
-                new ConnectorField { ConnectorId = 1, Name = "username", Value = "user" },
-                new ConnectorField { ConnectorId = 1, Name = "password", Value = "pass" },
-            ],
-        };
+        var configuration = CreateConfiguration(new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" });
 
-        var fileStorageConnector = new Connector
-        {
-            Id = 2,
-            Name = "FileStorage",
-            ConnectorImplementation = new ConnectorImplementation
-            {
-                Id = 2,
-                Name = "Test File Storage",
-                Identifier = FileStorageImplementation,
-                ConnectorTypeId = Constants.ConnectorTypes.FileStorage,
-                ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.FileStorage, Name = "File Storage" },
-            },
-            ConnectorFields =
-            [
-                new ConnectorField { ConnectorId = 2, Name = "connection.string", Value = "UseDevelopmentStorage=true" },
-            ],
-        };
+        _configurationReadRepository
+            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
+            .Returns([configuration]);
 
-        return new Configuration
+        _ediHandler
+            .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
+            .Returns(new List<MarketDocument>());
+
+        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBeEmpty();
+
+        await _documentRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
+    }
+
+    private static Configuration CreateConfiguration(Company company) =>
+        new()
         {
             Id = 1,
             Name = "edi.import",
             Company = company,
             CompanyId = company.Id,
-            Connectors = [ftpConnector, fileStorageConnector],
             ConfigurationFields =
             [
                 new ConfigurationField { ConfigurationId = 1, Name = "handler", Value = "BigData" },
-                new ConfigurationField { ConfigurationId = 1, Name = "ftp.root.directory", Value = RemoteDirectory },
-                new ConfigurationField { ConfigurationId = 1, Name = "file.storage.root.directory", Value = RootDirectory },
-                new ConfigurationField { ConfigurationId = 1, Name = "file.storage.folder", Value = FileStorageFolder },
             ],
         };
-    }
 }

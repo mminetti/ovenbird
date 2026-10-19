@@ -1,17 +1,8 @@
-﻿using System.Text;
-using Core.Assets;
-using Core.Common.Constants;
+using Ardalis.Result;
 using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
-using Infrastructure.Services.Files;
-using Infrastructure.Services.Market.BigData;
-using Infrastructure.Services.Market.BigData.Readers;
-using Microsoft.Extensions.DependencyInjection;
-using UnitTests.UseCases.Market.MarketDocuments.TestDoubles;
-using UseCases.Interfaces.Files;
-using UseCases.Interfaces.Secrets;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
@@ -20,41 +11,17 @@ namespace UnitTests.UseCases.Market.MarketDocuments;
 
 public class ImportMarketDocumentItemHandlerHandle
 {
-    private const string FileStorageImplementation = "TestFileStorage";
-    private const string RootDirectory = "import-market-documents";
-    private const string FileStorageFolder = "edi/import";
-
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
     private readonly IReadRepository<MarketDocument> _documentReadRepository = Substitute.For<IReadRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
-    private readonly TestFileStorage _fileStorage = new();
+    private readonly IEdiImportHandler _ediHandler = Substitute.For<IEdiImportHandler>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
-    private readonly ConnectorFileStorageTransport _transport;
-    private readonly EdiImportHandlerResolver _ediResolver;
     private readonly Configuration _configuration;
     private readonly ImportMarketDocumentItemHandler _handler;
 
     public ImportMarketDocumentItemHandlerHandle()
     {
-        var services = new ServiceCollection();
-        services.AddKeyedSingleton<IFileStorage>(FileStorageImplementation, _fileStorage);
-        services.AddKeyedSingleton<IMarketDocumentTransactionReader, Usage_867_TransactionReader>(Usage_867_TransactionReader.Set);
-        services.AddKeyedSingleton<IMarketDocumentTransactionReader, Invoice_810_TransactionReader>(Invoice_810_TransactionReader.Set);
-
-        var serviceProvider = services.BuildServiceProvider();
-
-        var secretResolver = Substitute.For<IConnectorFieldSecretResolver>();
-        secretResolver
-            .ResolveAsync(Arg.Any<ConnectorField>(), Arg.Any<CancellationToken>())
-            .Returns(ci => Task.FromResult(((ConnectorField)ci[0]).Value!));
-
-        _transport = new ConnectorFileStorageTransport(serviceProvider, secretResolver, TimeProvider.System);
-
-        var ftpTransport = new ConnectorFtpTransport(serviceProvider, secretResolver);
-        var ediHandler = new BigDataEdiImportHandler(ftpTransport, _transport, _documentReadRepository);
-        _ediResolver = new EdiImportHandlerResolver([ediHandler]);
-
-        var parserResolver = new MarketDocumentParserResolver([new BigDataMarketDocumentParser(serviceProvider)]);
+        _ediHandler.Identifier.Returns("BigData");
 
         _configuration = CreateConfiguration();
 
@@ -66,45 +33,28 @@ public class ImportMarketDocumentItemHandlerHandle
             _itemRepository,
             _documentReadRepository,
             _configurationReadRepository,
-            _ediResolver,
-            parserResolver,
+            new EdiImportHandlerResolver([_ediHandler]),
             _bus);
     }
 
     [Fact]
-    public async Task ParsesEachTransactionIntoAMarketDocumentItem()
+    public async Task PersistsEachItemReturnedByTheHandler_AndTriggersEntityBuilding()
     {
-        const string xml = """
-            <Document>
-              <TransactionList>
-                <Transaction>
-                  <TransactionSet>867</TransactionSet>
-                  <TransactionSubSet>03</TransactionSubSet>
-                  <Usage>
-                    <PurposeCode>SU</PurposeCode>
-                    <TransactionReferenceNumber>REF-1</TransactionReferenceNumber>
-                    <UtilityAccountNumber>ACCT-1</UtilityAccountNumber>
-                  </Usage>
-                </Transaction>
-                <Transaction>
-                  <TransactionSet>810</TransactionSet>
-                  <TransactionSubSet>02</TransactionSubSet>
-                  <Invoice>
-                    <BillPurpose>00</BillPurpose>
-                    <BillActionCode>PR</BillActionCode>
-                    <BillNumber>BILL-1</BillNumber>
-                    <LDCAccountNumber>LDC-1</LDCAccountNumber>
-                  </Invoice>
-                </Transaction>
-              </TransactionList>
-            </Document>
-            """;
-
-        var document = await UploadDocumentAsync(xml);
+        var document = new MarketDocument { Id = 1, Identifier = "document.xml", CompanyId = _configuration.CompanyId!.Value };
 
         _documentReadRepository
             .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(document);
+
+        var parsedItems = new List<MarketDocumentItem>
+        {
+            new() { Set = "867", SubSet = "03", ReferenceNumber = "REF-1", ServicePointIdentifier = "ACCT-1" },
+            new() { Set = "810", SubSet = "02", ReferenceNumber = "BILL-1", ServicePointIdentifier = "LDC-1" },
+        };
+
+        _ediHandler
+            .ExecuteItemImportAsync(_configuration, document, Arg.Any<CancellationToken>())
+            .Returns(parsedItems);
 
         long nextId = 500;
         var created = new List<MarketDocumentItem>();
@@ -124,77 +74,25 @@ public class ImportMarketDocumentItemHandlerHandle
         result.Value.ShouldBe([500, 501]);
 
         created.Count.ShouldBe(2);
-
         created[0].MarketDocumentId.ShouldBe(document.Id);
-        created[0].Set.ShouldBe("867");
-        created[0].ReferenceNumber.ShouldBe("REF-1");
-        created[0].ServicePointIdentifier.ShouldBe("ACCT-1");
-
         created[1].MarketDocumentId.ShouldBe(document.Id);
-        created[1].Set.ShouldBe("810");
-        created[1].ReferenceNumber.ShouldBe("BILL-1");
-        created[1].ServicePointIdentifier.ShouldBe("LDC-1");
+
+        await _bus.Received(2).InvokeAsync(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ThrowsWhenTransactionSetCannotBeResolved()
+    public async Task ThrowsWhenMarketDocumentIsNotFound()
     {
-        const string xml = """
-            <Document>
-              <TransactionList>
-                <Transaction>
-                  <TransactionSet>999</TransactionSet>
-                  <TransactionSubSet>01</TransactionSubSet>
-                </Transaction>
-              </TransactionList>
-            </Document>
-            """;
-
-        var document = await UploadDocumentAsync(xml);
-
         _documentReadRepository
             .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdSpec>(), Arg.Any<CancellationToken>())
-            .Returns(document);
+            .Returns((MarketDocument?)null);
 
         await Should.ThrowAsync<InvalidOperationException>(() => _handler.Handle(
-            new ImportMarketDocumentItemCommand(_configuration.Id, document.Id), CancellationToken.None));
-    }
-
-    private async Task<MarketDocument> UploadDocumentAsync(string xml)
-    {
-        using var content = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-
-        var fileReference = await _transport.UploadAsync(_configuration, content, "document.xml", CancellationToken.None);
-
-        return new MarketDocument
-        {
-            Id = 1,
-            Identifier = "document.xml",
-            Asset = new Asset { FileName = "document.xml", Reference = fileReference },
-            CompanyId = _configuration.CompanyId!.Value,
-        };
+            new ImportMarketDocumentItemCommand(_configuration.Id, 1), CancellationToken.None));
     }
 
     private static Configuration CreateConfiguration()
     {
-        var fileStorageConnector = new Connector
-        {
-            Id = 1,
-            Name = "FileStorage",
-            ConnectorImplementation = new ConnectorImplementation
-            {
-                Id = 1,
-                Name = "Test File Storage",
-                Identifier = FileStorageImplementation,
-                ConnectorTypeId = Constants.ConnectorTypes.FileStorage,
-                ConnectorType = new ConnectorType { Id = Constants.ConnectorTypes.FileStorage, Name = "File Storage" },
-            },
-            ConnectorFields =
-            [
-                new ConnectorField { ConnectorId = 1, Name = "connection.string", Value = "UseDevelopmentStorage=true" },
-            ],
-        };
-
         var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
 
         return new Configuration
@@ -203,12 +101,9 @@ public class ImportMarketDocumentItemHandlerHandle
             Name = "edi.import",
             Company = company,
             CompanyId = company.Id,
-            Connectors = [fileStorageConnector],
             ConfigurationFields =
             [
                 new ConfigurationField { ConfigurationId = 1, Name = "handler", Value = "BigData" },
-                new ConfigurationField { ConfigurationId = 1, Name = "file.storage.root.directory", Value = RootDirectory },
-                new ConfigurationField { ConfigurationId = 1, Name = "file.storage.folder", Value = FileStorageFolder },
             ],
         };
     }

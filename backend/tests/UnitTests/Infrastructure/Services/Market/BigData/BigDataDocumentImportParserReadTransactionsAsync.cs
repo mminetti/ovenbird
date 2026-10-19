@@ -8,9 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData;
 
-public class BigDataMarketDocumentParserReadTransactionsAsync
+public class BigDataDocumentImportParserReadTransactionsAsync
 {
-    private static BigDataMarketDocumentParser CreateParser(IServiceProvider serviceProvider) =>
+    private static BigDataDocumentImportParser CreateParser(IServiceProvider serviceProvider) =>
         new(serviceProvider);
 
     [Fact]
