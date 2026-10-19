@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -6,7 +6,7 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public abstract class UsageTransactionImportBuilderBase<TUsage>(
-    IBigDataLookupService lookupService,
+    IBigDataValueMapper valueMapper,
     IRepository<TUsage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
@@ -14,7 +14,7 @@ public abstract class UsageTransactionImportBuilderBase<TUsage>(
 {
     protected override string RequiredElementName => "Usage";
 
-    protected IBigDataLookupService LookupService => lookupService;
+    protected IBigDataValueMapper ValueMapper => valueMapper;
 
     protected abstract int ReferenceTypeId { get; }
 
@@ -23,8 +23,8 @@ public abstract class UsageTransactionImportBuilderBase<TUsage>(
         var transaction = DeserializeTransaction(item);
         var usage = transaction.Usage;
 
-        var commodityId = lookupService.GetCommodityId(transaction.Commodity);
-        var servicePoint = await lookupService.GetServicePointAsync(usage.UtilityAccountNumber, ct);
+        var commodityId = valueMapper.GetCommodityId(transaction.Commodity);
+        var servicePoint = await GetServicePointAsync(usage.UtilityAccountNumber, ct);
 
         await PrepareAsync(usage, ct);
 
@@ -48,7 +48,7 @@ public abstract class UsageTransactionImportBuilderBase<TUsage>(
                     usageEntity.PeriodEndDate = periodEndDate;
                     usageEntity.Consumption = read.ReadConsumption;
                     usageEntity.CommodityId = commodityId;
-                    usageEntity.UnitOfMeasureId = lookupService.GetUnitOfMeasureId(read.ReadUOM);
+                    usageEntity.UnitOfMeasureId = valueMapper.GetUnitOfMeasureId(read.ReadUOM);
 
                     var created = await usageRepository.AddAsync(usageEntity, ct);
 
@@ -70,6 +70,9 @@ public abstract class UsageTransactionImportBuilderBase<TUsage>(
 
     /// <summary>Resolves any transaction-level context needed by <see cref="CreateUsage"/>, once per transaction.</summary>
     protected virtual Task PrepareAsync(UsageXml usage, CancellationToken ct) => Task.CompletedTask;
+
+    /// <summary>Resolves the ServicePoint (with its meters) for the transaction's utility account number.</summary>
+    protected abstract Task<ServicePoint> GetServicePointAsync(string identifier, CancellationToken ct);
 
     /// <summary>Creates the entity for a single meter read, populated with its type-specific fields. Shared fields are filled in by the base class.</summary>
     protected abstract TUsage CreateUsage(UsageReadXml read);

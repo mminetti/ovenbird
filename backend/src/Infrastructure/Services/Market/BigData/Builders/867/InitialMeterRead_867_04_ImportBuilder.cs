@@ -2,6 +2,7 @@
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
@@ -52,12 +53,23 @@ public class InitialMeterRead_867_04_ImportBuilder(
                 }
             }
 
+            // TODO: move this to an event handler
             serviceStart.ServiceDate = serviceDate;
             serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Completed;
         }
     }
 
-    // TODO: resolve ServiceStart 
-    private static Task<ServiceStart> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct) =>
-        throw new NotImplementedException("ServiceStart resolution for 867_04 transactions is not yet implemented.");
+    private async Task<ServiceStart> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(sourceReferenceNumber))
+        {
+            throw new InvalidOperationException("Transaction has no TranNr814.");
+        }
+
+        var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
+            new ServiceStartItemByIdentifierSpec(sourceReferenceNumber), ct)
+            ?? throw new InvalidOperationException($"ServiceStartItem with tracking number '{sourceReferenceNumber}' was not found.");
+
+        return serviceStartItem.ServiceStart;
+    }
 }

@@ -1,5 +1,7 @@
+using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
@@ -65,21 +67,67 @@ public class SwitchRejectBuilderCreateAsync
     };
 
     [Fact]
-    public async Task ThrowsBecauseServiceStartResolutionIsNotYetImplemented()
+    public async Task ThrowsWhenServiceStartCannotBeResolved()
     {
-        // ServiceStart resolution for 814 transactions is an explicit TODO (SwitchReject_814_02_ImportBuilder.GetServiceStartAsync) -
-        // this documents that CreateAsync currently cannot complete until that is implemented.
-        await Should.ThrowAsync<NotImplementedException>(
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
     }
 
     [Fact]
-    public async Task NeverCallsPersistenceBeforeServiceStartIsResolved()
+    public async Task NeverCallsPersistenceWhenServiceStartCannotBeResolved()
     {
-        await Should.ThrowAsync<NotImplementedException>(
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
 
         await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RejectsServiceStartWhenResolved()
+    {
+        var serviceStart = new ServiceStart { Id = 99 };
+        var existingServiceStartItem = new ServiceStartItem
+        {
+            Id = 1,
+            ServiceStartId = serviceStart.Id,
+            Identifier = "181442709922511112506412439",
+            ServiceStart = serviceStart,
+        };
+
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(existingServiceStartItem);
+
+        _serviceStartItemRepository
+            .AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var item = callInfo.Arg<ServiceStartItem>();
+                item.Id = 2;
+                return item;
+            });
+
+        _referenceRepository
+            .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
+
+        var item = CreateItem();
+
+        await _builder.CreateAsync(item, CancellationToken.None);
+
+        await _serviceStartItemRepository.Received(1).AddAsync(
+            Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),
+            Arg.Any<CancellationToken>());
+
+        serviceStart.ServiceOrderStatusId.ShouldBe(Constants.ServiceOrderStatuses.Rejected);
     }
 }

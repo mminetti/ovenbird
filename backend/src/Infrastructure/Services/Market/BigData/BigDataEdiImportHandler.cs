@@ -38,6 +38,7 @@ public class BigDataEdiImportHandler(
             }
 
             using var content = await ftpTransport.DownloadFileAsync(configuration, remoteFile, ct);
+
             var fileReference = await fileStorageTransport.UploadAsync(configuration, content, identifier, ct);
 
             documents.Add(new MarketDocument

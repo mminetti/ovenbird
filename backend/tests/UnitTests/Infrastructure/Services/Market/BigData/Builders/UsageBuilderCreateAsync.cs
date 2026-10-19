@@ -9,7 +9,8 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 public class UsageBuilderCreateAsync
 {
     private readonly IReadRepository<Usage> _usageReadRepository = Substitute.For<IReadRepository<Usage>>();
-    private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
+    private readonly IReadRepository<ServicePoint> _servicePointReadRepository = Substitute.For<IReadRepository<ServicePoint>>();
+    private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
     private readonly IRepository<Usage> _usageRepository = Substitute.For<IRepository<Usage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly Usage_867_03_ImportBuilder _builder;
@@ -18,13 +19,14 @@ public class UsageBuilderCreateAsync
     {
         _builder = new Usage_867_03_ImportBuilder(
             _usageReadRepository,
-            _lookupService,
+            _servicePointReadRepository,
+            _valueMapper,
             _usageRepository,
             _referenceRepository);
 
-        _lookupService.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
-        _lookupService.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
-        _lookupService.GetUsageTypeId(Arg.Any<string>()).Returns(Constants.UsagePurposes.Original);
+        _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
+        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
+        _valueMapper.GetUsageTypeId(Arg.Any<string>()).Returns(Constants.UsagePurposes.Original);
 
         var servicePoint = new ServicePoint
         {
@@ -33,7 +35,9 @@ public class UsageBuilderCreateAsync
             Meters = [new Meter { Id = 30, Identifier = "135300358LG" }],
         };
 
-        _lookupService.GetServicePointAsync("10443720004239415", Arg.Any<CancellationToken>()).Returns(servicePoint);
+        _servicePointReadRepository
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(servicePoint);
     }
 
     private const string Xml = """
@@ -171,7 +175,7 @@ public class UsageBuilderCreateAsync
             "<PurposeCode>00</PurposeCode>",
             "<PurposeCode>05</PurposeCode>\n    <OriginalTransactionNumber>ORIG-1</OriginalTransactionNumber>");
 
-        _lookupService.GetUsageTypeId("05").Returns(Constants.UsagePurposes.Replace);
+        _valueMapper.GetUsageTypeId("05").Returns(Constants.UsagePurposes.Replace);
 
         _usageReadRepository
             .FirstOrDefaultAsync(Arg.Any<UsageByIdentifierSpec>(), Arg.Any<CancellationToken>())
@@ -211,8 +215,8 @@ public class UsageBuilderCreateAsync
     [Fact]
     public async Task ThrowsWhenMeterIdentifierCannotBeResolved()
     {
-        _lookupService
-            .GetServicePointAsync("10443720004239415", Arg.Any<CancellationToken>())
+        _servicePointReadRepository
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns(new ServicePoint { Id = 20, Identifier = "SP-1", Meters = [] });
 
         await Should.ThrowAsync<InvalidOperationException>(

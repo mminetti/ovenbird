@@ -2,6 +2,7 @@
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
@@ -49,12 +50,23 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
             await referenceRepository.AddAsync(reference, ct);
 
+            // TODO: move this to an event handler
             serviceStart.ServiceDate = serviceDate;
             serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Scheduled;
         }
     }
 
-    // TODO: resolve ServiceStart 
-    private static Task<ServiceStart> GetServiceStartAsync(string? trackingNumber, CancellationToken ct) =>
-        throw new NotImplementedException("ServiceStart resolution for 814 transactions is not yet implemented.");
+    private async Task<ServiceStart> GetServiceStartAsync(string? trackingNumber, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(trackingNumber))
+        {
+            throw new InvalidOperationException("Transaction has no ProcessTrackingNumber.");
+        }
+
+        var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
+            new ServiceStartItemByIdentifierSpec(trackingNumber), ct)
+            ?? throw new InvalidOperationException($"ServiceStartItem with tracking number '{trackingNumber}' was not found.");
+
+        return serviceStartItem.ServiceStart;
+    }
 }

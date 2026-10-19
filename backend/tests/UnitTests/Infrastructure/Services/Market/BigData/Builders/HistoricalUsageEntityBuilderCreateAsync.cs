@@ -1,13 +1,15 @@
 ﻿using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class HistoricalUsageEntityBuilderCreateAsync
 {
-    private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
+    private readonly IReadRepository<ServicePoint> _servicePointReadRepository = Substitute.For<IReadRepository<ServicePoint>>();
+    private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
     private readonly IRepository<HistoricalUsage> _historicalUsageRepository = Substitute.For<IRepository<HistoricalUsage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly HistoricalUsage_867_02_ImportBuilder _builder;
@@ -15,12 +17,13 @@ public class HistoricalUsageEntityBuilderCreateAsync
     public HistoricalUsageEntityBuilderCreateAsync()
     {
         _builder = new HistoricalUsage_867_02_ImportBuilder(
-            _lookupService,
+            _servicePointReadRepository,
+            _valueMapper,
             _historicalUsageRepository,
             _referenceRepository);
 
-        _lookupService.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
-        _lookupService.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
+        _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
+        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
 
         var servicePoint = new ServicePoint
         {
@@ -33,7 +36,9 @@ public class HistoricalUsageEntityBuilderCreateAsync
             ],
         };
 
-        _lookupService.GetServicePointAsync("ACCT-1", Arg.Any<CancellationToken>()).Returns(servicePoint);
+        _servicePointReadRepository
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(servicePoint);
     }
 
     private const string Xml = """
@@ -135,9 +140,9 @@ public class HistoricalUsageEntityBuilderCreateAsync
     [Fact]
     public async Task ThrowsWhenServicePointCannotBeResolved()
     {
-        _lookupService
-            .GetServicePointAsync("ACCT-1", Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<ServicePoint>(new InvalidOperationException("ServicePoint 'ACCT-1' was not found.")));
+        _servicePointReadRepository
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServicePoint?)null);
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
@@ -146,8 +151,8 @@ public class HistoricalUsageEntityBuilderCreateAsync
     [Fact]
     public async Task ThrowsWhenMeterIdentifierCannotBeResolved()
     {
-        _lookupService
-            .GetServicePointAsync("ACCT-1", Arg.Any<CancellationToken>())
+        _servicePointReadRepository
+            .FirstOrDefaultAsync(Arg.Any<ServicePointWithMetersByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns(new ServicePoint { Id = 20, Identifier = "SP-1", Meters = [] });
 
         await Should.ThrowAsync<InvalidOperationException>(

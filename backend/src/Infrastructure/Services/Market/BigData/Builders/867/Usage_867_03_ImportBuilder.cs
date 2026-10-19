@@ -7,10 +7,11 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class Usage_867_03_ImportBuilder(
     IReadRepository<Usage> usageReadRepository,
-    IBigDataLookupService lookupService,
+    IReadRepository<ServicePoint> servicePointReadRepository,
+    IBigDataValueMapper valueMapper,
     IRepository<Usage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionImportBuilderBase<Usage>(lookupService, usageRepository, referenceRepository)
+    : UsageTransactionImportBuilderBase<Usage>(valueMapper, usageRepository, referenceRepository)
 {
     public const string Key = "BigData_867_03";
 
@@ -27,10 +28,14 @@ public class Usage_867_03_ImportBuilder(
 
     protected override async Task PrepareAsync(UsageXml usage, CancellationToken ct)
     {
-        _usageTypeId = LookupService.GetUsageTypeId(usage.PurposeCode ?? string.Empty);
+        _usageTypeId = ValueMapper.GetUsageTypeId(usage.PurposeCode ?? string.Empty);
         _isFinal = usage.FinalIndicator == "F";
         _originalUsageId = await GetOriginalUsageIdAsync(usage.OriginalTransactionNumber, ct);
     }
+
+    protected override async Task<ServicePoint> GetServicePointAsync(string identifier, CancellationToken ct) =>
+        await servicePointReadRepository.FirstOrDefaultAsync(new ServicePointWithMetersByIdentifierSpec(identifier), ct)
+            ?? throw new InvalidOperationException($"Service Point '{identifier}' was not found.");
 
     protected override Usage CreateUsage(UsageReadXml read) => new()
     {

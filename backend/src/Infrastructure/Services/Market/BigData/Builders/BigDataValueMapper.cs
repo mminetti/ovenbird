@@ -1,12 +1,8 @@
-﻿using Core.ServiceDelivery;
-using Core.ServiceDelivery.Specifications;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class BigDataLookupService(
-    IReadRepository<ServicePoint> servicePointReadRepository)
-    : IBigDataLookupService
+public class BigDataValueMapper : IBigDataValueMapper
 {
     private static readonly Dictionary<string, int> _commodityIdsByCode = new()
     {
@@ -39,11 +35,4 @@ public class BigDataLookupService(
         _usageTypeIdsByPurposeCode.TryGetValue(purposeCode, out var id)
             ? id
             : throw new InvalidOperationException($"Unmapped usage purpose code '{purposeCode}'.");
-
-    public async Task<ServicePoint> GetServicePointAsync(string identifier, CancellationToken ct)
-    {
-        return await servicePointReadRepository.FirstOrDefaultAsync(
-            new ServicePointWithMetersByIdentifierSpec(identifier), ct)
-            ?? throw new InvalidOperationException($"Service Point '{identifier}' was not found.");
-    }
 }
