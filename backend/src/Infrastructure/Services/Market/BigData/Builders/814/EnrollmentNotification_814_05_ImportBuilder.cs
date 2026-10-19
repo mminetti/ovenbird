@@ -13,7 +13,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_814_05";
-
     protected override string RequiredElementName => "AccountMaint";
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)

@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -16,9 +16,7 @@ public class Usage_867_03_ImportBuilder(
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_867_03";
-
     private const string DetailUsageType = "DET";
-
     protected override string RequiredElementName => "Usage";
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
@@ -36,7 +34,7 @@ public class Usage_867_03_ImportBuilder(
 
         foreach (var usageMeter in usageTransaction.UsageMeters.Where(x => x.UsageType == DetailUsageType))
         {
-            var meter = await GetMeter(service.ServicePoint, usageMeter.MeterIdentifier, ct);
+            var meter = service.ServicePoint.GetMeter(usageMeter.MeterIdentifier);
 
             var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
             var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
@@ -86,7 +84,8 @@ public class Usage_867_03_ImportBuilder(
             return null;
         }
 
-        var originalUsage = await usageReadRepository.FirstOrDefaultAsync(new UsageByIdentifierSpec(originalTransactionNumber), ct)
+        var originalUsage = await usageReadRepository.FirstOrDefaultAsync(
+            new UsageByIdentifierSpec(originalTransactionNumber), ct)
             ?? throw new InvalidOperationException($"Original usage '{originalTransactionNumber}' was not found.");
 
         return originalUsage.Id;
@@ -94,12 +93,12 @@ public class Usage_867_03_ImportBuilder(
 
     private Task<Service> GetServiceAsync(string identifier, CancellationToken ct)
     {
-        throw new NotImplementedException();
-    }
+        // if this is a final read, check if we can find a end service item with identifier = TranNr814
+        // if we do, use it to get the service
+        // if not, get all services for that service point identifier, with start and end date within the read period
+        // if 0 or more than one, return error
+        // if only one, return the service, including service point and meters
 
-    private Task<Meter?> GetMeter(ServicePoint servicePoint, string? meterIdentifier, CancellationToken ct)
-    {
-        //return servicePoint.GetMeter(meterIdentifier);
         throw new NotImplementedException();
     }
 }

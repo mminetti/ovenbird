@@ -13,9 +13,7 @@ public class InitialMeterRead_867_04_ImportBuilder(
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_867_04";
-
     private const string InitialUsageType = "INT";
-
     protected override string RequiredElementName => "Usage";
 
     public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)

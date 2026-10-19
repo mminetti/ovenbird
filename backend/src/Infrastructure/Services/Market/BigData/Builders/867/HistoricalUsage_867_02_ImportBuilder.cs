@@ -1,7 +1,8 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Specifications;
 using Core.Subscription;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
@@ -9,6 +10,7 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class HistoricalUsage_867_02_ImportBuilder(
     IBigDataValueMapper valueMapper,
+    IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<HistoricalUsage> historicalUsageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
@@ -24,11 +26,11 @@ public class HistoricalUsage_867_02_ImportBuilder(
 
         var commodityId = valueMapper.GetCommodityId(transaction.Commodity);
 
-        var service = await GetServiceAsync(usageTransaction.UtilityAccountNumber, ct);
+        var service = await GetServiceAsync(usageTransaction.TranNr814, ct);
 
         foreach (var usageMeter in usageTransaction.UsageMeters)
         {
-            var meter = await GetMeter(service.ServicePoint, usageMeter.MeterIdentifier, ct);
+            var meter = service.ServicePoint.GetMeter(usageMeter.MeterIdentifier);
 
             var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
             var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
@@ -65,14 +67,17 @@ public class HistoricalUsage_867_02_ImportBuilder(
         }
     }
 
-    private Task<Service> GetServiceAsync(string identifier, CancellationToken ct)
+    private async Task<Service> GetServiceAsync(string? identifier, CancellationToken ct)
     {
-        throw new NotImplementedException();
-    }
+        if (string.IsNullOrWhiteSpace(identifier))
+        {
+            throw new InvalidOperationException("Transaction has no ProcessTrackingNumber.");
+        }
 
-    private Task<Meter?> GetMeter(ServicePoint servicePoint, string? meterIdentifier, CancellationToken ct)
-    {
-        //return servicePoint.GetMeter(meterIdentifier);
-        throw new NotImplementedException();
+        var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
+            new ServiceStartItemByIdentifierSpec(identifier), ct)
+            ?? throw new InvalidOperationException($"ServiceStartItem with Identifier '{identifier}' was not found.");
+
+        return serviceStartItem.ServiceStart.Service;
     }
 }
