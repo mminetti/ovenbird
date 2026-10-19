@@ -12,11 +12,11 @@ public class UsageBuilderCreateAsync
     private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
     private readonly IRepository<Usage> _usageRepository = Substitute.For<IRepository<Usage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly Usage_867_03_Builder _builder;
+    private readonly Usage_867_03_ImportBuilder _builder;
 
     public UsageBuilderCreateAsync()
     {
-        _builder = new Usage_867_03_Builder(
+        _builder = new Usage_867_03_ImportBuilder(
             _usageReadRepository,
             _lookupService,
             _usageRepository,

@@ -10,7 +10,7 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class MoveInRequestGeneratorCreateAsync
 {
-    private readonly MoveInRequest_814_16_Generator _generator = new(TimeProvider.System);
+    private readonly MoveInRequest_814_16_ExportGenerator _generator = new(TimeProvider.System);
     private readonly Configuration _configuration = new()
     {
         Id = 1,

@@ -6,7 +6,7 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class InitialMeterRead_867_04_Builder(
+public class InitialMeterRead_867_04_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder

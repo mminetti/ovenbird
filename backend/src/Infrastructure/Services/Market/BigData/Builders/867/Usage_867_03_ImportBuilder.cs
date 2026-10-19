@@ -5,12 +5,12 @@ using Core.ServiceDelivery.Specifications;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class Usage_867_03_Builder(
+public class Usage_867_03_ImportBuilder(
     IReadRepository<Usage> usageReadRepository,
     IBigDataLookupService lookupService,
     IRepository<Usage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionBuilderBase<Usage>(lookupService, usageRepository, referenceRepository)
+    : UsageTransactionImportBuilderBase<Usage>(lookupService, usageRepository, referenceRepository)
 {
     public const string Key = "BigData_867_03";
 

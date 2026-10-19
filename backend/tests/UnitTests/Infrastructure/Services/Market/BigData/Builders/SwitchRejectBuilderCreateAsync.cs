@@ -8,11 +8,11 @@ public class SwitchRejectBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly SwitchReject_814_02_Builder _builder;
+    private readonly SwitchReject_814_02_ImportBuilder _builder;
 
     public SwitchRejectBuilderCreateAsync()
     {
-        _builder = new SwitchReject_814_02_Builder(
+        _builder = new SwitchReject_814_02_ImportBuilder(
             _serviceStartItemRepository,
             _referenceRepository);
     }
@@ -67,7 +67,7 @@ public class SwitchRejectBuilderCreateAsync
     [Fact]
     public async Task ThrowsBecauseServiceStartResolutionIsNotYetImplemented()
     {
-        // ServiceStart resolution for 814 transactions is an explicit TODO (SwitchReject_814_02_Builder.GetServiceStartAsync) -
+        // ServiceStart resolution for 814 transactions is an explicit TODO (SwitchReject_814_02_ImportBuilder.GetServiceStartAsync) -
         // this documents that CreateAsync currently cannot complete until that is implemented.
         await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));

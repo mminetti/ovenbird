@@ -5,7 +5,7 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public abstract class ServiceStartRejectBuilderBase(
+public abstract class ServiceStartRejectImportBuilderBase(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder

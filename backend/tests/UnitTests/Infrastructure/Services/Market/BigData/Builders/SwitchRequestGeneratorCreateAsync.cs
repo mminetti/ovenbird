@@ -10,7 +10,7 @@ namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
 public class SwitchRequestGeneratorCreateAsync
 {
-    private readonly SwitchRequest_814_01_Generator _generator = new(TimeProvider.System);
+    private readonly SwitchRequest_814_01_ExportGenerator _generator = new(TimeProvider.System);
     private readonly Configuration _configuration = new()
     {
         Id = 1,

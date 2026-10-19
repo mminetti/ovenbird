@@ -10,11 +10,11 @@ public class HistoricalUsageEntityBuilderCreateAsync
     private readonly IBigDataLookupService _lookupService = Substitute.For<IBigDataLookupService>();
     private readonly IRepository<HistoricalUsage> _historicalUsageRepository = Substitute.For<IRepository<HistoricalUsage>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly HistoricalUsage_867_02_Builder _builder;
+    private readonly HistoricalUsage_867_02_ImportBuilder _builder;
 
     public HistoricalUsageEntityBuilderCreateAsync()
     {
-        _builder = new HistoricalUsage_867_02_Builder(
+        _builder = new HistoricalUsage_867_02_ImportBuilder(
             _lookupService,
             _historicalUsageRepository,
             _referenceRepository);

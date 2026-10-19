@@ -1,7 +1,7 @@
 ﻿namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class SwitchRequest_814_01_Generator(TimeProvider timeProvider) 
-    : ServiceStartRequestGeneratorBase(timeProvider)
+public class SwitchRequest_814_01_ExportGenerator(TimeProvider timeProvider)
+    : ServiceStartRequestExportGeneratorBase(timeProvider)
 {
     public const string Key = "BigData_814_01";
 

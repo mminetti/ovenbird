@@ -123,14 +123,14 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedTransient<IMarketDocumentTransactionReader, Invoice_810_TransactionReader>(Invoice_810_TransactionReader.Set);
         services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceOrder_650_TransactionReader>(ServiceOrder_650_TransactionReader.Set);
         services.AddKeyedTransient<IMarketDocumentTransactionReader, ServiceRequest_814_TransactionReader>(ServiceRequest_814_TransactionReader.Set);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsage_867_02_Builder>(HistoricalUsage_867_02_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, Usage_867_03_Builder>(Usage_867_03_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, InitialMeterRead_867_04_Builder>(InitialMeterRead_867_04_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, SwitchReject_814_02_Builder>(SwitchReject_814_02_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentNotification_814_05_Builder>(EnrollmentNotification_814_05_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityBuilder, MoveInReject_814_17_Builder>(MoveInReject_814_17_Builder.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityGenerator, SwitchRequest_814_01_Generator>(SwitchRequest_814_01_Generator.Key);
-        services.AddKeyedScoped<IMarketDocumentEntityGenerator, MoveInRequest_814_16_Generator>(MoveInRequest_814_16_Generator.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, HistoricalUsage_867_02_ImportBuilder>(HistoricalUsage_867_02_ImportBuilder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, Usage_867_03_ImportBuilder>(Usage_867_03_ImportBuilder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, InitialMeterRead_867_04_ImportBuilder>(InitialMeterRead_867_04_ImportBuilder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, SwitchReject_814_02_ImportBuilder>(SwitchReject_814_02_ImportBuilder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentNotification_814_05_ImportBuilder>(EnrollmentNotification_814_05_ImportBuilder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityBuilder, MoveInReject_814_17_ImportBuilder>(MoveInReject_814_17_ImportBuilder.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityGenerator, SwitchRequest_814_01_ExportGenerator>(SwitchRequest_814_01_ExportGenerator.Key);
+        services.AddKeyedScoped<IMarketDocumentEntityGenerator, MoveInRequest_814_16_ExportGenerator>(MoveInRequest_814_16_ExportGenerator.Key);
 
         var keyVaultUri = config["KeyVault:Uri"];
 

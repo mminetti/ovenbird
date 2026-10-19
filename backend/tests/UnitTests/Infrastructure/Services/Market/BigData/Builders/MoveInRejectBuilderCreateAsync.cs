@@ -8,11 +8,11 @@ public class MoveInRejectBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly MoveInReject_814_17_Builder _builder;
+    private readonly MoveInReject_814_17_ImportBuilder _builder;
 
     public MoveInRejectBuilderCreateAsync()
     {
-        _builder = new MoveInReject_814_17_Builder(
+        _builder = new MoveInReject_814_17_ImportBuilder(
             _serviceStartItemRepository,
             _referenceRepository);
     }
@@ -67,7 +67,7 @@ public class MoveInRejectBuilderCreateAsync
     [Fact]
     public async Task ThrowsBecauseServiceStartResolutionIsNotYetImplemented()
     {
-        // ServiceStart resolution for 814 transactions is an explicit TODO (MoveInReject_814_17_Builder.GetServiceStartAsync) -
+        // ServiceStart resolution for 814 transactions is an explicit TODO (MoveInReject_814_17_ImportBuilder.GetServiceStartAsync) -
         // this documents that CreateAsync currently cannot complete until that is implemented.
         await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));

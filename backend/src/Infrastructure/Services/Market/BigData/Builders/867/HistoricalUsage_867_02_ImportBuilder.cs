@@ -4,11 +4,11 @@ using Core.ServiceDelivery;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public class HistoricalUsage_867_02_Builder(
+public class HistoricalUsage_867_02_ImportBuilder(
     IBigDataLookupService lookupService,
     IRepository<HistoricalUsage> historicalUsageRepository,
     IRepository<MarketDocumentReference> referenceRepository)
-    : UsageTransactionBuilderBase<HistoricalUsage>(lookupService, historicalUsageRepository, referenceRepository)
+    : UsageTransactionImportBuilderBase<HistoricalUsage>(lookupService, historicalUsageRepository, referenceRepository)
 {
     public const string Key = "BigData_867_02";
 

@@ -5,7 +5,7 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public abstract class UsageTransactionBuilderBase<TUsage>(
+public abstract class UsageTransactionImportBuilderBase<TUsage>(
     IBigDataLookupService lookupService,
     IRepository<TUsage> usageRepository,
     IRepository<MarketDocumentReference> referenceRepository)

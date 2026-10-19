@@ -8,11 +8,11 @@ public class InitialMeterReadBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly InitialMeterRead_867_04_Builder _builder;
+    private readonly InitialMeterRead_867_04_ImportBuilder _builder;
 
     public InitialMeterReadBuilderCreateAsync()
     {
-        _builder = new InitialMeterRead_867_04_Builder(
+        _builder = new InitialMeterRead_867_04_ImportBuilder(
             _serviceStartItemRepository,
             _referenceRepository);
     }
@@ -70,7 +70,7 @@ public class InitialMeterReadBuilderCreateAsync
     [Fact]
     public async Task ThrowsBecauseServiceStartResolutionIsNotYetImplemented()
     {
-        // ServiceStart resolution for 867_04 transactions is an explicit TODO (InitialMeterRead_867_04_Builder.GetServiceStartAsync) -
+        // ServiceStart resolution for 867_04 transactions is an explicit TODO (InitialMeterRead_867_04_ImportBuilder.GetServiceStartAsync) -
         // this documents that CreateAsync currently cannot complete until that is implemented.
         await Should.ThrowAsync<NotImplementedException>(
             () => _builder.CreateAsync(CreateItem(), CancellationToken.None));

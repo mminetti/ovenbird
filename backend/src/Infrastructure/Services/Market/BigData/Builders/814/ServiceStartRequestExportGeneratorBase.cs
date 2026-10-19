@@ -6,7 +6,7 @@ using UseCases.Market.MarketDocuments.Export.Interfaces;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
-public abstract class ServiceStartRequestGeneratorBase(TimeProvider timeProvider)
+public abstract class ServiceStartRequestExportGeneratorBase(TimeProvider timeProvider)
     : TransactionXmlWriterBase<ServiceRequestTransactionXml>, IMarketDocumentEntityGenerator
 {
     private const string Set = "814";
