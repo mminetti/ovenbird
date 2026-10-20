@@ -12,7 +12,9 @@ public class Usage_867_03_ImportBuilder(
     IReadRepository<Usage> usageReadRepository,
     IBigDataValueMapper valueMapper,
     IRepository<Usage> usageRepository,
-    IRepository<MarketDocumentReference> referenceRepository)
+    IRepository<MarketDocumentReference> referenceRepository,
+    IRepository<ServiceStartItem> serviceStartItemRepository,
+    IReadRepository<Service> serviceReadRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_867_03";
@@ -26,18 +28,24 @@ public class Usage_867_03_ImportBuilder(
 
         var commodityId = valueMapper.GetCommodityId(transaction.Commodity);
 
-        var service = await GetServiceAsync(usageTransaction.UtilityAccountNumber, ct);
-
         var usageTypeId = valueMapper.GetUsageTypeId(usageTransaction.PurposeCode ?? string.Empty);
         var isFinal = usageTransaction.FinalIndicator == "F";
         var originalUsageId = await GetOriginalUsageIdAsync(usageTransaction.OriginalTransactionNumber, ct);
 
         foreach (var usageMeter in usageTransaction.UsageMeters.Where(x => x.UsageType == DetailUsageType))
         {
-            var meter = service.ServicePoint.GetMeter(usageMeter.MeterIdentifier);
-
             var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
             var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
+
+            var service = await GetServiceAsync(
+                usageTransaction.UtilityAccountNumber, 
+                usageTransaction.TranNr814, 
+                isFinal, 
+                periodStartDate, 
+                periodEndDate, 
+                ct);
+
+            var meter = service.ServicePoint.GetMeter(usageMeter.MeterIdentifier);
 
             foreach (var quantity in usageMeter.UsageQuantities)
             {
@@ -91,14 +99,40 @@ public class Usage_867_03_ImportBuilder(
         return originalUsage.Id;
     }
 
-    private Task<Service> GetServiceAsync(string identifier, CancellationToken ct)
+    private async Task<Service> GetServiceAsync(
+        string servicePointIdentifier, 
+        string? tranNr814, 
+        bool isFinal,
+        DateOnly periodStartDate, 
+        DateOnly periodEndDate, 
+        CancellationToken ct)
     {
-        // if this is a final read, check if we can find a end service item with identifier = TranNr814
-        // if we do, use it to get the service
-        // if not, get all services for that service point identifier, with start and end date within the read period
-        // if 0 or more than one, return error
-        // if only one, return the service, including service point and meters
+        if (isFinal && !string.IsNullOrWhiteSpace(tranNr814))
+        {
+            var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
+                new ServiceStartItemByIdentifierSpec(tranNr814), ct);
 
-        throw new NotImplementedException();
+            if (serviceStartItem is not null)
+            {
+                return serviceStartItem.ServiceStart.Service;
+            }
+        }
+
+        var services = await serviceReadRepository.ListAsync(
+            new ServiceByServicePointAndPeriodSpec(servicePointIdentifier, periodStartDate, periodEndDate), ct);
+
+        if (services.Count == 0)
+        {
+            throw new InvalidOperationException(
+                $"No Service was found for ServicePoint '{servicePointIdentifier}' covering period {periodStartDate:yyyy-MM-dd} to {periodEndDate:yyyy-MM-dd}.");
+        }
+
+        if (services.Count > 1)
+        {
+            throw new InvalidOperationException(
+                $"Multiple Services ({services.Count}) were found for ServicePoint '{servicePointIdentifier}' covering period {periodStartDate:yyyy-MM-dd} to {periodEndDate:yyyy-MM-dd}.");
+        }
+
+        return services.First();
     }
 }

@@ -1,4 +1,4 @@
-using CoreConstants = Core.Common.Constants.Constants;
+﻿using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
