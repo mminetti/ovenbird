@@ -1,8 +1,9 @@
-﻿using Core.Common.Constants;
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
+using Wolverine;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
 
@@ -10,13 +11,15 @@ public class ConfirmationBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
 
     public ConfirmationBuilderCreateAsync()
     {
         _builder = new EnrollmentNotification_814_05_ImportBuilder(
             _serviceStartItemRepository,
-            _referenceRepository);
+            _referenceRepository,
+            _bus);
     }
 
     private const string Xml = """
@@ -156,7 +159,11 @@ public class ConfirmationBuilderCreateAsync
             Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),
             Arg.Any<CancellationToken>());
 
-        serviceStart.ServiceDate.ShouldBe(new DateOnly(2025, 11, 12));
-        serviceStart.ServiceOrderStatusId.ShouldBe(Constants.ServiceOrderStatuses.Scheduled);
+        await _bus.Received(1).PublishAsync(
+            Arg.Is<ServiceStartScheduledEvent>(x =>
+                x.ServiceStart == serviceStart &&
+                x.ServiceDate == new DateOnly(2025, 11, 12) &&
+                x.MarketDocumentItemId == item.Id),
+            Arg.Any<DeliveryOptions>());
     }
 }

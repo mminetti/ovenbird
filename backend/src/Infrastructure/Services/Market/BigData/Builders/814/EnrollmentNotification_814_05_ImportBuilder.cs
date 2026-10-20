@@ -2,14 +2,17 @@
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
+using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
+using Wolverine;
 
 namespace Infrastructure.Services.Market.BigData.Builders;
 
 public class EnrollmentNotification_814_05_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
-    IRepository<MarketDocumentReference> referenceRepository)
+    IRepository<MarketDocumentReference> referenceRepository,
+    IMessageBus bus)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_814_05";
@@ -49,9 +52,7 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
             await referenceRepository.AddAsync(reference, ct);
 
-            // TODO: move this to an event handler
-            serviceStart.ServiceDate = serviceDate;
-            serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Scheduled;
+            await bus.PublishAsync(new ServiceStartScheduledEvent(serviceStart, serviceDate, item.Id));
         }
     }
 
