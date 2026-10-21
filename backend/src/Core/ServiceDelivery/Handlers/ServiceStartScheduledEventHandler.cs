@@ -1,16 +1,50 @@
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 using Core.ServiceDelivery.Events;
+using Core.ServiceDelivery.Specifications;
 
 namespace Core.ServiceDelivery.Handlers;
 
-public class ServiceStartScheduledEventHandler
+public class ServiceStartScheduledEventHandler(
+    IRepository<ServiceStart> serviceStartRepository,
+    IRepository<ServicePoint> servicePointRepository)
 {
-    public Task Handle(ServiceStartScheduledEvent domainEvent, CancellationToken ct)
+    public async Task Handle(ServiceStartScheduledEvent domainEvent, CancellationToken ct)
     {
-        domainEvent.ServiceStart.ServiceDate = domainEvent.ServiceDate;
-        domainEvent.ServiceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Scheduled;
+        var serviceStart = await serviceStartRepository.GetByIdAsync(domainEvent.ServiceStartId, ct)
+            ?? throw new InvalidOperationException($"ServiceStart '{domainEvent.ServiceStartId}' was not found.");
 
-        // TODO: use domainEvent.MarketDocumentItemId to drive related logic once requirements are defined.
-        return Task.CompletedTask;
+        serviceStart.ServiceDate = domainEvent.ServiceDate;
+        serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Scheduled;
+
+        await serviceStartRepository.UpdateAsync(serviceStart, ct);
+
+        var servicePoint = await servicePointRepository.FirstOrDefaultAsync(
+            new ServicePointByIdentifierAndCommoditySpec(domainEvent.ServicePointIdentifier, domainEvent.CommodityId), ct)
+            ?? throw new InvalidOperationException($"ServicePoint '{domainEvent.ServicePointIdentifier}' was not found.");
+
+        servicePoint.CustomerClassId = domainEvent.CustomerClassId;
+        servicePoint.LoadProfileId = domainEvent.LoadProfileId;
+        servicePoint.ReadCycleId = domainEvent.ReadCycleId;
+        servicePoint.IsAmsMeter = domainEvent.IsAmsMeter;
+
+        if (servicePoint.GetMeter(domainEvent.MeterIdentifier) is null)
+        {
+            servicePoint.Meters.Add(new Meter
+            {
+                ServicePointId = servicePoint.Id,
+                Identifier = domainEvent.MeterIdentifier,
+                IsActive = true,
+            });
+        }
+
+        var premise = servicePoint.Premise;
+        premise.AddressLine1 = domainEvent.AddressLine1;
+        premise.City = domainEvent.City;
+        premise.State = domainEvent.State;
+        premise.Zip = domainEvent.Zip;
+        premise.Zip4 = domainEvent.Zip4;
+        premise.CountyId = domainEvent.CountyId;
+
+        await servicePointRepository.UpdateAsync(servicePoint, ct);
     }
 }

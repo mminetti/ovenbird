@@ -21,6 +21,11 @@ public class BigDataValueMapper : IBigDataValueMapper
         ["05"] = CoreConstants.UsagePurposes.Replace,
     };
 
+    private static readonly HashSet<string> _amsMeterAdvanceMeterInfoCodes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AMSR",
+    };
+
     public int GetCommodityId(string code) =>
         _commodityIdsByCode.TryGetValue(code, out var id)
             ? id
@@ -35,4 +40,7 @@ public class BigDataValueMapper : IBigDataValueMapper
         _usageTypeIdsByPurposeCode.TryGetValue(purposeCode, out var id)
             ? id
             : throw new InvalidOperationException($"Unmapped usage purpose code '{purposeCode}'.");
+
+    public bool IsAmsMeter(string? advanceMeterInfoCode) =>
+        !string.IsNullOrWhiteSpace(advanceMeterInfoCode) && _amsMeterAdvanceMeterInfoCodes.Contains(advanceMeterInfoCode);
 }
