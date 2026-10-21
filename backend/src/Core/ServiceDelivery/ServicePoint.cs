@@ -30,4 +30,30 @@ public class ServicePoint : AuditableEntityBase<long>
         return Meters?
             .FirstOrDefault(x => string.Equals(x.Identifier, identifier, StringComparison.OrdinalIgnoreCase));
     }
+
+    public Meter AddMeter(string identifier)
+    {
+        var existing = GetMeter(identifier);
+
+        if (existing is not null)
+        {
+            return existing;
+        }
+
+        foreach (var existingMeter in Meters)
+        {
+            existingMeter.IsActive = false;
+        }
+
+        var meter = new Meter
+        {
+            ServicePointId = Id,
+            Identifier = identifier,
+            IsActive = true,
+        };
+
+        Meters.Add(meter);
+
+        return meter;
+    }
 }

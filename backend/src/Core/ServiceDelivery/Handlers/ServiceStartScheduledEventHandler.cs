@@ -27,15 +27,7 @@ public class ServiceStartScheduledEventHandler(
         servicePoint.ReadCycleId = domainEvent.ReadCycleId;
         servicePoint.IsAmsMeter = domainEvent.IsAmsMeter;
 
-        if (servicePoint.GetMeter(domainEvent.MeterIdentifier) is null)
-        {
-            servicePoint.Meters.Add(new Meter
-            {
-                ServicePointId = servicePoint.Id,
-                Identifier = domainEvent.MeterIdentifier,
-                IsActive = true,
-            });
-        }
+        servicePoint.AddMeter(domainEvent.MeterIdentifier);
 
         var premise = servicePoint.Premise;
         premise.AddressLine1 = domainEvent.AddressLine1;
