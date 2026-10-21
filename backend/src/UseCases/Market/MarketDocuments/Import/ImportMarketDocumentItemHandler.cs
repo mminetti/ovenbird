@@ -31,6 +31,7 @@ public class ImportMarketDocumentItemHandler(
         var items = await ediHandler.ExecuteItemImportAsync(configuration, document, ct);
 
         var itemIds = new List<long>();
+        var errors = new List<string>();
 
         foreach (var item in items)
         {
@@ -38,11 +39,23 @@ public class ImportMarketDocumentItemHandler(
 
             var created = await itemRepository.AddAsync(item, ct);
 
-            await bus.InvokeAsync(new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
+            var buildResult = await bus.InvokeAsync<Result>(new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
 
-            itemIds.Add(created.Id);
+            if (buildResult.IsSuccess)
+            {
+                itemIds.Add(created.Id);
+            }
+            else
+            {
+                errors.AddRange(FlattenErrors(buildResult).Select(message => $"MarketDocumentItem '{created.Id}': {message}"));
+            }
         }
 
-        return Result.Success<IReadOnlyList<long>>(itemIds);
+        return errors.Count == 0
+            ? Result.Success<IReadOnlyList<long>>(itemIds)
+            : Result<IReadOnlyList<long>>.Error(new ErrorList(errors, string.Empty));
     }
+
+    private static IEnumerable<string> FlattenErrors(Result result) =>
+        result.Errors.Concat(result.ValidationErrors.Select(v => v.ErrorMessage));
 }

@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -27,9 +28,9 @@ public class UsageBuilderCreateAsync
             _serviceStartItemRepository,
             _serviceReadRepository);
 
-        _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
-        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
-        _valueMapper.GetUsageTypeId(Arg.Any<string>()).Returns(Constants.UsagePurposes.Original);
+        _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Result.Success(Constants.Commodities.Electricity));
+        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Result.Success(Constants.UnitOfMeasures.KilowattHour));
+        _valueMapper.GetUsageTypeId(Arg.Any<string>()).Returns(Result.Success(Constants.UsagePurposes.Original));
 
         _usageRepository
             .AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>())
@@ -227,8 +228,9 @@ public class UsageBuilderCreateAsync
         _usageRepository.AddAsync(Arg.Do<Usage>(createdUsages.Add), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Usage>());
 
-        await _builder.CreateAsync(CreateItem(FinalXml), CancellationToken.None);
+        var result = await _builder.CreateAsync(CreateItem(FinalXml), CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         createdUsages.Count.ShouldBe(1);
         createdUsages[0].ServiceId.ShouldBe(50);
         createdUsages[0].ServicePointId.ShouldBe(20);
@@ -251,8 +253,9 @@ public class UsageBuilderCreateAsync
         _usageRepository.AddAsync(Arg.Do<Usage>(createdUsages.Add), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Usage>());
 
-        await _builder.CreateAsync(CreateItem(Xml), CancellationToken.None);
+        var result = await _builder.CreateAsync(CreateItem(Xml), CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         createdUsages.Count.ShouldBe(1);
         createdUsages[0].ServiceId.ShouldBe(60);
         createdUsages[0].ServicePointId.ShouldBe(20);
@@ -279,8 +282,9 @@ public class UsageBuilderCreateAsync
         _usageRepository.AddAsync(Arg.Do<Usage>(createdUsages.Add), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Usage>());
 
-        await _builder.CreateAsync(CreateItem(FinalXml), CancellationToken.None);
+        var result = await _builder.CreateAsync(CreateItem(FinalXml), CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         createdUsages.Count.ShouldBe(1);
         createdUsages[0].ServiceId.ShouldBe(70);
 
@@ -288,21 +292,22 @@ public class UsageBuilderCreateAsync
     }
 
     [Fact]
-    public async Task ThrowsWhenNoServiceMatchesDateRange()
+    public async Task ReturnsInvalidWhenNoServiceMatchesDateRange()
     {
         _serviceReadRepository
             .ListAsync(Arg.Any<ServiceByServicePointAndPeriodSpec>(), Arg.Any<CancellationToken>())
             .Returns([]);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(Xml), CancellationToken.None));
+        var result = await _builder.CreateAsync(CreateItem(Xml), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
 
         await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ThrowsWhenMultipleServicesMatchDateRange()
+    public async Task ReturnsInvalidWhenMultipleServicesMatchDateRange()
     {
         var serviceA = CreateService(60, 20, "10443720004239415", new DateOnly(2026, 1, 1), null);
         var serviceB = CreateService(61, 21, "10443720004239415", new DateOnly(2026, 1, 1), null);
@@ -311,8 +316,9 @@ public class UsageBuilderCreateAsync
             .ListAsync(Arg.Any<ServiceByServicePointAndPeriodSpec>(), Arg.Any<CancellationToken>())
             .Returns([serviceA, serviceB]);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(Xml), CancellationToken.None));
+        var result = await _builder.CreateAsync(CreateItem(Xml), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
 
         await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
@@ -332,8 +338,9 @@ public class UsageBuilderCreateAsync
         _usageRepository.AddAsync(Arg.Do<Usage>(createdUsages.Add), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Usage>());
 
-        await _builder.CreateAsync(CreateItem(TwoMetersXml), CancellationToken.None);
+        var result = await _builder.CreateAsync(CreateItem(TwoMetersXml), CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         createdUsages.Count.ShouldBe(2);
         createdUsages[0].ServiceId.ShouldBe(80);
         createdUsages[0].ServicePointId.ShouldBe(20);

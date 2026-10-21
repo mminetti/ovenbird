@@ -14,21 +14,26 @@ public class MarketDocumentEntityBuilderHandler(
 {
     private const string HandlerIdentifier = "handler";
 
-    public async Task Handle(MarketDocumentEntityBuilderCommand command, CancellationToken ct)
+    public async Task<Result> Handle(MarketDocumentEntityBuilderCommand command, CancellationToken ct)
     {
-        var item = await itemReadRepository.GetByIdAsync(command.MarketDocumentItemId, ct)
-            ?? throw new InvalidOperationException($"MarketDocumentItem '{command.MarketDocumentItemId}' was not found.");
+        var item = await itemReadRepository.GetByIdAsync(command.MarketDocumentItemId, ct);
+        if (item is null)
+        {
+            return Result.NotFound();
+        }
 
         var configuration = await configurationReadRepository.FirstOrDefaultAsync(
-            new ConfigurationByIdSpec(command.ConfigurationId), ct)
-            ?? throw new InvalidOperationException($"Configuration '{command.ConfigurationId}' was not found.");
+            new ConfigurationByIdSpec(command.ConfigurationId), ct);
+        if (configuration is null)
+        {
+            return Result.NotFound();
+        }
 
         var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
         var entityBuilder = entityBuilderResolver.Resolve($"{handlerIdentifier}_{item.Set}_{item.SubSet}");
 
-        if (entityBuilder is not null)
-        {
-            await entityBuilder.CreateAsync(item, ct);
-        }
+        return entityBuilder is not null
+            ? await entityBuilder.CreateAsync(item, ct)
+            : Result.Success();
     }
 }

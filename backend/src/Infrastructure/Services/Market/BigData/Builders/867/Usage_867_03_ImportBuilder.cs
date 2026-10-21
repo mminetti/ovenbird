@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -21,37 +21,76 @@ public class Usage_867_03_ImportBuilder(
     private const string DetailUsageType = "DET";
     protected override string RequiredElementName => "Usage";
 
-    public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        var transaction = DeserializeTransaction(item);
+        var transactionResult = DeserializeTransaction(item);
+        if (!transactionResult.IsSuccess)
+        {
+            return AsResult(transactionResult);
+        }
+
+        var transaction = transactionResult.Value;
         var usageTransaction = transaction.Usage;
 
-        var commodityId = valueMapper.GetCommodityId(transaction.Commodity);
+        var commodityIdResult = valueMapper.GetCommodityId(transaction.Commodity);
+        if (!commodityIdResult.IsSuccess)
+        {
+            return AsResult(commodityIdResult);
+        }
 
-        var usageTypeId = valueMapper.GetUsageTypeId(usageTransaction.PurposeCode ?? string.Empty);
+        var commodityId = commodityIdResult.Value;
+
+        var usageTypeIdResult = valueMapper.GetUsageTypeId(usageTransaction.PurposeCode ?? string.Empty);
+        if (!usageTypeIdResult.IsSuccess)
+        {
+            return AsResult(usageTypeIdResult);
+        }
+
+        var usageTypeId = usageTypeIdResult.Value;
         var isFinal = usageTransaction.FinalIndicator == "F";
-        var originalUsageId = await GetOriginalUsageIdAsync(usageTransaction.OriginalTransactionNumber, ct);
+
+        var originalUsageIdResult = await GetOriginalUsageIdAsync(usageTransaction.OriginalTransactionNumber, ct);
+        if (!originalUsageIdResult.IsSuccess)
+        {
+            return AsResult(originalUsageIdResult);
+        }
+
+        var originalUsageId = originalUsageIdResult.Value;
+
+        var pendingUsages = new List<Usage>();
 
         foreach (var usageMeter in usageTransaction.UsageMeters.Where(x => x.UsageType == DetailUsageType))
         {
             var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
             var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
 
-            var service = await GetServiceAsync(
-                usageTransaction.UtilityAccountNumber, 
-                usageTransaction.TranNr814, 
-                isFinal, 
-                periodStartDate, 
-                periodEndDate, 
+            var serviceResult = await GetServiceAsync(
+                usageTransaction.UtilityAccountNumber,
+                usageTransaction.TranNr814,
+                isFinal,
+                periodStartDate,
+                periodEndDate,
                 ct);
 
+            if (!serviceResult.IsSuccess)
+            {
+                return AsResult(serviceResult);
+            }
+
+            var service = serviceResult.Value;
             var meter = service.ServicePoint.GetMeter(usageMeter.MeterIdentifier);
 
             foreach (var quantity in usageMeter.UsageQuantities)
             {
                 foreach (var read in quantity.UsageReads)
                 {
-                    var usage = new Usage
+                    var unitOfMeasureIdResult = valueMapper.GetUnitOfMeasureId(read.ReadUOM);
+                    if (!unitOfMeasureIdResult.IsSuccess)
+                    {
+                        return AsResult(unitOfMeasureIdResult);
+                    }
+
+                    pendingUsages.Add(new Usage
                     {
                         UsageTypeId = usageTypeId,
                         OriginalUsageId = originalUsageId,
@@ -67,44 +106,50 @@ public class Usage_867_03_ImportBuilder(
                         PeriodEndDate = periodEndDate,
                         Consumption = read.ReadConsumption,
                         CommodityId = commodityId,
-                        UnitOfMeasureId = valueMapper.GetUnitOfMeasureId(read.ReadUOM),
-                    };
-
-                    var created = await usageRepository.AddAsync(usage, ct);
-
-                    var reference = new MarketDocumentReference
-                    {
-                        MarketDocumentItemId = item.Id,
-                        ReferenceTypeId = Constants.MarketDocumentReferenceTypes.Usage,
-                        ReferenceId = created.Id,
-                    };
-
-                    await referenceRepository.AddAsync(reference, ct);
+                        UnitOfMeasureId = unitOfMeasureIdResult.Value,
+                    });
                 }
             }
         }
+
+        foreach (var usage in pendingUsages)
+        {
+            var created = await usageRepository.AddAsync(usage, ct);
+
+            var reference = new MarketDocumentReference
+            {
+                MarketDocumentItemId = item.Id,
+                ReferenceTypeId = Constants.MarketDocumentReferenceTypes.Usage,
+                ReferenceId = created.Id,
+            };
+
+            await referenceRepository.AddAsync(reference, ct);
+        }
+
+        return Result.Success();
     }
 
-    private async Task<long?> GetOriginalUsageIdAsync(string? originalTransactionNumber, CancellationToken ct)
+    private async Task<Result<long?>> GetOriginalUsageIdAsync(string? originalTransactionNumber, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(originalTransactionNumber))
         {
-            return null;
+            return Result.Success<long?>(null);
         }
 
         var originalUsage = await usageReadRepository.FirstOrDefaultAsync(
-            new UsageByIdentifierSpec(originalTransactionNumber), ct)
-            ?? throw new InvalidOperationException($"Original usage '{originalTransactionNumber}' was not found.");
+            new UsageByIdentifierSpec(originalTransactionNumber), ct);
 
-        return originalUsage.Id;
+        return originalUsage is not null
+            ? Result.Success<long?>(originalUsage.Id)
+            : Result.Invalid(new ValidationError(nameof(originalTransactionNumber), $"Original usage '{originalTransactionNumber}' was not found."));
     }
 
-    private async Task<Service> GetServiceAsync(
-        string servicePointIdentifier, 
-        string? tranNr814, 
+    private async Task<Result<Service>> GetServiceAsync(
+        string servicePointIdentifier,
+        string? tranNr814,
         bool isFinal,
-        DateOnly periodStartDate, 
-        DateOnly periodEndDate, 
+        DateOnly periodStartDate,
+        DateOnly periodEndDate,
         CancellationToken ct)
     {
         if (isFinal && !string.IsNullOrWhiteSpace(tranNr814))
@@ -114,7 +159,7 @@ public class Usage_867_03_ImportBuilder(
 
             if (serviceStartItem is not null)
             {
-                return serviceStartItem.ServiceStart.Service;
+                return Result.Success(serviceStartItem.ServiceStart.Service);
             }
         }
 
@@ -123,16 +168,18 @@ public class Usage_867_03_ImportBuilder(
 
         if (services.Count == 0)
         {
-            throw new InvalidOperationException(
-                $"No Service was found for ServicePoint '{servicePointIdentifier}' covering period {periodStartDate:yyyy-MM-dd} to {periodEndDate:yyyy-MM-dd}.");
+            return Result.Invalid(new ValidationError(
+                nameof(servicePointIdentifier),
+                $"No Service was found for ServicePoint '{servicePointIdentifier}' covering period {periodStartDate:yyyy-MM-dd} to {periodEndDate:yyyy-MM-dd}."));
         }
 
         if (services.Count > 1)
         {
-            throw new InvalidOperationException(
-                $"Multiple Services ({services.Count}) were found for ServicePoint '{servicePointIdentifier}' covering period {periodStartDate:yyyy-MM-dd} to {periodEndDate:yyyy-MM-dd}.");
+            return Result.Invalid(new ValidationError(
+                nameof(servicePointIdentifier),
+                $"Multiple Services ({services.Count}) were found for ServicePoint '{servicePointIdentifier}' covering period {periodStartDate:yyyy-MM-dd} to {periodEndDate:yyyy-MM-dd}."));
         }
 
-        return services.First();
+        return Result.Success(services.First());
     }
 }

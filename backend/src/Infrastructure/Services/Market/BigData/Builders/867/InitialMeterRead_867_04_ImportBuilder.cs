@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -16,12 +16,23 @@ public class InitialMeterRead_867_04_ImportBuilder(
     private const string InitialUsageType = "INT";
     protected override string RequiredElementName => "Usage";
 
-    public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        var transaction = DeserializeTransaction(item);
-        var usage = transaction.Usage;
+        var transactionResult = DeserializeTransaction(item);
+        if (!transactionResult.IsSuccess)
+        {
+            return AsResult(transactionResult);
+        }
 
-        var serviceStart = await GetServiceStartAsync(usage.TranNr814, ct);
+        var usage = transactionResult.Value.Usage;
+
+        var serviceStartResult = await GetServiceStartAsync(usage.TranNr814, ct);
+        if (!serviceStartResult.IsSuccess)
+        {
+            return AsResult(serviceStartResult);
+        }
+
+        var serviceStart = serviceStartResult.Value;
 
         foreach (var usageMeter in usage.UsageMeters.Where(x => x.UsageType == InitialUsageType))
         {
@@ -55,19 +66,22 @@ public class InitialMeterRead_867_04_ImportBuilder(
             serviceStart.ServiceDate = serviceDate;
             serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Completed;
         }
+
+        return Result.Success();
     }
 
-    private async Task<ServiceStart> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct)
+    private async Task<Result<ServiceStart>> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(sourceReferenceNumber))
         {
-            throw new InvalidOperationException("Transaction has no TranNr814.");
+            return Result.Invalid(new ValidationError(nameof(sourceReferenceNumber), "Transaction has no TranNr814."));
         }
 
         var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
-            new ServiceStartItemByIdentifierSpec(sourceReferenceNumber), ct)
-            ?? throw new InvalidOperationException($"ServiceStartItem with tracking number '{sourceReferenceNumber}' was not found.");
+            new ServiceStartItemByIdentifierSpec(sourceReferenceNumber), ct);
 
-        return serviceStartItem.ServiceStart;
+        return serviceStartItem is not null
+            ? Result.Success(serviceStartItem.ServiceStart)
+            : Result.Invalid(new ValidationError(nameof(sourceReferenceNumber), $"ServiceStartItem with tracking number '{sourceReferenceNumber}' was not found."));
     }
 }

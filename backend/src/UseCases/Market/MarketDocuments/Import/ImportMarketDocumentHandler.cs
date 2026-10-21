@@ -19,6 +19,7 @@ public class ImportMarketDocumentHandler(
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
+        var errors = new List<string>();
 
         var configurations = await configurationReadRepository.ListAsync(
             new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
@@ -35,8 +36,13 @@ public class ImportMarketDocumentHandler(
                 {
                     var created = await documentRepository.AddAsync(document, ct);
 
-                    _ = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
+                    var itemImportResult = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
                         new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
+
+                    if (!itemImportResult.IsSuccess)
+                    {
+                        errors.AddRange(itemImportResult.Errors.Select(message => $"MarketDocument '{created.Id}': {message}"));
+                    }
 
                     documentIds.Add(created.Id);
                 }
@@ -47,6 +53,8 @@ public class ImportMarketDocumentHandler(
             }
         }
 
-        return Result.Success<IReadOnlyList<long>>(documentIds);
+        return errors.Count == 0
+            ? Result.Success<IReadOnlyList<long>>(documentIds)
+            : Result<IReadOnlyList<long>>.Error(new ErrorList(errors, string.Empty));
     }
 }

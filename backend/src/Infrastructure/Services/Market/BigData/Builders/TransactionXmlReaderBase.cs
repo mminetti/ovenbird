@@ -10,19 +10,24 @@ public abstract class TransactionXmlReaderBase<TXml>
 
     protected abstract string RequiredElementName { get; }
 
-    protected TXml DeserializeTransaction(MarketDocumentItem item)
+    protected Result<TXml> DeserializeTransaction(MarketDocumentItem item)
     {
         var transactionElement = XElement.Parse(item.Raw);
 
         if (transactionElement.Element(RequiredElementName) is null)
         {
-            throw new InvalidOperationException($"MarketDocumentItem '{item.Id}' has no '{RequiredElementName}' element.");
+            return Result.Invalid(new ValidationError(
+                RequiredElementName,
+                $"MarketDocumentItem '{item.Id}' has no '{RequiredElementName}' element."));
         }
 
         var serializer = new XmlSerializer(typeof(TXml));
 
         using var reader = transactionElement.CreateReader();
 
-        return (TXml)serializer.Deserialize(reader)!;
+        return Result.Success((TXml)serializer.Deserialize(reader)!);
     }
+
+    protected static Result AsResult<T>(Result<T> result) =>
+        Result.Invalid(result.ValidationErrors.ToList());
 }

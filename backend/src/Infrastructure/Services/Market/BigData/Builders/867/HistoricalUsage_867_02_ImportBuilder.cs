@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -19,14 +19,34 @@ public class HistoricalUsage_867_02_ImportBuilder(
 
     protected override string RequiredElementName => "Usage";
 
-    public async Task CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        var transaction = DeserializeTransaction(item);
+        var transactionResult = DeserializeTransaction(item);
+        if (!transactionResult.IsSuccess)
+        {
+            return AsResult(transactionResult);
+        }
+
+        var transaction = transactionResult.Value;
         var usageTransaction = transaction.Usage;
 
-        var commodityId = valueMapper.GetCommodityId(transaction.Commodity);
+        var commodityIdResult = valueMapper.GetCommodityId(transaction.Commodity);
+        if (!commodityIdResult.IsSuccess)
+        {
+            return AsResult(commodityIdResult);
+        }
 
-        var service = await GetServiceAsync(usageTransaction.TranNr814, ct);
+        var commodityId = commodityIdResult.Value;
+
+        var serviceResult = await GetServiceAsync(usageTransaction.TranNr814, ct);
+        if (!serviceResult.IsSuccess)
+        {
+            return AsResult(serviceResult);
+        }
+
+        var service = serviceResult.Value;
+
+        var pendingUsages = new List<HistoricalUsage>();
 
         foreach (var usageMeter in usageTransaction.UsageMeters)
         {
@@ -39,7 +59,13 @@ public class HistoricalUsage_867_02_ImportBuilder(
             {
                 foreach (var read in quantity.UsageReads)
                 {
-                    var usage = new HistoricalUsage
+                    var unitOfMeasureIdResult = valueMapper.GetUnitOfMeasureId(read.ReadUOM);
+                    if (!unitOfMeasureIdResult.IsSuccess)
+                    {
+                        return AsResult(unitOfMeasureIdResult);
+                    }
+
+                    pendingUsages.Add(new HistoricalUsage
                     {
                         ServiceId = service.Id,
                         Identifier = item.ReferenceNumber,
@@ -49,35 +75,41 @@ public class HistoricalUsage_867_02_ImportBuilder(
                         PeriodEndDate = periodEndDate,
                         Consumption = read.ReadConsumption,
                         CommodityId = commodityId,
-                        UnitOfMeasureId = valueMapper.GetUnitOfMeasureId(read.ReadUOM),
-                    };
-
-                    var created = await historicalUsageRepository.AddAsync(usage, ct);
-
-                    var reference = new MarketDocumentReference
-                    {
-                        MarketDocumentItemId = item.Id,
-                        ReferenceTypeId = Constants.MarketDocumentReferenceTypes.HistoricalUsage,
-                        ReferenceId = created.Id,
-                    };
-
-                    await referenceRepository.AddAsync(reference, ct);
+                        UnitOfMeasureId = unitOfMeasureIdResult.Value,
+                    });
                 }
             }
         }
+
+        foreach (var usage in pendingUsages)
+        {
+            var created = await historicalUsageRepository.AddAsync(usage, ct);
+
+            var reference = new MarketDocumentReference
+            {
+                MarketDocumentItemId = item.Id,
+                ReferenceTypeId = Constants.MarketDocumentReferenceTypes.HistoricalUsage,
+                ReferenceId = created.Id,
+            };
+
+            await referenceRepository.AddAsync(reference, ct);
+        }
+
+        return Result.Success();
     }
 
-    private async Task<Service> GetServiceAsync(string? identifier, CancellationToken ct)
+    private async Task<Result<Service>> GetServiceAsync(string? identifier, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(identifier))
         {
-            throw new InvalidOperationException("Transaction has no ProcessTrackingNumber.");
+            return Result.Invalid(new ValidationError(nameof(identifier), "Transaction has no ProcessTrackingNumber."));
         }
 
         var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
-            new ServiceStartItemByIdentifierSpec(identifier), ct)
-            ?? throw new InvalidOperationException($"ServiceStartItem with Identifier '{identifier}' was not found.");
+            new ServiceStartItemByIdentifierSpec(identifier), ct);
 
-        return serviceStartItem.ServiceStart.Service;
+        return serviceStartItem is not null
+            ? Result.Success(serviceStartItem.ServiceStart.Service)
+            : Result.Invalid(new ValidationError(nameof(identifier), $"ServiceStartItem with Identifier '{identifier}' was not found."));
     }
 }

@@ -29,6 +29,10 @@ public class ImportMarketDocumentItemHandlerHandle
             .FirstOrDefaultAsync(Arg.Any<ConfigurationByIdSpec>(), Arg.Any<CancellationToken>())
             .Returns(_configuration);
 
+        _bus
+            .InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+
         _handler = new ImportMarketDocumentItemHandler(
             _itemRepository,
             _documentReadRepository,
@@ -77,7 +81,52 @@ public class ImportMarketDocumentItemHandlerHandle
         created[0].MarketDocumentId.ShouldBe(document.Id);
         created[1].MarketDocumentId.ShouldBe(document.Id);
 
-        await _bus.Received(2).InvokeAsync(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
+        await _bus.Received(2).InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ContinuesProcessingRemainingItemsAndAccumulatesErrorsWhenOneItemsBuilderFails()
+    {
+        var document = new MarketDocument { Id = 1, Identifier = "document.xml", CompanyId = _configuration.CompanyId!.Value };
+
+        _documentReadRepository
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdSpec>(), Arg.Any<CancellationToken>())
+            .Returns(document);
+
+        var parsedItems = new List<MarketDocumentItem>
+        {
+            new() { Set = "814", SubSet = "05", ReferenceNumber = "REF-1", ServicePointIdentifier = "ACCT-1" },
+            new() { Set = "814", SubSet = "05", ReferenceNumber = "REF-2", ServicePointIdentifier = "ACCT-2" },
+        };
+
+        _ediHandler
+            .ExecuteItemImportAsync(_configuration, document, Arg.Any<CancellationToken>())
+            .Returns(parsedItems);
+
+        long nextId = 500;
+        _itemRepository
+            .AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var item = callInfo.Arg<MarketDocumentItem>();
+                item.Id = nextId++;
+                return item;
+            });
+
+        _bus
+            .InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Result.Invalid(new ValidationError("Field", "bad data")),
+                Result.Success());
+
+        var result = await _handler.Handle(
+            new ImportMarketDocumentItemCommand(_configuration.Id, document.Id), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.Errors.ShouldContain(e => e.Contains("500") && e.Contains("bad data"));
+
+        await _bus.Received(2).InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
+        await _itemRepository.Received(2).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

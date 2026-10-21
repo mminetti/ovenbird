@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -23,8 +24,8 @@ public class HistoricalUsageEntityBuilderCreateAsync
             _historicalUsageRepository,
             _referenceRepository);
 
-        _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Constants.Commodities.Electricity);
-        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Constants.UnitOfMeasures.KilowattHour);
+        _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Result.Success(Constants.Commodities.Electricity));
+        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Result.Success(Constants.UnitOfMeasures.KilowattHour));
     }
 
     private const string Xml = """
@@ -130,8 +131,9 @@ public class HistoricalUsageEntityBuilderCreateAsync
 
         var item = CreateItem();
 
-        await _builder.CreateAsync(item, CancellationToken.None);
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         createdUsages.Count.ShouldBe(2);
 
         createdUsages[0].ServiceId.ShouldBe(50);
@@ -154,14 +156,15 @@ public class HistoricalUsageEntityBuilderCreateAsync
     }
 
     [Fact]
-    public async Task ThrowsWhenServiceCannotBeResolved()
+    public async Task ReturnsInvalidWhenServiceCannotBeResolved()
     {
         _serviceStartItemRepository
             .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns((ServiceStartItem?)null);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
     }
 
     [Fact]
@@ -171,8 +174,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
             .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns((ServiceStartItem?)null);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
+        await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
         await _historicalUsageRepository.DidNotReceive().AddAsync(Arg.Any<HistoricalUsage>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
@@ -196,8 +198,9 @@ public class HistoricalUsageEntityBuilderCreateAsync
             .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
-        await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         await _historicalUsageRepository.Received(2).AddAsync(
             Arg.Is<HistoricalUsage>(x => x.MeterId == null),
             Arg.Any<CancellationToken>());

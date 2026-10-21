@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -67,14 +68,15 @@ public class SwitchRejectBuilderCreateAsync
     };
 
     [Fact]
-    public async Task ThrowsWhenServiceStartCannotBeResolved()
+    public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()
     {
         _serviceStartItemRepository
             .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns((ServiceStartItem?)null);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
     }
 
     [Fact]
@@ -84,8 +86,7 @@ public class SwitchRejectBuilderCreateAsync
             .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
             .Returns((ServiceStartItem?)null);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _builder.CreateAsync(CreateItem(), CancellationToken.None));
+        await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
         await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
@@ -122,8 +123,9 @@ public class SwitchRejectBuilderCreateAsync
 
         var item = CreateItem();
 
-        await _builder.CreateAsync(item, CancellationToken.None);
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
 
+        result.IsSuccess.ShouldBeTrue();
         await _serviceStartItemRepository.Received(1).AddAsync(
             Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),
             Arg.Any<CancellationToken>());

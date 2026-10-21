@@ -1,3 +1,4 @@
+using Ardalis.Result;
 using Core.Common.Constants;
 using Infrastructure.Services.Market.BigData.Builders;
 
@@ -10,24 +11,24 @@ public class BigDataValueMapperTests
     [Fact]
     public void GetCommodityIdMapsKnownCode()
     {
-        _mapper.GetCommodityId("E").ShouldBe(Constants.Commodities.Electricity);
+        _mapper.GetCommodityId("E").Value.ShouldBe(Constants.Commodities.Electricity);
     }
 
     [Fact]
-    public void GetCommodityIdThrowsForUnknownCode()
+    public void GetCommodityIdReturnsInvalidForUnknownCode()
     {
-        Should.Throw<InvalidOperationException>(() => _mapper.GetCommodityId("Z"));
+        _mapper.GetCommodityId("Z").Status.ShouldBe(ResultStatus.Invalid);
     }
 
     [Fact]
     public void GetUnitOfMeasureIdMapsKnownCode()
     {
-        _mapper.GetUnitOfMeasureId("KH").ShouldBe(Constants.UnitOfMeasures.KilowattHour);
+        _mapper.GetUnitOfMeasureId("KH").Value.ShouldBe(Constants.UnitOfMeasures.KilowattHour);
     }
 
     [Fact]
-    public void GetUnitOfMeasureIdThrowsForUnknownCode()
+    public void GetUnitOfMeasureIdReturnsInvalidForUnknownCode()
     {
-        Should.Throw<InvalidOperationException>(() => _mapper.GetUnitOfMeasureId("ZZ"));
+        _mapper.GetUnitOfMeasureId("ZZ").Status.ShouldBe(ResultStatus.Invalid);
     }
 }

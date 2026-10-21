@@ -1,5 +1,6 @@
 ﻿global using System.Reflection;
 global using Ardalis.GuardClauses;
+global using Ardalis.Result;
 global using Ardalis.SharedKernel;
 global using Ardalis.Specification.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore;
