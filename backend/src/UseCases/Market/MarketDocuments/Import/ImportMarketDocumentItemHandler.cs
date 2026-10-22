@@ -1,4 +1,4 @@
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -39,7 +39,8 @@ public class ImportMarketDocumentItemHandler(
 
             var created = await itemRepository.AddAsync(item, ct);
 
-            var buildResult = await bus.InvokeAsync<Result>(new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
+            var buildResult = await bus.InvokeAsync<Result>(
+                new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
 
             if (buildResult.IsSuccess)
             {
@@ -47,7 +48,8 @@ public class ImportMarketDocumentItemHandler(
             }
             else
             {
-                errors.AddRange(FlattenErrors(buildResult).Select(message => $"MarketDocumentItem '{created.Id}': {message}"));
+                errors.AddRange(FlattenErrors(buildResult)
+                    .Select(message => $"MarketDocumentItem '{created.Id}': {message}"));
             }
         }
 

@@ -18,11 +18,13 @@ using Infrastructure.Services.Market.BigData;
 using Infrastructure.Services.Market.BigData.Builders;
 using Infrastructure.Services.Market.BigData.Readers;
 using Infrastructure.Services.Secrets;
+using Infrastructure.Services.ServiceDelivery;
 using UseCases.Auditing.List;
 using UseCases.Common;
 using UseCases.Common.DataLists.Get;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
+using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using UseCases.Market.Markets.List;
@@ -112,6 +114,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<MarketDocumentGeneratorResolver>()
             .AddScoped<MarketDocumentEntityGeneratorResolver>()
             .AddScoped<IBigDataValueMapper, BigDataValueMapper>()
+            .AddScoped<IServiceDeliveryLookupService, ServiceDeliveryLookupService>()
             .AddScoped<CurrentUserService>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));

@@ -1,9 +1,10 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
+using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 
@@ -12,15 +13,14 @@ namespace Infrastructure.Services.Market.BigData.Builders;
 public class EnrollmentNotification_814_05_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository,
-    IReadRepository<CustomerClass> customerClassRepository,
-    IReadRepository<LoadProfile> loadProfileRepository,
-    IReadRepository<ReadCycle> readCycleRepository,
-    IReadRepository<County> countyRepository,
+    IServiceDeliveryLookupService lookupService,
     IBigDataValueMapper valueMapper,
     IMessageBus bus)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
-    public const string Key = "BigData_814_05";
+    public const string Key = $"BigData_{Set}_{SubSet}";
+    private const string Set = "814";
+    private const string SubSet = "05";
     private const string PremiseEntityType = "8R";
     protected override string RequiredElementName => "AccountMaint";
 
@@ -61,13 +61,13 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         var (zip, zip4) = SplitZip(premiseAddress.EntityPostalCode);
 
-        var countyIdResult = await GetCountyIdAsync(premiseAddress.EntityCounty, ct);
-        if (!countyIdResult.IsSuccess)
+        var countyResult = await lookupService.GetCountyByNameAsync(premiseAddress.EntityCounty, ct);
+        if (!countyResult.IsSuccess)
         {
-            return AsResult(countyIdResult);
+            return AsResult(countyResult);
         }
 
-        var countyId = countyIdResult.Value;
+        var county = countyResult.Value;
 
         var service = accountMaint.Services.FirstOrDefault();
         if (service is null)
@@ -98,29 +98,29 @@ public class EnrollmentNotification_814_05_ImportBuilder(
                 $"MarketDocumentItem '{item.Id}' has no ServiceMeter."));
         }
 
-        var customerClassIdResult = await GetCustomerClassIdAsync(serviceMeter.LDCRateClass, ct);
-        if (!customerClassIdResult.IsSuccess)
+        var customerClassResult = await lookupService.GetCustomerClassByNameAsync(serviceMeter.LDCRateClass, ct);
+        if (!customerClassResult.IsSuccess)
         {
-            return AsResult(customerClassIdResult);
+            return AsResult(customerClassResult);
         }
 
-        var customerClassId = customerClassIdResult.Value;
+        var customerClass = customerClassResult.Value;
 
-        var loadProfileIdResult = await GetLoadProfileIdAsync(serviceMeter.LoadProfileCode, ct);
-        if (!loadProfileIdResult.IsSuccess)
+        var loadProfileResult = await lookupService.GetLoadProfileByNameAsync(serviceMeter.LoadProfileCode, ct);
+        if (!loadProfileResult.IsSuccess)
         {
-            return AsResult(loadProfileIdResult);
+            return AsResult(loadProfileResult);
         }
 
-        var loadProfileId = loadProfileIdResult.Value;
+        var loadProfile = loadProfileResult.Value;
 
-        var readCycleIdResult = await GetReadCycleIdAsync(serviceMeter.OwnerMeterCycle, ct);
-        if (!readCycleIdResult.IsSuccess)
+        var readCycleResult = await lookupService.GetReadCycleByNameAsync(serviceMeter.OwnerMeterCycle, ct);
+        if (!readCycleResult.IsSuccess)
         {
-            return AsResult(readCycleIdResult);
+            return AsResult(readCycleResult);
         }
 
-        var readCycleId = readCycleIdResult.Value;
+        var readCycle = readCycleResult.Value;
 
         var isAmsMeter = valueMapper.IsAmsMeter(serviceMeter.AdvanceMeterInfo);
 
@@ -147,9 +147,9 @@ public class EnrollmentNotification_814_05_ImportBuilder(
             serviceDate,
             service.UtilityAccountNumber,
             commodityId,
-            customerClassId,
-            loadProfileId,
-            readCycleId,
+            customerClass.Id,
+            loadProfile.Id,
+            readCycle.Id,
             isAmsMeter,
             serviceMeter.MeterNumber ?? string.Empty,
             premiseAddress.EntityAddress1 ?? string.Empty,
@@ -157,7 +157,7 @@ public class EnrollmentNotification_814_05_ImportBuilder(
             premiseAddress.EntityState ?? string.Empty,
             zip,
             zip4,
-            countyId));
+            county.Id));
 
         return Result.Success();
     }
@@ -175,42 +175,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         return serviceStartItem is not null
             ? Result.Success(serviceStartItem.ServiceStart)
             : Result.Invalid(new ValidationError(nameof(trackingNumber), $"ServiceStartItem with identifier '{trackingNumber}' was not found."));
-    }
-
-    private async Task<Result<int>> GetCustomerClassIdAsync(string? name, CancellationToken ct)
-    {
-        var customerClass = await customerClassRepository.FirstOrDefaultAsync(new CustomerClassByNameSpec(name ?? string.Empty), ct);
-
-        return customerClass is not null
-            ? Result.Success(customerClass.Id)
-            : Result.Invalid(new ValidationError(nameof(CustomerClass), $"Unmapped customer class '{name}'."));
-    }
-
-    private async Task<Result<int>> GetLoadProfileIdAsync(string? name, CancellationToken ct)
-    {
-        var loadProfile = await loadProfileRepository.FirstOrDefaultAsync(new LoadProfileByNameSpec(name ?? string.Empty), ct);
-
-        return loadProfile is not null
-            ? Result.Success(loadProfile.Id)
-            : Result.Invalid(new ValidationError(nameof(LoadProfile), $"Unmapped load profile '{name}'."));
-    }
-
-    private async Task<Result<int>> GetReadCycleIdAsync(string? name, CancellationToken ct)
-    {
-        var readCycle = await readCycleRepository.FirstOrDefaultAsync(new ReadCycleByNameSpec(name ?? string.Empty), ct);
-
-        return readCycle is not null
-            ? Result.Success(readCycle.Id)
-            : Result.Invalid(new ValidationError(nameof(ReadCycle), $"Unmapped read cycle '{name}'."));
-    }
-
-    private async Task<Result<int>> GetCountyIdAsync(string? name, CancellationToken ct)
-    {
-        var county = await countyRepository.FirstOrDefaultAsync(new CountyByNameSpec(name ?? string.Empty), ct);
-
-        return county is not null
-            ? Result.Success(county.Id)
-            : Result.Invalid(new ValidationError(nameof(County), $"Unmapped county '{name}'."));
     }
 
     private static (string Zip, string? Zip4) SplitZip(string? postalCode)

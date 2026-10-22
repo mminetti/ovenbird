@@ -1,4 +1,4 @@
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -55,6 +55,6 @@ public class ImportMarketDocumentHandler(
 
         return errors.Count == 0
             ? Result.Success<IReadOnlyList<long>>(documentIds)
-            : Result<IReadOnlyList<long>>.Error(new ErrorList(errors, string.Empty));
+            : Result<IReadOnlyList<long>>.Error(new ErrorList(errors));
     }
 }

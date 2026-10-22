@@ -4,6 +4,7 @@ using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.Market.BigData.Builders;
+using UseCases.Interfaces.ServiceDelivery;
 using Wolverine;
 
 namespace UnitTests.Infrastructure.Services.Market.BigData.Builders;
@@ -12,10 +13,7 @@ public class ConfirmationBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly IReadRepository<CustomerClass> _customerClassRepository = Substitute.For<IReadRepository<CustomerClass>>();
-    private readonly IReadRepository<LoadProfile> _loadProfileRepository = Substitute.For<IReadRepository<LoadProfile>>();
-    private readonly IReadRepository<ReadCycle> _readCycleRepository = Substitute.For<IReadRepository<ReadCycle>>();
-    private readonly IReadRepository<County> _countyRepository = Substitute.For<IReadRepository<County>>();
+    private readonly IServiceDeliveryLookupService _lookupService = Substitute.For<IServiceDeliveryLookupService>();
     private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
@@ -25,10 +23,7 @@ public class ConfirmationBuilderCreateAsync
         _builder = new EnrollmentNotification_814_05_ImportBuilder(
             _serviceStartItemRepository,
             _referenceRepository,
-            _customerClassRepository,
-            _loadProfileRepository,
-            _readCycleRepository,
-            _countyRepository,
+            _lookupService,
             _valueMapper,
             _bus);
     }
@@ -173,21 +168,21 @@ public class ConfirmationBuilderCreateAsync
             .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
-        _customerClassRepository
-            .FirstOrDefaultAsync(Arg.Any<CustomerClassByNameSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new CustomerClass { Id = 11, Name = "RESIDENTIAL SERVICE" });
+        _lookupService
+            .GetCustomerClassByNameAsync("RESIDENTIAL SERVICE", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new CustomerClass { Id = 11, Name = "RESIDENTIAL SERVICE" }));
 
-        _loadProfileRepository
-            .FirstOrDefaultAsync(Arg.Any<LoadProfileByNameSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new LoadProfile { Id = 22, Name = "RESHIWR_COAST_IDR_WS_NOTOU" });
+        _lookupService
+            .GetLoadProfileByNameAsync("RESHIWR_COAST_IDR_WS_NOTOU", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new LoadProfile { Id = 22, Name = "RESHIWR_COAST_IDR_WS_NOTOU" }));
 
-        _readCycleRepository
-            .FirstOrDefaultAsync(Arg.Any<ReadCycleByNameSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new ReadCycle { Id = 33, Name = "14" });
+        _lookupService
+            .GetReadCycleByNameAsync("14", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new ReadCycle { Id = 33, Name = "14" }));
 
-        _countyRepository
-            .FirstOrDefaultAsync(Arg.Any<CountyByNameSpec>(), Arg.Any<CancellationToken>())
-            .Returns(new County { Id = 44, Name = "TRAVIS" });
+        _lookupService
+            .GetCountyByNameAsync("TRAVIS", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new County { Id = 44, Name = "TRAVIS" }));
 
         _valueMapper.GetCommodityId("E").Returns(Result.Success(2));
         _valueMapper.IsAmsMeter("AMSR").Returns(true);

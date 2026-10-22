@@ -1,4 +1,4 @@
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -17,16 +17,18 @@ public class MarketDocumentEntityBuilderHandler(
     public async Task<Result> Handle(MarketDocumentEntityBuilderCommand command, CancellationToken ct)
     {
         var item = await itemReadRepository.GetByIdAsync(command.MarketDocumentItemId, ct);
+
         if (item is null)
         {
-            return Result.NotFound();
+            return Result.NotFound($"Market Document not found for id {command.MarketDocumentItemId}");
         }
 
         var configuration = await configurationReadRepository.FirstOrDefaultAsync(
             new ConfigurationByIdSpec(command.ConfigurationId), ct);
+
         if (configuration is null)
         {
-            return Result.NotFound();
+            return Result.NotFound($"Configuration not found for id {command.ConfigurationId}");
         }
 
         var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
