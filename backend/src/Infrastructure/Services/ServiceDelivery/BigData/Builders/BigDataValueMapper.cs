@@ -1,3 +1,4 @@
+﻿using Core.ServiceDelivery;
 using CoreConstants = Core.Common.Constants.Constants;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
@@ -29,18 +30,21 @@ public class BigDataValueMapper : IBigDataValueMapper
     public Result<int> GetCommodityId(string code) =>
         _commodityIdsByCode.TryGetValue(code, out var id)
             ? Result.Success(id)
-            : Result.Invalid(new ValidationError(nameof(code), $"Unmapped commodity code '{code}'."));
+            : Result.Invalid(new ValidationError(nameof(Commodity), $"Unmapped commodity code '{code}'."));
 
     public Result<int> GetUnitOfMeasureId(string code) =>
         _unitOfMeasureIdsByCode.TryGetValue(code, out var id)
             ? Result.Success(id)
-            : Result.Invalid(new ValidationError(nameof(code), $"Unmapped unit of measure code '{code}'."));
+            : Result.Invalid(new ValidationError(nameof(UnitOfMeasure), $"Unmapped unit of measure code '{code}'."));
 
     public Result<int> GetUsageTypeId(string purposeCode) =>
         _usageTypeIdsByPurposeCode.TryGetValue(purposeCode, out var id)
             ? Result.Success(id)
-            : Result.Invalid(new ValidationError(nameof(purposeCode), $"Unmapped usage purpose code '{purposeCode}'."));
+            : Result.Invalid(new ValidationError(nameof(UsageType), $"Unmapped usage purpose code '{purposeCode}'."));
 
-    public bool IsAmsMeter(string? advanceMeterInfoCode) =>
-        !string.IsNullOrWhiteSpace(advanceMeterInfoCode) && _amsMeterAdvanceMeterInfoCodes.Contains(advanceMeterInfoCode);
+    public bool IsAmsMeter(string? advanceMeterInfoCode)
+    { 
+        return !string.IsNullOrWhiteSpace(advanceMeterInfoCode) && 
+            _amsMeterAdvanceMeterInfoCodes.Contains(advanceMeterInfoCode);
+    }
 }

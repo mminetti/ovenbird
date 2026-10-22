@@ -1,4 +1,4 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 using System.Xml.Serialization;
 using Core.MarketExchange;
 
@@ -18,7 +18,7 @@ public abstract class TransactionXmlReaderBase<TXml>
         {
             return Result.Invalid(new ValidationError(
                 RequiredElementName,
-                $"MarketDocumentItem '{item.Id}' has no '{RequiredElementName}' element."));
+                $"'{RequiredElementName}' element is required."));
         }
 
         var serializer = new XmlSerializer(typeof(TXml));

@@ -51,17 +51,35 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         var commodityId = commodityIdResult.Value;
 
-        var premiseAddress = accountMaint.NameAddresses.FirstOrDefault(x => x.EntityType == PremiseEntityType);
-        if (premiseAddress is null)
+        var premise = accountMaint.NameAddresses.FirstOrDefault(x => x.EntityType == PremiseEntityType);
+        if (premise is null)
         {
             return Result.Invalid(new ValidationError(
-                PremiseEntityType,
-                $"MarketDocumentItem '{item.Id}' has no NameAddress with EntityType '{PremiseEntityType}'."));
+                nameof(accountMaint.NameAddresses),
+                $"Name Address with EntityType '{PremiseEntityType}' is required."));
         }
 
-        var (zip, zip4) = SplitZip(premiseAddress.EntityPostalCode);
+        if (string.IsNullOrWhiteSpace(premise.EntityAddress1))
+        {
+            return Result.Invalid(new ValidationError(nameof(premise.EntityAddress1),
+                $"Premise Address is required."));
+        }
 
-        var countyResult = await lookupService.GetCountyByNameAsync(premiseAddress.EntityCounty, ct);
+        if (string.IsNullOrWhiteSpace(premise.EntityCity))
+        {
+            return Result.Invalid(new ValidationError(nameof(premise.EntityCity),
+                $"Premise City is required."));
+        }
+
+        if (string.IsNullOrWhiteSpace(premise.EntityState))
+        {
+            return Result.Invalid(new ValidationError(nameof(premise.EntityState),
+                $"Premise State is required."));
+        }
+
+        var (zip, zip4) = SplitZip(premise.EntityPostalCode);
+
+        var countyResult = await lookupService.GetCountyByNameAsync(premise.EntityCounty, ct);
         if (!countyResult.IsSuccess)
         {
             return AsResult(countyResult);
@@ -72,30 +90,28 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         var service = accountMaint.Services.FirstOrDefault();
         if (service is null)
         {
-            return Result.Invalid(new ValidationError(
-                nameof(accountMaint.Services),
-                $"MarketDocumentItem '{item.Id}' has no Service."));
+            return Result.Invalid(new ValidationError(nameof(accountMaint.Services), $"Service is required."));
         }
 
-        var customerAgreementDate = service.ServiceDates
-            .Select(x => x.CustomerAgreementDate)
-            .FirstOrDefault(x => !string.IsNullOrWhiteSpace(x));
+        var customerAgreementDate = service.ServiceDates.FirstOrDefault()?.CustomerAgreementDate;
 
         if (customerAgreementDate is null)
         {
-            return Result.Invalid(new ValidationError(
-                nameof(customerAgreementDate),
-                $"MarketDocumentItem '{item.Id}' has no CustomerAgreementDate."));
+            return Result.Invalid(new ValidationError(nameof(customerAgreementDate), 
+                $"Service Start Date is required."));
         }
 
-        var serviceDate = DateOnly.ParseExact(customerAgreementDate, DateFormat, CultureInfo.InvariantCulture);
+        if (!DateOnly.TryParseExact(customerAgreementDate, DateFormat, out var serviceDate))
+        {
+            return Result.Invalid(new ValidationError(nameof(customerAgreementDate),
+                $"Service Start Date is invalid."));
+        }
 
         var serviceMeter = service.ServiceMeters.FirstOrDefault();
         if (serviceMeter is null)
         {
-            return Result.Invalid(new ValidationError(
-                nameof(service.ServiceMeters),
-                $"MarketDocumentItem '{item.Id}' has no ServiceMeter."));
+            return Result.Invalid(new ValidationError(nameof(service.ServiceMeters),
+                $"Service Meter is required."));
         }
 
         var customerClassResult = await lookupService.GetCustomerClassByNameAsync(serviceMeter.LDCRateClass, ct);
@@ -124,6 +140,12 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         var isAmsMeter = valueMapper.IsAmsMeter(serviceMeter.AdvanceMeterInfo);
 
+        if (string.IsNullOrWhiteSpace(serviceMeter.MeterNumber))
+        {
+            return Result.Invalid(new ValidationError(nameof(serviceMeter.MeterNumber),
+                $"Service Meter Number is required."));
+        }
+
         var serviceStartItem = new ServiceStartItem
         {
             ServiceStartId = serviceStart.Id,
@@ -151,10 +173,10 @@ public class EnrollmentNotification_814_05_ImportBuilder(
             loadProfile.Id,
             readCycle.Id,
             isAmsMeter,
-            serviceMeter.MeterNumber ?? string.Empty,
-            premiseAddress.EntityAddress1 ?? string.Empty,
-            premiseAddress.EntityCity ?? string.Empty,
-            premiseAddress.EntityState ?? string.Empty,
+            serviceMeter.MeterNumber,
+            premise.EntityAddress1,
+            premise.EntityCity,
+            premise.EntityState,
             zip,
             zip4,
             county.Id));
@@ -162,19 +184,19 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         return Result.Success();
     }
 
-    private async Task<Result<ServiceStart>> GetServiceStartAsync(string? trackingNumber, CancellationToken ct)
+    private async Task<Result<ServiceStart>> GetServiceStartAsync(string? identifier, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(trackingNumber))
+        if (string.IsNullOrWhiteSpace(identifier))
         {
-            return Result.Invalid(new ValidationError(nameof(trackingNumber), "Transaction has no ProcessTrackingNumber."));
+            return Result.Invalid(new ValidationError(nameof(ServiceStart), "Service Start has no Identifier."));
         }
 
         var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
-            new ServiceStartItemByIdentifierSpec(trackingNumber), ct);
+            new ServiceStartItemByIdentifierSpec(identifier), ct);
 
         return serviceStartItem is not null
             ? Result.Success(serviceStartItem.ServiceStart)
-            : Result.Invalid(new ValidationError(nameof(trackingNumber), $"ServiceStartItem with identifier '{trackingNumber}' was not found."));
+            : Result.Invalid(new ValidationError(nameof(ServiceStart), $"Service Start Item with identifier '{identifier}' was not found."));
     }
 
     private static (string Zip, string? Zip4) SplitZip(string? postalCode)
