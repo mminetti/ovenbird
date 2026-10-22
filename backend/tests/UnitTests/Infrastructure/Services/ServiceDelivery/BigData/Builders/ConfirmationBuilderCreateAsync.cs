@@ -1,0 +1,218 @@
+using Ardalis.Result;
+using Core.MarketExchange;
+using Core.ServiceDelivery;
+using Core.ServiceDelivery.Events;
+using Core.ServiceDelivery.Specifications;
+using Infrastructure.Services.ServiceDelivery.BigData.Builders;
+using UseCases.Interfaces.ServiceDelivery;
+using Wolverine;
+
+namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
+
+public class ConfirmationBuilderCreateAsync
+{
+    private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
+    private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
+    private readonly IServiceDeliveryLookupService _lookupService = Substitute.For<IServiceDeliveryLookupService>();
+    private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
+    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
+    private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
+
+    public ConfirmationBuilderCreateAsync()
+    {
+        _builder = new EnrollmentNotification_814_05_ImportBuilder(
+            _serviceStartItemRepository,
+            _referenceRepository,
+            _lookupService,
+            _valueMapper,
+            _bus);
+    }
+
+    private const string Xml = """
+        <Transaction>
+          <SupplierDUNS>1234567890123</SupplierDUNS>
+          <UtilityDUNS>123456789</UtilityDUNS>
+          <TransactionSet>814</TransactionSet>
+          <TransactionSubSet>05</TransactionSubSet>
+          <State>TX</State>
+          <Commodity>E</Commodity>
+          <AccountMaint>
+            <ResponseRequestFlag>S</ResponseRequestFlag>
+            <TransactionNumber>164535844520251112112933189069</TransactionNumber>
+            <ProcessTrackingNumber>181451702318211122510245294</ProcessTrackingNumber>
+            <UtilityName>ACME UTILITY CO</UtilityName>
+            <ESPName>ACME ENERGY SUPPLIER</ESPName>
+            <DateStampCreated>20251112</DateStampCreated>
+            <DateStampReceived>20251112</DateStampReceived>
+            <TimeStampReceived>113334</TimeStampReceived>
+            <NameAddressList>
+              <NameAddress>
+                <EntityType>8R</EntityType>
+                <EntityName>JOHN DOE</EntityName>
+                <EntityAddress1>123 MAIN ST</EntityAddress1>
+                <EntityCity>AUSTIN</EntityCity>
+                <EntityState>TX</EntityState>
+                <EntityPostalCode>787010000</EntityPostalCode>
+                <EntityCounty>TRAVIS</EntityCounty>
+              </NameAddress>
+            </NameAddressList>
+            <ServiceList>
+              <Service>
+                <ProductID>EL</ProductID>
+                <ServiceRequested>CE</ServiceRequested>
+                <SecondServiceRequested>MVI</SecondServiceRequested>
+                <LineTrackNumber>1</LineTrackNumber>
+                <ActionCode>A</ActionCode>
+                <UtilityAccountNumber>1008901017189885037100</UtilityAccountNumber>
+                <StdPointLocationCode>BAR</StdPointLocationCode>
+                <ThirdServiceRequested>HU</ThirdServiceRequested>
+                <DistributionLoss>D</DistributionLoss>
+                <PremiseType>01</PremiseType>
+                <SpecialNeedsInfo>N</SpecialNeedsInfo>
+                <ServiceDateList>
+                  <ServiceDate>
+                    <CustomerAgreementDate>20251112</CustomerAgreementDate>
+                  </ServiceDate>
+                </ServiceDateList>
+                <ServiceMeterList>
+                  <ServiceMeter>
+                    <MeterNumber>I88362388</MeterNumber>
+                    <MeterAction>Q</MeterAction>
+                    <BillDataAndIntervalType>KHMON</BillDataAndIntervalType>
+                    <LDCRateClass>RESIDENTIAL SERVICE</LDCRateClass>
+                    <LoadProfileCode>RESHIWR_COAST_IDR_WS_NOTOU</LoadProfileCode>
+                    <OwnerMeterCycle>14</OwnerMeterCycle>
+                    <AdvanceMeterInfo>AMSR</AdvanceMeterInfo>
+                    <MeterConfiguration>M01</MeterConfiguration>
+                    <MeterConfigDesc>HOUSE</MeterConfigDesc>
+                    <ServiceMeterTOUList>
+                      <ServiceMeterTOU>
+                        <MeterType>KHMON</MeterType>
+                        <MeterMultiplier>1</MeterMultiplier>
+                        <TimeOfUse1>51</TimeOfUse1>
+                      </ServiceMeterTOU>
+                      <ServiceMeterTOU>
+                        <MeterType>KHMON</MeterType>
+                        <NumberOfDials>5.0</NumberOfDials>
+                        <TimeOfUse1>51</TimeOfUse1>
+                      </ServiceMeterTOU>
+                    </ServiceMeterTOUList>
+                  </ServiceMeter>
+                </ServiceMeterList>
+              </Service>
+            </ServiceList>
+          </AccountMaint>
+        </Transaction>
+        """;
+
+    private static MarketDocumentItem CreateItem() => new()
+    {
+        Id = 42,
+        Set = "814",
+        SubSet = "05",
+        ReferenceNumber = "164535844520251112112933189069",
+        Raw = Xml,
+    };
+
+    [Fact]
+    public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()
+    {
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+    }
+
+    [Fact]
+    public async Task NeverCallsPersistenceWhenServiceStartCannotBeResolved()
+    {
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
+        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ConfirmsServiceStartWhenResolved()
+    {
+        var serviceStart = new ServiceStart { Id = 99 };
+        var existingServiceStartItem = new ServiceStartItem
+        {
+            Id = 1,
+            ServiceStartId = serviceStart.Id,
+            Identifier = "181451702318211122510245294",
+            ServiceStart = serviceStart,
+        };
+
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(existingServiceStartItem);
+
+        _serviceStartItemRepository
+            .AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var item = callInfo.Arg<ServiceStartItem>();
+                item.Id = 2;
+                return item;
+            });
+
+        _referenceRepository
+            .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
+
+        _lookupService
+            .GetCustomerClassByNameAsync("RESIDENTIAL SERVICE", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new CustomerClass { Id = 11, Name = "RESIDENTIAL SERVICE" }));
+
+        _lookupService
+            .GetLoadProfileByNameAsync("RESHIWR_COAST_IDR_WS_NOTOU", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new LoadProfile { Id = 22, Name = "RESHIWR_COAST_IDR_WS_NOTOU" }));
+
+        _lookupService
+            .GetReadCycleByNameAsync("14", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new ReadCycle { Id = 33, Name = "14" }));
+
+        _lookupService
+            .GetCountyByNameAsync("TRAVIS", Arg.Any<CancellationToken>())
+            .Returns(Result.Success(new County { Id = 44, Name = "TRAVIS" }));
+
+        _valueMapper.GetCommodityId("E").Returns(Result.Success(2));
+        _valueMapper.IsAmsMeter("AMSR").Returns(true);
+
+        var item = CreateItem();
+
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
+
+        result.IsSuccess.ShouldBeTrue();
+        await _serviceStartItemRepository.Received(1).AddAsync(
+            Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),
+            Arg.Any<CancellationToken>());
+
+        await _bus.Received(1).PublishAsync(
+            Arg.Is<ServiceStartScheduledEvent>(x =>
+                x.ServiceStartId == serviceStart.Id &&
+                x.ServiceDate == new DateOnly(2025, 11, 12) &&
+                x.ServicePointIdentifier == "1008901017189885037100" &&
+                x.CommodityId == 2 &&
+                x.CustomerClassId == 11 &&
+                x.LoadProfileId == 22 &&
+                x.ReadCycleId == 33 &&
+                x.IsAmsMeter &&
+                x.MeterIdentifier == "I88362388" &&
+                x.AddressLine1 == "123 MAIN ST" &&
+                x.City == "AUSTIN" &&
+                x.State == "TX" &&
+                x.Zip == "78701" &&
+                x.Zip4 == "0000" &&
+                x.CountyId == 44),
+            Arg.Any<DeliveryOptions>());
+    }
+}
