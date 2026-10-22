@@ -8,5 +8,7 @@ public class MoveInReject_814_17_ImportBuilder(
     IRepository<MarketDocumentReference> referenceRepository)
     : ServiceStartRejectImportBuilderBase(serviceStartItemRepository, referenceRepository)
 {
-    public const string Key = "BigData_814_17";
+    public const string Key = $"BigData_{Set}_{SubSet}";
+    private const string Set = "814";
+    private const string SubSet = "17";
 }

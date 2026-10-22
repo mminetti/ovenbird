@@ -3,7 +3,8 @@
 public class MoveInRequest_814_16_ExportGenerator(TimeProvider timeProvider)
     : ServiceStartRequestExportGeneratorBase(timeProvider)
 {
-    public const string Key = "BigData_814_16";
+    public const string Key = $"BigData_{Set}_16";
+    private const string Set = "814";
     protected override string SubSet => "16";
     protected override string? PriorityCode => "01";
 

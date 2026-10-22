@@ -123,9 +123,55 @@ public class ImportMarketDocumentItemHandlerHandle
             new ImportMarketDocumentItemCommand(_configuration.Id, document.Id), CancellationToken.None);
 
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("500") && e.Contains("bad data"));
+        result.ValidationErrors.ShouldContain(e =>
+            e.Identifier == "Field" && e.ErrorMessage.Contains("REF-1") && e.ErrorMessage.Contains("bad data"));
 
         await _bus.Received(2).InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
+        await _itemRepository.Received(2).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CatchesUnexpectedExceptionsPerItem_AndTracksByReferenceNumber()
+    {
+        var document = new MarketDocument { Id = 1, Identifier = "document.xml", CompanyId = _configuration.CompanyId!.Value };
+
+        _documentReadRepository
+            .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdSpec>(), Arg.Any<CancellationToken>())
+            .Returns(document);
+
+        var parsedItems = new List<MarketDocumentItem>
+        {
+            new() { Set = "867", SubSet = "03", ReferenceNumber = "REF-1", ServicePointIdentifier = "ACCT-1" },
+            new() { Set = "867", SubSet = "03", ReferenceNumber = "REF-2", ServicePointIdentifier = "ACCT-2" },
+        };
+
+        _ediHandler
+            .ExecuteItemImportAsync(_configuration, document, Arg.Any<CancellationToken>())
+            .Returns(parsedItems);
+
+        long nextId = 500;
+        _itemRepository
+            .AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var item = callInfo.Arg<MarketDocumentItem>();
+                item.Id = nextId++;
+                return item;
+            });
+
+        _bus
+            .InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromException<Result>(new InvalidOperationException("boom")),
+                Task.FromResult(Result.Success()));
+
+        var result = await _handler.Handle(
+            new ImportMarketDocumentItemCommand(_configuration.Id, document.Id), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "REF-1" && e.ErrorMessage.Contains("boom"));
+        result.Value.ShouldBeNull();
+
         await _itemRepository.Received(2).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());
     }
 

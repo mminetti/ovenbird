@@ -99,14 +99,40 @@ public class ImportMarketDocumentHandlerHandle
 
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
-            .Returns(Result<IReadOnlyList<long>>.Error(new ErrorList(["bad data"], string.Empty)));
+            .Returns(Result<IReadOnlyList<long>>.Invalid(new ValidationError("REF-1", "bad data")));
 
         var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeFalse();
-        result.Errors.ShouldContain(e => e.Contains("100") && e.Contains("bad data"));
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "REF-1" && e.ErrorMessage.Contains("newfile.csv") && e.ErrorMessage.Contains("bad data"));
 
         await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task CatchesUnexpectedExceptionsPerDocument_AndTracksByDocumentIdentifier()
+    {
+        var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
+        var configuration = CreateConfiguration(company);
+
+        _configurationReadRepository
+            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
+            .Returns([configuration]);
+
+        var newDocument = new MarketDocument { Identifier = "newfile.csv", CompanyId = company.Id };
+
+        _ediHandler
+            .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
+            .Returns(new List<MarketDocument> { newDocument });
+
+        _documentRepository
+            .AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<MarketDocument>(new InvalidOperationException("boom")));
+
+        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
+
+        result.IsSuccess.ShouldBeFalse();
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "newfile.csv" && e.ErrorMessage == "boom");
     }
 
     [Fact]

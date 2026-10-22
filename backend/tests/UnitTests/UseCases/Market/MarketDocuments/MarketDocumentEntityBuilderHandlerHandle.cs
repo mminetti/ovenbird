@@ -91,6 +91,29 @@ public class MarketDocumentEntityBuilderHandlerHandle
     }
 
     [Fact]
+    public async Task ReturnsInvalidWithItemReferenceNumberWhenBuilderThrows()
+    {
+        var item = new MarketDocumentItem { Id = 1, Set = "867", SubSet = "02", ReferenceNumber = "REF-1" };
+
+        _itemReadRepository.GetByIdAsync(item.Id, Arg.Any<CancellationToken>()).Returns(item);
+
+        var builder = Substitute.For<IMarketDocumentEntityBuilder>();
+        builder.CreateAsync(item, Arg.Any<CancellationToken>())
+            .Returns(Task.FromException<Result>(new InvalidOperationException("boom")));
+
+        var services = new ServiceCollection();
+        services.AddKeyedSingleton(Key, builder);
+
+        var handler = new MarketDocumentEntityBuilderHandler(
+            _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
+
+        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "REF-1" && e.ErrorMessage == "boom");
+    }
+
+    [Fact]
     public async Task ReturnsNotFoundWhenMarketDocumentItemCannotBeFound()
     {
         _itemReadRepository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns((MarketDocumentItem?)null);

@@ -18,7 +18,10 @@ public class MarketDocumentImportJob(
 
         if (!result.IsSuccess)
         {
-            logger.LogError("MarketDocument import failed: {Errors}", string.Join(", ", result.Errors));
+            var messages = result.Errors
+                .Concat(result.ValidationErrors.Select(v => $"{v.Identifier}: {v.ErrorMessage}"));
+
+            logger.LogError("MarketDocument import failed: {Errors}", string.Join(", ", messages));
         }
         else
         {

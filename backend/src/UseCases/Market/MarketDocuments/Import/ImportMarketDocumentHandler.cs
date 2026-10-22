@@ -19,20 +19,34 @@ public class ImportMarketDocumentHandler(
     public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
         var documentIds = new List<long>();
-        var errors = new List<string>();
+        var errors = new List<ValidationError>();
 
         var configurations = await configurationReadRepository.ListAsync(
             new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
 
         foreach (var configuration in configurations)
         {
-            var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
-
-            var documents = await ediHandler.ExecuteImportAsync(configuration, ct);
+            IReadOnlyList<MarketDocument> documents;
+            try
+            {
+                var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+                documents = await ediHandler.ExecuteImportAsync(configuration, ct);
+            }
+            catch (Exception ex)
+            {
+                errors.Add(new ValidationError(configuration.Id.ToString(), ex.Message));
+                continue;
+            }
 
             foreach (var document in documents)
             {
-                if (document.Id == 0)
+                if (document.Id != 0)
+                {
+                    documentIds.Add(document.Id);
+                    continue;
+                }
+
+                try
                 {
                     var created = await documentRepository.AddAsync(document, ct);
 
@@ -41,20 +55,21 @@ public class ImportMarketDocumentHandler(
 
                     if (!itemImportResult.IsSuccess)
                     {
-                        errors.AddRange(itemImportResult.Errors.Select(message => $"MarketDocument '{created.Id}': {message}"));
+                        errors.AddRange(itemImportResult.ValidationErrors.Select(v =>
+                            new ValidationError(v.Identifier, $"MarketDocument '{document.Identifier}': {v.ErrorMessage}")));
                     }
 
                     documentIds.Add(created.Id);
                 }
-                else
+                catch (Exception ex)
                 {
-                    documentIds.Add(document.Id);
+                    errors.Add(new ValidationError(document.Identifier, ex.Message));
                 }
             }
         }
 
         return errors.Count == 0
             ? Result.Success<IReadOnlyList<long>>(documentIds)
-            : Result<IReadOnlyList<long>>.Error(new ErrorList(errors));
+            : Result<IReadOnlyList<long>>.Invalid(errors);
     }
 }

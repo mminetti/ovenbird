@@ -31,11 +31,18 @@ public class MarketDocumentEntityBuilderHandler(
             return Result.NotFound($"Configuration not found for id {command.ConfigurationId}");
         }
 
-        var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
-        var entityBuilder = entityBuilderResolver.Resolve($"{handlerIdentifier}_{item.Set}_{item.SubSet}");
+        try
+        {
+            var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
+            var entityBuilder = entityBuilderResolver.Resolve($"{handlerIdentifier}_{item.Set}_{item.SubSet}");
 
-        return entityBuilder is not null
-            ? await entityBuilder.CreateAsync(item, ct)
-            : Result.Success();
+            return entityBuilder is not null
+                ? await entityBuilder.CreateAsync(item, ct)
+                : Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Invalid(new ValidationError(item.ReferenceNumber, ex.Message));
+        }
     }
 }

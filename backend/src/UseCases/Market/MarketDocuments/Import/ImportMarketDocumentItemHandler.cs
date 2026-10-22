@@ -31,33 +31,43 @@ public class ImportMarketDocumentItemHandler(
         var items = await ediHandler.ExecuteItemImportAsync(configuration, document, ct);
 
         var itemIds = new List<long>();
-        var errors = new List<string>();
+        var errors = new List<ValidationError>();
 
         foreach (var item in items)
         {
-            item.MarketDocumentId = document.Id;
-
-            var created = await itemRepository.AddAsync(item, ct);
-
-            var buildResult = await bus.InvokeAsync<Result>(
-                new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
-
-            if (buildResult.IsSuccess)
+            try
             {
-                itemIds.Add(created.Id);
+                item.MarketDocumentId = document.Id;
+
+                var created = await itemRepository.AddAsync(item, ct);
+
+                var buildResult = await bus.InvokeAsync<Result>(
+                    new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
+
+                if (buildResult.IsSuccess)
+                {
+                    itemIds.Add(created.Id);
+                }
+                else
+                {
+                    errors.AddRange(FlattenErrors(buildResult, item.ReferenceNumber));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                errors.AddRange(FlattenErrors(buildResult)
-                    .Select(message => $"MarketDocumentItem '{created.Id}': {message}"));
+                errors.Add(new ValidationError(item.ReferenceNumber,
+                    $"MarketDocumentItem '{item.ReferenceNumber}': {ex.Message}"));
             }
         }
 
         return errors.Count == 0
             ? Result.Success<IReadOnlyList<long>>(itemIds)
-            : Result<IReadOnlyList<long>>.Error(new ErrorList(errors, string.Empty));
+            : Result<IReadOnlyList<long>>.Invalid(errors);
     }
 
-    private static IEnumerable<string> FlattenErrors(Result result) =>
-        result.Errors.Concat(result.ValidationErrors.Select(v => v.ErrorMessage));
+    private static IEnumerable<ValidationError> FlattenErrors(Result result, string referenceNumber) =>
+        result.ValidationErrors
+            .Select(v => new ValidationError(v.Identifier, $"MarketDocumentItem '{referenceNumber}': {v.ErrorMessage}"))
+            .Concat(result.Errors.Select(message =>
+                new ValidationError(referenceNumber, $"MarketDocumentItem '{referenceNumber}': {message}")));
 }
