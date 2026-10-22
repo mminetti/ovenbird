@@ -115,7 +115,8 @@ public static class InfrastructureServiceExtensions
             .AddScoped<MarketDocumentEntityGeneratorResolver>()
             .AddScoped<IBigDataValueMapper, BigDataValueMapper>()
             .AddScoped<IServiceDeliveryLookupService, ServiceDeliveryLookupService>()
-            .AddScoped<CurrentUserService>();
+            .AddScoped<CurrentUserService>()
+            .AddScoped<ProcessRunTracker>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));
         services.AddKeyedTransient<IFtpService, SshNetSftpService>(nameof(SshNetSftpService));

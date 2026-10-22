@@ -2,6 +2,7 @@ using Ardalis.Result;
 using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
@@ -97,14 +98,17 @@ public class ImportMarketDocumentHandlerHandle
                 return document;
             });
 
+        // Mimics what ImportMarketDocumentItemHandler itself already returns for a failed item.
         _bus
             .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
-            .Returns(Result<IReadOnlyList<long>>.Invalid(new ValidationError("REF-1", "bad data")));
+            .Returns(Result<IReadOnlyList<long>>.Invalid(new ValidationError(
+                EntityReference.Format(nameof(MarketDocumentItem), 900), "MarketDocumentItem 'REF-1': bad data", string.Empty, ValidationSeverity.Error)));
 
         var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeFalse();
-        result.ValidationErrors.ShouldContain(e => e.Identifier == "REF-1" && e.ErrorMessage.Contains("newfile.csv") && e.ErrorMessage.Contains("bad data"));
+        result.ValidationErrors.ShouldContain(e =>
+            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), 900) && e.ErrorMessage.Contains("bad data"));
 
         await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
     }
@@ -132,7 +136,8 @@ public class ImportMarketDocumentHandlerHandle
         var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeFalse();
-        result.ValidationErrors.ShouldContain(e => e.Identifier == "newfile.csv" && e.ErrorMessage == "boom");
+        result.ValidationErrors.ShouldContain(e =>
+            e.Identifier == string.Empty && e.ErrorMessage.Contains("newfile.csv") && e.ErrorMessage.Contains("boom"));
     }
 
     [Fact]

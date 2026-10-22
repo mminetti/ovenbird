@@ -3,6 +3,7 @@ using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
@@ -52,7 +53,7 @@ public class MarketDocumentEntityBuilderHandlerHandle
     }
 
     [Fact]
-    public async Task PropagatesResultFromBuilderUnchanged()
+    public async Task PromotesTheBuilderFieldIdentifierIntoErrorCode_AndTagsTheItemAsTheEntityReference()
     {
         var item = new MarketDocumentItem { Id = 1, Set = "867", SubSet = "02" };
 
@@ -60,7 +61,7 @@ public class MarketDocumentEntityBuilderHandlerHandle
 
         var builder = Substitute.For<IMarketDocumentEntityBuilder>();
         builder.CreateAsync(item, Arg.Any<CancellationToken>())
-            .Returns(Result.Invalid(new ValidationError("Field", "bad data")));
+            .Returns(Result.Invalid(new ValidationError("CustomerClass", "Unmapped customer class 'Residential'.")));
 
         var services = new ServiceCollection();
         services.AddKeyedSingleton(Key, builder);
@@ -71,6 +72,10 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.ShouldContain(e =>
+            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), item.Id)
+            && e.ErrorCode == "CustomerClass"
+            && e.ErrorMessage == "Unmapped customer class 'Residential'.");
     }
 
     [Fact]
@@ -91,7 +96,7 @@ public class MarketDocumentEntityBuilderHandlerHandle
     }
 
     [Fact]
-    public async Task ReturnsInvalidWithItemReferenceNumberWhenBuilderThrows()
+    public async Task ReturnsInvalidTaggedWithTheItemEntityReferenceWhenBuilderThrows()
     {
         var item = new MarketDocumentItem { Id = 1, Set = "867", SubSet = "02", ReferenceNumber = "REF-1" };
 
@@ -110,7 +115,10 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
-        result.ValidationErrors.ShouldContain(e => e.Identifier == "REF-1" && e.ErrorMessage == "boom");
+        result.ValidationErrors.ShouldContain(e =>
+            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), item.Id)
+            && e.ErrorCode == string.Empty
+            && e.ErrorMessage == "boom");
     }
 
     [Fact]

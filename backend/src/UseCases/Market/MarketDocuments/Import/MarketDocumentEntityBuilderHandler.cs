@@ -1,6 +1,7 @@
 ﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -31,18 +32,28 @@ public class MarketDocumentEntityBuilderHandler(
             return Result.NotFound($"Configuration not found for id {command.ConfigurationId}");
         }
 
+        var entityReference = EntityReference.Format(nameof(MarketDocumentItem), item.Id);
+
         try
         {
             var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
             var entityBuilder = entityBuilderResolver.Resolve($"{handlerIdentifier}_{item.Set}_{item.SubSet}");
 
-            return entityBuilder is not null
+            var result = entityBuilder is not null
                 ? await entityBuilder.CreateAsync(item, ct)
                 : Result.Success();
+
+            // The builder's ValidationErrors already identify the failing field (via nameof(...)) -
+            // promote that into ErrorCode as the "fix action" field key, and replace Identifier with
+            // the record this error is actually about, now that we know it.
+            return result.Status == ResultStatus.Invalid
+                ? Result.Invalid(result.ValidationErrors.Select(v =>
+                    new ValidationError(entityReference, v.ErrorMessage, v.Identifier, v.Severity)))
+                : result;
         }
         catch (Exception ex)
         {
-            return Result.Invalid(new ValidationError(item.ReferenceNumber, ex.Message));
+            return Result.Invalid(new ValidationError(entityReference, ex.Message, string.Empty, ValidationSeverity.Error));
         }
     }
 }

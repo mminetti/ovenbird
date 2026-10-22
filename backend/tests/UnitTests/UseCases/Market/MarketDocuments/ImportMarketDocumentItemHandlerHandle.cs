@@ -3,6 +3,7 @@ using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
@@ -113,10 +114,13 @@ public class ImportMarketDocumentItemHandlerHandle
                 return item;
             });
 
+        // Mimics what MarketDocumentEntityBuilderHandler itself already returns: Identifier is the
+        // item's entity reference, ErrorCode is the failing field.
         _bus
             .InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>())
             .Returns(
-                Result.Invalid(new ValidationError("Field", "bad data")),
+                Result.Invalid(new ValidationError(
+                    EntityReference.Format(nameof(MarketDocumentItem), 500), "bad data", "CustomerClass", ValidationSeverity.Error)),
                 Result.Success());
 
         var result = await _handler.Handle(
@@ -124,7 +128,9 @@ public class ImportMarketDocumentItemHandlerHandle
 
         result.IsSuccess.ShouldBeFalse();
         result.ValidationErrors.ShouldContain(e =>
-            e.Identifier == "Field" && e.ErrorMessage.Contains("REF-1") && e.ErrorMessage.Contains("bad data"));
+            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), 500)
+            && e.ErrorCode == "CustomerClass"
+            && e.ErrorMessage == "bad data");
 
         await _bus.Received(2).InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
         await _itemRepository.Received(2).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());
@@ -169,7 +175,9 @@ public class ImportMarketDocumentItemHandlerHandle
             new ImportMarketDocumentItemCommand(_configuration.Id, document.Id), CancellationToken.None);
 
         result.IsSuccess.ShouldBeFalse();
-        result.ValidationErrors.ShouldContain(e => e.Identifier == "REF-1" && e.ErrorMessage.Contains("boom"));
+        result.ValidationErrors.ShouldContain(e =>
+            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), 500)
+            && e.ErrorMessage.Contains("REF-1") && e.ErrorMessage.Contains("boom"));
         result.Value.ShouldBeNull();
 
         await _itemRepository.Received(2).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());

@@ -2,6 +2,7 @@
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -35,11 +36,13 @@ public class ImportMarketDocumentItemHandler(
 
         foreach (var item in items)
         {
+            MarketDocumentItem? created = null;
+
             try
             {
                 item.MarketDocumentId = document.Id;
 
-                var created = await itemRepository.AddAsync(item, ct);
+                created = await itemRepository.AddAsync(item, ct);
 
                 var buildResult = await bus.InvokeAsync<Result>(
                     new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
@@ -50,13 +53,17 @@ public class ImportMarketDocumentItemHandler(
                 }
                 else
                 {
-                    errors.AddRange(FlattenErrors(buildResult, item.ReferenceNumber));
+                    errors.AddRange(FlattenErrors(buildResult, created.Id));
                 }
             }
             catch (Exception ex)
             {
-                errors.Add(new ValidationError(item.ReferenceNumber,
-                    $"MarketDocumentItem '{item.ReferenceNumber}': {ex.Message}"));
+                var identifier = created is not null
+                    ? EntityReference.Format(nameof(MarketDocumentItem), created.Id)
+                    : string.Empty;
+
+                errors.Add(new ValidationError(identifier,
+                    $"MarketDocumentItem '{item.ReferenceNumber}': {ex.Message}", string.Empty, ValidationSeverity.Error));
             }
         }
 
@@ -65,9 +72,10 @@ public class ImportMarketDocumentItemHandler(
             : Result<IReadOnlyList<long>>.Invalid(errors);
     }
 
-    private static IEnumerable<ValidationError> FlattenErrors(Result result, string referenceNumber) =>
+    // buildResult.ValidationErrors already carry the right EntityReference/Field/Severity (set by
+    // MarketDocumentEntityBuilderHandler) - only its plain NotFound-style Errors need wrapping here.
+    private static IEnumerable<ValidationError> FlattenErrors(Result result, long itemId) =>
         result.ValidationErrors
-            .Select(v => new ValidationError(v.Identifier, $"MarketDocumentItem '{referenceNumber}': {v.ErrorMessage}"))
-            .Concat(result.Errors.Select(message =>
-                new ValidationError(referenceNumber, $"MarketDocumentItem '{referenceNumber}': {message}")));
+            .Concat(result.Errors.Select(message => new ValidationError(
+                EntityReference.Format(nameof(MarketDocumentItem), itemId), message, string.Empty, ValidationSeverity.Error)));
 }

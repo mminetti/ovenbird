@@ -1,6 +1,7 @@
 ﻿using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using CoreConstants = Core.Common.Constants.Constants;
 
@@ -34,7 +35,8 @@ public class ImportMarketDocumentHandler(
             }
             catch (Exception ex)
             {
-                errors.Add(new ValidationError(configuration.Id.ToString(), ex.Message));
+                errors.Add(new ValidationError(
+                    EntityReference.Format(nameof(Configuration), configuration.Id), ex.Message, string.Empty, ValidationSeverity.Error));
                 continue;
             }
 
@@ -46,24 +48,30 @@ public class ImportMarketDocumentHandler(
                     continue;
                 }
 
+                MarketDocument? created = null;
+
                 try
                 {
-                    var created = await documentRepository.AddAsync(document, ct);
+                    created = await documentRepository.AddAsync(document, ct);
 
                     var itemImportResult = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
                         new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
 
                     if (!itemImportResult.IsSuccess)
                     {
-                        errors.AddRange(itemImportResult.ValidationErrors.Select(v =>
-                            new ValidationError(v.Identifier, $"MarketDocument '{document.Identifier}': {v.ErrorMessage}")));
+                        errors.AddRange(itemImportResult.ValidationErrors);
                     }
 
                     documentIds.Add(created.Id);
                 }
                 catch (Exception ex)
                 {
-                    errors.Add(new ValidationError(document.Identifier, ex.Message));
+                    var identifier = created is not null
+                        ? EntityReference.Format(nameof(MarketDocument), created.Id)
+                        : string.Empty;
+
+                    errors.Add(new ValidationError(identifier,
+                        $"MarketDocument '{document.Identifier}': {ex.Message}", string.Empty, ValidationSeverity.Error));
                 }
             }
         }

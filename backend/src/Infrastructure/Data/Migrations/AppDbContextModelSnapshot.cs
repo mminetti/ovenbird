@@ -416,6 +416,175 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Core.Processing.ProcessRun", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset?>("CompletedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("ProcessTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("StartedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProcessTypeId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("ProcessRun");
+                });
+
+            modelBuilder.Entity("Core.Processing.ProcessRunLogItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("EntityType")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<string>("Field")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("LevelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ProcessRunId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("ProcessRunId");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.ToTable("ProcessRunLogItem");
+                });
+
+            modelBuilder.Entity("Core.Processing.ProcessRunLogLevel", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProcessRunLogLevel");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Error"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Warning"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Info"
+                        });
+                });
+
+            modelBuilder.Entity("Core.Processing.ProcessRunStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProcessRunStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Running"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Succeeded"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Failed"
+                        });
+                });
+
+            modelBuilder.Entity("Core.Processing.ProcessType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProcessType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "MarketDocumentImport"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "MarketDocumentExport"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "MarketDocumentItemExport"
+                        });
+                });
+
             modelBuilder.Entity("Core.Security.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -2658,6 +2827,44 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ReferenceType");
                 });
 
+            modelBuilder.Entity("Core.Processing.ProcessRun", b =>
+                {
+                    b.HasOne("Core.Processing.ProcessType", "ProcessType")
+                        .WithMany()
+                        .HasForeignKey("ProcessTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Processing.ProcessRunStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ProcessType");
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("Core.Processing.ProcessRunLogItem", b =>
+                {
+                    b.HasOne("Core.Processing.ProcessRunLogLevel", "Level")
+                        .WithMany()
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Processing.ProcessRun", "ProcessRun")
+                        .WithMany("LogItems")
+                        .HasForeignKey("ProcessRunId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Level");
+
+                    b.Navigation("ProcessRun");
+                });
+
             modelBuilder.Entity("Core.Security.Permission", b =>
                 {
                     b.HasOne("Core.Security.PermissionModule", "Module")
@@ -3203,6 +3410,11 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.Processing.ProcessRun", b =>
+                {
+                    b.Navigation("LogItems");
                 });
 
             modelBuilder.Entity("Core.Security.PermissionModule", b =>
