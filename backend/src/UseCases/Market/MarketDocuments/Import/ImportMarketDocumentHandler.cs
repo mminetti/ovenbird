@@ -16,9 +16,9 @@ public class ImportMarketDocumentHandler(
 {
     private const string HandlerIdentifier = "handler";
 
-    public async Task<Result<IReadOnlyList<long>>> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
+    public async Task<ImportMarketDocumentResult> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
     {
-        var documentIds = new List<long>();
+        var imported = new List<string>();
         var errors = new List<ValidationError>();
 
         var configurations = await configurationReadRepository.ListAsync(
@@ -26,51 +26,22 @@ public class ImportMarketDocumentHandler(
 
         foreach (var configuration in configurations)
         {
-            IReadOnlyList<MarketDocument> documents;
-            try
+            var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+
+            var importResult = await ediHandler.ExecuteImportAsync(configuration, ct);
+
+            errors.AddRange(importResult.Errors);
+
+            foreach (var document in importResult.Documents)
             {
-                var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
-                documents = await ediHandler.ExecuteImportAsync(configuration, ct);
-            }
-            catch (Exception ex)
-            {
-                errors.Add(new ValidationError(
-                    EntityReference.Format(nameof(Configuration), configuration.Id), ex.Message, string.Empty, ValidationSeverity.Error));
-                continue;
-            }
+                var created = await documentRepository.AddAsync(document, ct);
 
-            foreach (var document in documents)
-            {
-                if (document.Id != 0)
-                {
-                    documentIds.Add(document.Id);
-                    continue;
-                }
+                await bus.PublishAsync(new ImportMarketDocumentItemCommand(configuration.Id, created.Id));
 
-                MarketDocument? created = null;
-
-                try
-                {
-                    created = await documentRepository.AddAsync(document, ct);
-
-                    await bus.PublishAsync(new ImportMarketDocumentItemCommand(configuration.Id, created.Id));
-
-                    documentIds.Add(created.Id);
-                }
-                catch (Exception ex)
-                {
-                    var identifier = created is not null
-                        ? EntityReference.Format(nameof(MarketDocument), created.Id)
-                        : string.Empty;
-
-                    errors.Add(new ValidationError(identifier,
-                        $"MarketDocument '{document.Identifier}': {ex.Message}", string.Empty, ValidationSeverity.Error));
-                }
+                imported.Add(created.Identifier);
             }
         }
 
-        return errors.Count == 0
-            ? Result.Success<IReadOnlyList<long>>(documentIds)
-            : Result<IReadOnlyList<long>>.Invalid(errors);
+        return new ImportMarketDocumentResult(imported, errors);
     }
 }

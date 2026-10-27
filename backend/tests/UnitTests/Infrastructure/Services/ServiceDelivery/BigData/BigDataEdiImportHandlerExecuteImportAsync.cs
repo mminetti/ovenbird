@@ -64,16 +64,16 @@ public class BigDataEdiImportHandlerExecuteImportAsync
             .FirstOrDefaultAsync(Arg.Any<MarketDocumentByIdentifierAndCompanySpec>(), Arg.Any<CancellationToken>())
             .Returns(existingDocument, (MarketDocument?)null);
 
-        var documents = await _handler.ExecuteImportAsync(configuration, CancellationToken.None);
+        var result = await _handler.ExecuteImportAsync(configuration, CancellationToken.None);
 
-        documents.Count.ShouldBe(2);
-        documents[0].ShouldBeSameAs(existingDocument);
+        result.Errors.ShouldBeEmpty();
+        result.Documents.Count.ShouldBe(1);
 
         // The already-imported file must never be re-downloaded or re-uploaded.
         _ftpService.DownloadedPaths.ShouldBe([$"{RemoteDirectory}/newfile.csv"]);
         _fileStorage.UploadedPaths.Count.ShouldBe(1);
 
-        var created = documents[1];
+        var created = result.Documents[0];
         created.Id.ShouldBe(0L);
         created.Identifier.ShouldBe("newfile.csv");
         created.CompanyId.ShouldBe(company.Id);

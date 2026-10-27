@@ -55,7 +55,7 @@ public class ProcessRunTrackerTests
                 && items.Any(i => i.EntityType == "MarketDocumentItem" && i.EntityId == "500"
                     && i.Field == "CustomerClass" && i.LevelId == Constants.ProcessRunLogLevels.Error)
                 && items.Any(i => i.EntityType == null && i.EntityId == null
-                    && i.Field == null && i.LevelId == Constants.ProcessRunLogLevels.Warning)),
+                    && i.Field == string.Empty && i.LevelId == Constants.ProcessRunLogLevels.Warning)),
             Arg.Any<CancellationToken>());
 
         await _processRunRepository.Received(1).UpdateAsync(

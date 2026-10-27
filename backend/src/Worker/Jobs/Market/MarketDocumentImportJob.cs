@@ -1,7 +1,7 @@
-using Ardalis.Result;
-using Quartz;
+﻿using Quartz;
 using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
+using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
 using CoreConstants = Core.Common.Constants.Constants;
 
@@ -16,21 +16,32 @@ public class MarketDocumentImportJob(
     {
         logger.LogInformation("Starting MarketDocument import");
 
-        var run = await processRunTracker.StartAsync(CoreConstants.ProcessTypes.MarketDocumentImport, cancellationToken);
-
-        var result = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
-            new ImportMarketDocumentCommand(), cancellationToken);
-
-        await processRunTracker.CompleteAsync(run.Id, result.IsSuccess, result.ValidationErrors, cancellationToken);
-
-        if (!result.IsSuccess)
+        try
         {
-            logger.LogError("MarketDocument import failed. ProcessRunId={ProcessRunId}, Errors={Errors}",
-                run.Id, string.Join(", ", result.ValidationErrors.Select(v => v.ErrorMessage)));
+            var run = await processRunTracker.StartAsync(CoreConstants.ProcessTypes.MarketDocumentImport, cancellationToken);
+
+            var result = await bus.InvokeAsync<ImportMarketDocumentResult>(
+                new ImportMarketDocumentCommand(), cancellationToken);
+
+            var succeeded = result.Errors.Count == 0;
+
+            await processRunTracker.CompleteAsync(run.Id, succeeded, result.Errors, cancellationToken);
+
+            if (!succeeded)
+            {
+                logger.LogError("MarketDocument import failed. ProcessRunId={ProcessRunId}, Errors={Errors}",
+                    run.Id, string.Join(", ", result.Errors.Select(v => v.ErrorMessage)));
+            }
+            else
+            {
+                logger.LogInformation(
+                    "Imported {ImportedCount} MarketDocument(s). ProcessRunId={ProcessRunId}",
+                    result.Imported.Count, run.Id);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            logger.LogInformation("Imported {Count} MarketDocument(s). ProcessRunId={ProcessRunId}", result.Value.Count, run.Id);
+            logger.LogError("Failed to import {Message}", ex.Message);
         }
     }
 }

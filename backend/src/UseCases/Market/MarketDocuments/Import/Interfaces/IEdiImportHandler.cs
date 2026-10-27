@@ -7,7 +7,7 @@ public interface IEdiImportHandler
 {
     string Identifier { get; }
 
-    Task<IReadOnlyList<MarketDocument>> ExecuteImportAsync(Configuration configuration, CancellationToken ct);
+    Task<EdiImportResult> ExecuteImportAsync(Configuration configuration, CancellationToken ct);
 
     Task<IReadOnlyList<MarketDocumentItem>> ExecuteItemImportAsync(Configuration configuration, MarketDocument document, CancellationToken ct);
 }

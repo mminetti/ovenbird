@@ -1,4 +1,3 @@
-using Ardalis.Result;
 using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -29,7 +28,7 @@ public class ImportMarketDocumentHandlerHandle
     }
 
     [Fact]
-    public async Task PersistsNewDocumentsAndTriggersItemImport_ButSkipsAlreadyExistingDocuments()
+    public async Task PersistsNewDocumentsAndTriggersItemImport()
     {
         var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
         var configuration = CreateConfiguration(company);
@@ -38,12 +37,11 @@ public class ImportMarketDocumentHandlerHandle
             .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
             .Returns([configuration]);
 
-        var existingDocument = new MarketDocument { Id = 99, Identifier = "existingfile.csv", CompanyId = company.Id };
         var newDocument = new MarketDocument { Identifier = "newfile.csv", CompanyId = company.Id };
 
         _ediHandler
             .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
-            .Returns(new List<MarketDocument> { existingDocument, newDocument });
+            .Returns(new EdiImportResult([newDocument], []));
 
         long nextId = 100;
         MarketDocument? created = null;
@@ -58,41 +56,14 @@ public class ImportMarketDocumentHandlerHandle
 
         var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
 
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBe([existingDocument.Id, 100]);
+        result.Imported.ShouldBe(["newfile.csv"]);
+        result.Errors.ShouldBeEmpty();
 
         created.ShouldBeSameAs(newDocument);
 
         await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
         await _bus.Received(1).PublishAsync(
             Arg.Is<ImportMarketDocumentItemCommand>(c => c.ConfigurationId == configuration.Id && c.MarketDocumentId == 100));
-    }
-
-    [Fact]
-    public async Task CatchesUnexpectedExceptionsPerDocument_AndTracksByDocumentIdentifier()
-    {
-        var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
-        var configuration = CreateConfiguration(company);
-
-        _configurationReadRepository
-            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
-            .Returns([configuration]);
-
-        var newDocument = new MarketDocument { Identifier = "newfile.csv", CompanyId = company.Id };
-
-        _ediHandler
-            .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
-            .Returns(new List<MarketDocument> { newDocument });
-
-        _documentRepository
-            .AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<MarketDocument>(new InvalidOperationException("boom")));
-
-        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
-
-        result.IsSuccess.ShouldBeFalse();
-        result.ValidationErrors.ShouldContain(e =>
-            e.Identifier == string.Empty && e.ErrorMessage.Contains("newfile.csv") && e.ErrorMessage.Contains("boom"));
     }
 
     [Fact]
@@ -106,12 +77,12 @@ public class ImportMarketDocumentHandlerHandle
 
         _ediHandler
             .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
-            .Returns(new List<MarketDocument>());
+            .Returns(new EdiImportResult([], []));
 
         var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
 
-        result.IsSuccess.ShouldBeTrue();
-        result.Value.ShouldBeEmpty();
+        result.Imported.ShouldBeEmpty();
+        result.Errors.ShouldBeEmpty();
 
         await _documentRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
     }

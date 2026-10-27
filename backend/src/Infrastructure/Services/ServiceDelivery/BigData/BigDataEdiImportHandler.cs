@@ -17,46 +17,62 @@ public class BigDataEdiImportHandler(
 {
     public string Identifier => "BigData";
 
-    public async Task<IReadOnlyList<MarketDocument>> ExecuteImportAsync(Configuration configuration, CancellationToken ct)
+    public async Task<EdiImportResult> ExecuteImportAsync(
+        Configuration configuration,
+        CancellationToken ct)
     {
-        var company = configuration.GetRequiredCompany();
-        var remoteFiles = await ftpTransport.ListFilesAsync(configuration, ct);
-
         var documents = new List<MarketDocument>();
+        var errors = new List<ValidationError>();
 
-        foreach (var remoteFile in remoteFiles)
+        try
         {
-            var identifier = Path.GetFileName(remoteFile);
+            var company = configuration.GetRequiredCompany();
+            var remoteFiles = await ftpTransport.ListFilesAsync(configuration, ct);
 
-            var existing = await documentReadRepository.FirstOrDefaultAsync(
-                new MarketDocumentByIdentifierAndCompanySpec(identifier, company.Id), ct);
-
-            if (existing is not null)
+            foreach (var remoteFile in remoteFiles)
             {
-                documents.Add(existing);
-                continue;
-            }
+                var identifier = Path.GetFileName(remoteFile);
 
-            using var content = await ftpTransport.DownloadFileAsync(configuration, remoteFile, ct);
-
-            var fileReference = await fileStorageTransport.UploadAsync(configuration, content, identifier, ct);
-
-            documents.Add(new MarketDocument
-            {
-                Identifier = identifier,
-                CompanyId = company.Id,
-                DirectionId = Constants.MarketDocumentDirections.Inbound,
-                StatusId = Constants.MarketDocumentStatuses.New,
-                Asset = new Asset
+                try
                 {
-                    FileName = identifier,
-                    Extension = Path.GetExtension(identifier),
-                    Reference = fileReference
+                    var existing = await documentReadRepository.FirstOrDefaultAsync(
+                        new MarketDocumentByIdentifierAndCompanySpec(identifier, company.Id), ct);
+
+                    if (existing is not null)
+                    {
+                        continue;
+                    }
+
+                    using var content = await ftpTransport.DownloadFileAsync(configuration, remoteFile, ct);
+
+                    var fileReference = await fileStorageTransport.UploadAsync(configuration, content, identifier, ct);
+
+                    documents.Add(new MarketDocument
+                    {
+                        Identifier = identifier,
+                        CompanyId = company.Id,
+                        DirectionId = Constants.MarketDocumentDirections.Inbound,
+                        StatusId = Constants.MarketDocumentStatuses.New,
+                        Asset = new Asset
+                        {
+                            FileName = identifier,
+                            Extension = Path.GetExtension(identifier),
+                            Reference = fileReference
+                        }
+                    });
                 }
-            });
+                catch (Exception ex)
+                {
+                    errors.Add(new ValidationError(identifier, ex.Message, nameof(MarketDocument), ValidationSeverity.Error));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errors.Add(new ValidationError(configuration.Name, ex.Message, nameof(Configuration), ValidationSeverity.Error));
         }
 
-        return documents;
+        return new EdiImportResult(documents, errors);
     }
 
     public async Task<IReadOnlyList<MarketDocumentItem>> ExecuteItemImportAsync(
