@@ -2,6 +2,7 @@
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
+using Microsoft.Extensions.Logging;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -13,7 +14,8 @@ public class ImportMarketDocumentItemHandler(
     IReadRepository<MarketDocument> documentRepository,
     IReadRepository<Configuration> configurationRepository,
     EdiImportHandlerResolver ediResolver,
-    IMessageBus bus)
+    IMessageBus bus,
+    ILogger<ImportMarketDocumentItemHandler> logger)
 {
     private const string HandlerIdentifier = "handler";
 
@@ -66,9 +68,16 @@ public class ImportMarketDocumentItemHandler(
             }
         }
 
-        return errors.Count == 0
-            ? Result.Success<IReadOnlyList<long>>(itemIds)
-            : Result<IReadOnlyList<long>>.Invalid(errors);
+        if (errors.Count > 0)
+        {
+            logger.LogError(
+                "MarketDocumentItem import failed for MarketDocument {MarketDocumentId}. Errors={Errors}",
+                document.Id, string.Join(", ", errors.Select(e => e.ErrorMessage)));
+
+            return Result<IReadOnlyList<long>>.Invalid(errors);
+        }
+
+        return Result.Success<IReadOnlyList<long>>(itemIds);
     }
 
     // buildResult.ValidationErrors already carry the right EntityReference/Field/Severity (set by

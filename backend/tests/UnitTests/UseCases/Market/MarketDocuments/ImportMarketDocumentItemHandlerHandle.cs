@@ -3,6 +3,7 @@ using Core.MarketExchange;
 using Core.MarketExchange.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
+using Microsoft.Extensions.Logging;
 using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -39,7 +40,8 @@ public class ImportMarketDocumentItemHandlerHandle
             _documentReadRepository,
             _configurationReadRepository,
             new EdiImportHandlerResolver([_ediHandler]),
-            _bus);
+            _bus,
+            Substitute.For<ILogger<ImportMarketDocumentItemHandler>>());
     }
 
     [Fact]

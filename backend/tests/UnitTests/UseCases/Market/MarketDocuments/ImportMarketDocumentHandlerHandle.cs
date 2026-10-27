@@ -21,10 +21,6 @@ public class ImportMarketDocumentHandlerHandle
     {
         _ediHandler.Identifier.Returns("BigData");
 
-        _bus
-            .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success<IReadOnlyList<long>>([]));
-
         _handler = new ImportMarketDocumentHandler(
             _documentRepository,
             _configurationReadRepository,
@@ -68,49 +64,8 @@ public class ImportMarketDocumentHandlerHandle
         created.ShouldBeSameAs(newDocument);
 
         await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
-        await _bus.Received(1).InvokeAsync<Result<IReadOnlyList<long>>>(
-            Arg.Is<ImportMarketDocumentItemCommand>(c => c.ConfigurationId == configuration.Id && c.MarketDocumentId == 100),
-            Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task AccumulatesErrorsFromItemImport_ButStillPersistsTheDocument()
-    {
-        var company = new Company { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
-        var configuration = CreateConfiguration(company);
-
-        _configurationReadRepository
-            .ListAsync(Arg.Any<ConfigurationByTypeSpec>(), Arg.Any<CancellationToken>())
-            .Returns([configuration]);
-
-        var newDocument = new MarketDocument { Identifier = "newfile.csv", CompanyId = company.Id };
-
-        _ediHandler
-            .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
-            .Returns(new List<MarketDocument> { newDocument });
-
-        _documentRepository
-            .AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
-            {
-                var document = callInfo.Arg<MarketDocument>();
-                document.Id = 100;
-                return document;
-            });
-
-        // Mimics what ImportMarketDocumentItemHandler itself already returns for a failed item.
-        _bus
-            .InvokeAsync<Result<IReadOnlyList<long>>>(Arg.Any<ImportMarketDocumentItemCommand>(), Arg.Any<CancellationToken>())
-            .Returns(Result<IReadOnlyList<long>>.Invalid(new ValidationError(
-                EntityReference.Format(nameof(MarketDocumentItem), 900), "MarketDocumentItem 'REF-1': bad data", string.Empty, ValidationSeverity.Error)));
-
-        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
-
-        result.IsSuccess.ShouldBeFalse();
-        result.ValidationErrors.ShouldContain(e =>
-            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), 900) && e.ErrorMessage.Contains("bad data"));
-
-        await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
+        await _bus.Received(1).PublishAsync(
+            Arg.Is<ImportMarketDocumentItemCommand>(c => c.ConfigurationId == configuration.Id && c.MarketDocumentId == 100));
     }
 
     [Fact]

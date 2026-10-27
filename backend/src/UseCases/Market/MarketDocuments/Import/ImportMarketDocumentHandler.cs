@@ -53,13 +53,7 @@ public class ImportMarketDocumentHandler(
                 {
                     created = await documentRepository.AddAsync(document, ct);
 
-                    var itemImportResult = await bus.InvokeAsync<Result<IReadOnlyList<long>>>(
-                        new ImportMarketDocumentItemCommand(configuration.Id, created.Id), ct);
-
-                    if (!itemImportResult.IsSuccess)
-                    {
-                        errors.AddRange(itemImportResult.ValidationErrors);
-                    }
+                    await bus.PublishAsync(new ImportMarketDocumentItemCommand(configuration.Id, created.Id));
 
                     documentIds.Add(created.Id);
                 }
