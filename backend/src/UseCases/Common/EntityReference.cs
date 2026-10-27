@@ -1,10 +1,5 @@
-namespace UseCases.Common;
+﻿namespace UseCases.Common;
 
-/// <summary>
-/// Packs an entity type + id pair into a single string (and back), for carrying a pointer to
-/// "the specific record with the problem" through a channel that only has one string slot to spare
-/// (such as <see cref="ValidationError.Identifier"/>).
-/// </summary>
 public static class EntityReference
 {
     private const char Separator = '#';
@@ -30,6 +25,7 @@ public static class EntityReference
 
         entityType = value[..separatorIndex];
         entityId = value[(separatorIndex + 1)..];
+
         return true;
     }
 }
