@@ -6,17 +6,16 @@ using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
-public record ImportMarketDocumentCommand();
+public record MarketDocumentImportCommand();
 
-public class ImportMarketDocumentHandler(
+public class MarketDocumentImportHandler(
     IRepository<MarketDocument> documentRepository,
     IReadRepository<Configuration> configurationReadRepository,
-    EdiImportHandlerResolver ediResolver,
-    IMessageBus bus)
+    EdiImportHandlerResolver ediResolver)
 {
     private const string HandlerIdentifier = "handler";
 
-    public async Task<ImportMarketDocumentResult> Handle(ImportMarketDocumentCommand command, CancellationToken ct)
+    public async Task<ImportMarketDocumentResult> Handle(MarketDocumentImportCommand command, CancellationToken ct)
     {
         var imported = new List<string>();
         var errors = new List<ValidationError>();
@@ -34,9 +33,9 @@ public class ImportMarketDocumentHandler(
 
             foreach (var document in importResult.Documents)
             {
-                var created = await documentRepository.AddAsync(document, ct);
+                document.MarkImported();
 
-                await bus.PublishAsync(new ImportMarketDocumentItemCommand(configuration.Id, created.Id));
+                var created = await documentRepository.AddAsync(document, ct);
 
                 imported.Add(created.Identifier);
             }

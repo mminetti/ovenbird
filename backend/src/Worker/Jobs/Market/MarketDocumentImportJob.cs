@@ -21,7 +21,7 @@ public class MarketDocumentImportJob(
             var run = await processRunTracker.StartAsync(CoreConstants.ProcessTypes.MarketDocumentImport, cancellationToken);
 
             var result = await bus.InvokeAsync<ImportMarketDocumentResult>(
-                new ImportMarketDocumentCommand(), cancellationToken);
+                new MarketDocumentImportCommand(), cancellationToken);
 
             var succeeded = result.Errors.Count == 0;
 

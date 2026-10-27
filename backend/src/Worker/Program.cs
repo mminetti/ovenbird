@@ -19,7 +19,7 @@ builder.Services.AddInfrastructureServices(builder.Configuration, startupLogger)
 builder.UseWolverine(opts =>
 {
     opts.Discovery.IncludeAssembly(typeof(MarketDocument).Assembly);
-    opts.Discovery.IncludeAssembly(typeof(ImportMarketDocumentCommand).Assembly);
+    opts.Discovery.IncludeAssembly(typeof(MarketDocumentImportCommand).Assembly);
     opts.Discovery.IncludeAssembly(typeof(InfrastructureServiceExtensions).Assembly);
 
     opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();

@@ -1,30 +1,28 @@
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
+using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
-public class ImportMarketDocumentHandlerHandle
+public class MarketDocumentImportHandlerHandle
 {
     private readonly IRepository<MarketDocument> _documentRepository = Substitute.For<IRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly IEdiImportHandler _ediHandler = Substitute.For<IEdiImportHandler>();
-    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
-    private readonly ImportMarketDocumentHandler _handler;
+    private readonly MarketDocumentImportHandler _handler;
 
-    public ImportMarketDocumentHandlerHandle()
+    public MarketDocumentImportHandlerHandle()
     {
         _ediHandler.Identifier.Returns("BigData");
 
-        _handler = new ImportMarketDocumentHandler(
+        _handler = new MarketDocumentImportHandler(
             _documentRepository,
             _configurationReadRepository,
-            new EdiImportHandlerResolver([_ediHandler]),
-            _bus);
+            new EdiImportHandlerResolver([_ediHandler]));
     }
 
     [Fact]
@@ -54,7 +52,7 @@ public class ImportMarketDocumentHandlerHandle
                 return document;
             });
 
-        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
+        var result = await _handler.Handle(new MarketDocumentImportCommand(), CancellationToken.None);
 
         result.Imported.ShouldBe(["newfile.csv"]);
         result.Errors.ShouldBeEmpty();
@@ -62,8 +60,9 @@ public class ImportMarketDocumentHandlerHandle
         created.ShouldBeSameAs(newDocument);
 
         await _documentRepository.Received(1).AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
-        await _bus.Received(1).PublishAsync(
-            Arg.Is<ImportMarketDocumentItemCommand>(c => c.ConfigurationId == configuration.Id && c.MarketDocumentId == 100));
+
+        var domainEvent = newDocument.DomainEvents.OfType<MarketDocumentImportedEvent>().ShouldHaveSingleItem();
+        domainEvent.MarketDocument.ShouldBeSameAs(newDocument);
     }
 
     [Fact]
@@ -79,7 +78,7 @@ public class ImportMarketDocumentHandlerHandle
             .ExecuteImportAsync(configuration, Arg.Any<CancellationToken>())
             .Returns(new EdiImportResult([], []));
 
-        var result = await _handler.Handle(new ImportMarketDocumentCommand(), CancellationToken.None);
+        var result = await _handler.Handle(new MarketDocumentImportCommand(), CancellationToken.None);
 
         result.Imported.ShouldBeEmpty();
         result.Errors.ShouldBeEmpty();
