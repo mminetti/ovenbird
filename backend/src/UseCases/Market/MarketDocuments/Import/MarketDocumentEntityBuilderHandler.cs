@@ -14,45 +14,28 @@ public class MarketDocumentEntityBuilderHandler(
 {
     private const string HandlerIdentifier = "handler";
 
-    public async Task<Result> Handle(MarketDocumentEntityBuilderCommand command, CancellationToken ct)
+    public async Task Handle(MarketDocumentEntityBuilderCommand command, CancellationToken ct)
     {
-        var item = await itemReadRepository.GetByIdAsync(command.MarketDocumentItemId, ct);
-
-        if (item is null)
-        {
-            return Result.NotFound($"Market Document not found for id {command.MarketDocumentItemId}");
-        }
-
-        var configuration = await configurationReadRepository.FirstOrDefaultAsync(
-            new ConfigurationByIdSpec(command.ConfigurationId), ct);
-
-        if (configuration is null)
-        {
-            return Result.NotFound($"Configuration not found for id {command.ConfigurationId}");
-        }
-
-        var entityReference = EntityReference.Format(nameof(MarketDocumentItem), item.Id);
-
         try
         {
+            var item = await itemReadRepository.GetByIdAsync(command.MarketDocumentItemId, ct)
+            ?? throw new InvalidOperationException($"Market Document not found for id {command.MarketDocumentItemId}");
+
+            var configuration = await configurationReadRepository.FirstOrDefaultAsync(
+                new ConfigurationByIdSpec(command.ConfigurationId), ct)
+                ?? throw new InvalidOperationException($"Configuration not found for id {command.ConfigurationId}");
+
             var handlerIdentifier = configuration.GetRequiredValue(HandlerIdentifier);
             var entityBuilder = entityBuilderResolver.Resolve($"{handlerIdentifier}_{item.Set}_{item.SubSet}");
 
-            var result = entityBuilder is not null
-                ? await entityBuilder.CreateAsync(item, ct)
-                : Result.Success();
-
-            // The builder's ValidationErrors already identify the failing field (via nameof(...)) -
-            // promote that into ErrorCode as the "fix action" field key, and replace Identifier with
-            // the record this error is actually about, now that we know it.
-            return result.Status == ResultStatus.Invalid
-                ? Result.Invalid(result.ValidationErrors.Select(v =>
-                    new ValidationError(entityReference, v.ErrorMessage, v.Identifier, v.Severity)))
-                : result;
+            if (entityBuilder is not null)
+            {
+                await entityBuilder.CreateAsync(item, ct);
+            }
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return Result.Invalid(new ValidationError(entityReference, ex.Message, string.Empty, ValidationSeverity.Error));
+            
         }
     }
 }

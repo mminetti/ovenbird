@@ -76,7 +76,9 @@ public class BigDataEdiImportHandler(
     }
 
     public async Task<IReadOnlyList<MarketDocumentItem>> ExecuteItemImportAsync(
-        Configuration configuration, MarketDocument document, CancellationToken ct)
+        Configuration configuration, 
+        MarketDocument document, 
+        CancellationToken ct)
     {
         var reference = document.Asset?.Reference
             ?? throw new InvalidOperationException($"MarketDocument '{document.Id}' has no associated asset.");

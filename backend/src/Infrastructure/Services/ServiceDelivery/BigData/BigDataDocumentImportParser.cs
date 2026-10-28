@@ -20,8 +20,8 @@ public class BigDataDocumentImportParser(IServiceProvider serviceProvider) : IMa
 
         foreach (var transaction in transactions)
         {
-            var set = transaction.Element("TransactionSet")?.Value ?? string.Empty;
-            var subSet = transaction.Element("TransactionSubSet")?.Value ?? string.Empty;
+            string set = transaction.Element("TransactionSet")?.Value!;
+            string subSet = transaction.Element("TransactionSubSet")?.Value!;
 
             var reader = GetRequiredReader(set);
             var item = reader.Read(transaction);

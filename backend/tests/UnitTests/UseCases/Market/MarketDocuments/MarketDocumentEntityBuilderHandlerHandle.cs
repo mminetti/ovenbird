@@ -3,7 +3,6 @@ using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
-using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
@@ -46,36 +45,9 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var handler = new MarketDocumentEntityBuilderHandler(
             _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
 
-        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
+        await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
 
-        result.IsSuccess.ShouldBeTrue();
         await builder.Received(1).CreateAsync(item, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task PromotesTheBuilderFieldIdentifierIntoErrorCode_AndTagsTheItemAsTheEntityReference()
-    {
-        var item = new MarketDocumentItem { Id = 1, Set = "867", SubSet = "02" };
-
-        _itemReadRepository.GetByIdAsync(item.Id, Arg.Any<CancellationToken>()).Returns(item);
-
-        var builder = Substitute.For<IMarketDocumentEntityBuilder>();
-        builder.CreateAsync(item, Arg.Any<CancellationToken>())
-            .Returns(Result.Invalid(new ValidationError("CustomerClass", "Unmapped customer class 'Residential'.")));
-
-        var services = new ServiceCollection();
-        services.AddKeyedSingleton(Key, builder);
-
-        var handler = new MarketDocumentEntityBuilderHandler(
-            _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
-
-        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
-
-        result.Status.ShouldBe(ResultStatus.Invalid);
-        result.ValidationErrors.ShouldContain(e =>
-            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), item.Id)
-            && e.ErrorCode == "CustomerClass"
-            && e.ErrorMessage == "Unmapped customer class 'Residential'.");
     }
 
     [Fact]
@@ -90,13 +62,12 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var handler = new MarketDocumentEntityBuilderHandler(
             _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
 
-        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
-
-        result.IsSuccess.ShouldBeTrue();
+        await Should.NotThrowAsync(() =>
+            handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None));
     }
 
     [Fact]
-    public async Task ReturnsInvalidTaggedWithTheItemEntityReferenceWhenBuilderThrows()
+    public async Task SwallowsExceptionWhenBuilderThrows()
     {
         var item = new MarketDocumentItem { Id = 1, Set = "867", SubSet = "02", ReferenceNumber = "REF-1" };
 
@@ -112,17 +83,14 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var handler = new MarketDocumentEntityBuilderHandler(
             _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
 
-        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
+        await Should.NotThrowAsync(() =>
+            handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None));
 
-        result.Status.ShouldBe(ResultStatus.Invalid);
-        result.ValidationErrors.ShouldContain(e =>
-            e.Identifier == EntityReference.Format(nameof(MarketDocumentItem), item.Id)
-            && e.ErrorCode == string.Empty
-            && e.ErrorMessage == "boom");
+        await builder.Received(1).CreateAsync(item, Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ReturnsNotFoundWhenMarketDocumentItemCannotBeFound()
+    public async Task SwallowsExceptionWhenMarketDocumentItemCannotBeFound()
     {
         _itemReadRepository.GetByIdAsync(1, Arg.Any<CancellationToken>()).Returns((MarketDocumentItem?)null);
 
@@ -131,13 +99,12 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var handler = new MarketDocumentEntityBuilderHandler(
             _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
 
-        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, 1), CancellationToken.None);
-
-        result.Status.ShouldBe(ResultStatus.NotFound);
+        await Should.NotThrowAsync(() =>
+            handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, 1), CancellationToken.None));
     }
 
     [Fact]
-    public async Task ReturnsNotFoundWhenConfigurationCannotBeFound()
+    public async Task SwallowsExceptionWhenConfigurationCannotBeFound()
     {
         var item = new MarketDocumentItem { Id = 1, Set = "867", SubSet = "02" };
 
@@ -152,8 +119,7 @@ public class MarketDocumentEntityBuilderHandlerHandle
         var handler = new MarketDocumentEntityBuilderHandler(
             _itemReadRepository, _configurationReadRepository, new MarketDocumentEntityBuilderResolver(services.BuildServiceProvider()));
 
-        var result = await handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None);
-
-        result.Status.ShouldBe(ResultStatus.NotFound);
+        await Should.NotThrowAsync(() =>
+            handler.Handle(new MarketDocumentEntityBuilderCommand(_configuration.Id, item.Id), CancellationToken.None));
     }
 }
