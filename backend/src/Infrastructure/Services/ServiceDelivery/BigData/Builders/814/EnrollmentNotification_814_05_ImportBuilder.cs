@@ -3,18 +3,15 @@ using Core.MarketExchange;
 using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
-using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using Wolverine;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public class EnrollmentNotification_814_05_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<MarketDocumentReference> referenceRepository,
-    IServiceDeliveryLookupService lookupService,
-    IBigDataValueMapper valueMapper,
-    IMessageBus bus)
+    IRepository<ServiceStart> serviceStartRepository,
+    IRepository<ServiceEvent> serviceEventRepository)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = $"BigData_{Set}_{SubSet}";
@@ -42,49 +39,12 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         var serviceStart = serviceStartResult.Value;
 
-        var commodityIdResult = valueMapper.GetCommodityId(transaction.Commodity);
-        if (!commodityIdResult.IsSuccess)
+        var serviceStartItem = new ServiceStartItem
         {
-            return AsResult(commodityIdResult);
-        }
-
-        var commodityId = commodityIdResult.Value;
-
-        var premise = accountMaint.NameAddresses.FirstOrDefault(x => x.EntityType == PremiseEntityType);
-        if (premise is null)
-        {
-            return Result.Invalid(new ValidationError(
-                nameof(accountMaint.NameAddresses),
-                $"Name Address with EntityType '{PremiseEntityType}' is required."));
-        }
-
-        if (string.IsNullOrWhiteSpace(premise.EntityAddress1))
-        {
-            return Result.Invalid(new ValidationError(nameof(premise.EntityAddress1),
-                $"Premise Address is required."));
-        }
-
-        if (string.IsNullOrWhiteSpace(premise.EntityCity))
-        {
-            return Result.Invalid(new ValidationError(nameof(premise.EntityCity),
-                $"Premise City is required."));
-        }
-
-        if (string.IsNullOrWhiteSpace(premise.EntityState))
-        {
-            return Result.Invalid(new ValidationError(nameof(premise.EntityState),
-                $"Premise State is required."));
-        }
-
-        var (zip, zip4) = SplitZip(premise.EntityPostalCode);
-
-        var countyResult = await lookupService.GetCountyByNameAsync(premise.EntityCounty, ct);
-        if (!countyResult.IsSuccess)
-        {
-            return AsResult(countyResult);
-        }
-
-        var county = countyResult.Value;
+            ServiceStartId = serviceStart.Id,
+            Identifier = item.ReferenceNumber,
+            ServiceActionId = Constants.ServiceActions.Confirm,
+        };
 
         var service = accountMaint.Services.FirstOrDefault();
         if (service is null)
@@ -96,7 +56,7 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         if (customerAgreementDate is null)
         {
-            return Result.Invalid(new ValidationError(nameof(customerAgreementDate), 
+            return Result.Invalid(new ValidationError(nameof(customerAgreementDate),
                 $"Service Start Date is required."));
         }
 
@@ -105,52 +65,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
             return Result.Invalid(new ValidationError(nameof(customerAgreementDate),
                 $"Service Start Date is invalid."));
         }
-
-        var serviceMeter = service.ServiceMeters.FirstOrDefault();
-        if (serviceMeter is null)
-        {
-            return Result.Invalid(new ValidationError(nameof(service.ServiceMeters),
-                $"Service Meter is required."));
-        }
-
-        var customerClassResult = await lookupService.GetCustomerClassByNameAsync(serviceMeter.LDCRateClass, ct);
-        if (!customerClassResult.IsSuccess)
-        {
-            return AsResult(customerClassResult);
-        }
-
-        var customerClass = customerClassResult.Value;
-
-        var loadProfileResult = await lookupService.GetLoadProfileByNameAsync(serviceMeter.LoadProfileCode, ct);
-        if (!loadProfileResult.IsSuccess)
-        {
-            return AsResult(loadProfileResult);
-        }
-
-        var loadProfile = loadProfileResult.Value;
-
-        var readCycleResult = await lookupService.GetReadCycleByNameAsync(serviceMeter.OwnerMeterCycle, ct);
-        if (!readCycleResult.IsSuccess)
-        {
-            return AsResult(readCycleResult);
-        }
-
-        var readCycle = readCycleResult.Value;
-
-        var isAmsMeter = valueMapper.IsAmsMeter(serviceMeter.AdvanceMeterInfo);
-
-        if (string.IsNullOrWhiteSpace(serviceMeter.MeterNumber))
-        {
-            return Result.Invalid(new ValidationError(nameof(serviceMeter.MeterNumber),
-                $"Service Meter Number is required."));
-        }
-
-        var serviceStartItem = new ServiceStartItem
-        {
-            ServiceStartId = serviceStart.Id,
-            Identifier = item.ReferenceNumber,
-            ServiceActionId = Constants.ServiceActions.Confirm,
-        };
 
         var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
 
@@ -163,22 +77,36 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         await referenceRepository.AddAsync(reference, ct);
 
-        await bus.PublishAsync(new ServiceStartScheduledEvent(
-            serviceStart.Id,
-            serviceDate,
+        var serviceEvent = new ServiceEvent
+        {
+            EventTypeId = Constants.ServiceEventTypes.ServiceStartConfirmed,
+            ReferenceTypeId = Constants.ServiceEventReferenceTypes.ServiceStartItem,
+            ReferenceId = created.Id,
+        };
+
+        var createdServiceEvent = await serviceEventRepository.AddAsync(serviceEvent, ct);
+
+        var premise = accountMaint.NameAddresses.FirstOrDefault(x => x.EntityType == PremiseEntityType);
+        var serviceMeter = service.ServiceMeters.FirstOrDefault();
+
+        var domainEvent = new ServiceStartScheduledEvent(
+            createdServiceEvent.Id,
             service.UtilityAccountNumber,
-            commodityId,
-            customerClass.Id,
-            loadProfile.Id,
-            readCycle.Id,
-            isAmsMeter,
-            serviceMeter.MeterNumber,
-            premise.EntityAddress1,
-            premise.EntityCity,
-            premise.EntityState,
-            zip,
-            zip4,
-            county.Id));
+            transaction.Commodity,
+            serviceMeter?.LDCRateClass,
+            serviceMeter?.LoadProfileCode,
+            serviceMeter?.OwnerMeterCycle,
+            serviceMeter?.AdvanceMeterInfo,
+            serviceMeter?.MeterNumber,
+            premise?.EntityAddress1,
+            premise?.EntityCity,
+            premise?.EntityState,
+            premise?.EntityPostalCode,
+            premise?.EntityCounty);
+
+        serviceStart.MarkScheduled(serviceDate, domainEvent);
+
+        await serviceStartRepository.UpdateAsync(serviceStart, ct);
 
         return Result.Success();
     }
@@ -196,14 +124,5 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         return serviceStartItem is not null
             ? Result.Success(serviceStartItem.ServiceStart)
             : Result.Invalid(new ValidationError(nameof(ServiceStart), $"Service Start Item with identifier '{identifier}' was not found."));
-    }
-
-    private static (string Zip, string? Zip4) SplitZip(string? postalCode)
-    {
-        var value = postalCode ?? string.Empty;
-
-        return value.Length == 9
-            ? (value[..5], value[5..])
-            : (value, null);
     }
 }

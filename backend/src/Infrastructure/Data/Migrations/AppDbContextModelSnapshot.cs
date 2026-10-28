@@ -1572,6 +1572,162 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EventTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("ReferenceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ReferenceTypeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventTypeId");
+
+                    b.HasIndex("ReferenceTypeId");
+
+                    b.ToTable("ServiceEvent");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEventAction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("ActionTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ServiceEventId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ActionTypeId");
+
+                    b.HasIndex("ServiceEventId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("ServiceEventAction");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEventActionType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceEventActionType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "UpdateServicePoint"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "SendNotification"
+                        });
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEventReferenceType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceEventReferenceType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ServiceStartItem"
+                        });
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEventType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ServiceEventType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ServiceStartConfirmed"
+                        });
+                });
+
             modelBuilder.Entity("Core.ServiceDelivery.ServiceOrderStatus", b =>
                 {
                     b.Property<int>("Id")
@@ -3043,6 +3199,52 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("County");
                 });
 
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEvent", b =>
+                {
+                    b.HasOne("Core.ServiceDelivery.ServiceEventType", "EventType")
+                        .WithMany()
+                        .HasForeignKey("EventTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.ServiceDelivery.ServiceEventReferenceType", "ReferenceType")
+                        .WithMany()
+                        .HasForeignKey("ReferenceTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("EventType");
+
+                    b.Navigation("ReferenceType");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEventAction", b =>
+                {
+                    b.HasOne("Core.ServiceDelivery.ServiceEventActionType", "ActionType")
+                        .WithMany()
+                        .HasForeignKey("ActionTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.ServiceDelivery.ServiceEvent", "ServiceEvent")
+                        .WithMany("Actions")
+                        .HasForeignKey("ServiceEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.ServiceDelivery.ServiceOrderStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ActionType");
+
+                    b.Navigation("ServiceEvent");
+
+                    b.Navigation("Status");
+                });
+
             modelBuilder.Entity("Core.ServiceDelivery.ServicePoint", b =>
                 {
                     b.HasOne("Core.ServiceDelivery.Commodity", "Commodity")
@@ -3425,6 +3627,11 @@ namespace Infrastructure.Data.Migrations
             modelBuilder.Entity("Core.ServiceDelivery.Market", b =>
                 {
                     b.Navigation("Companies");
+                });
+
+            modelBuilder.Entity("Core.ServiceDelivery.ServiceEvent", b =>
+                {
+                    b.Navigation("Actions");
                 });
 
             modelBuilder.Entity("Core.ServiceDelivery.ServicePoint", b =>

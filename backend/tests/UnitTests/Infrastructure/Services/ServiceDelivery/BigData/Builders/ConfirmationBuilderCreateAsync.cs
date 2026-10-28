@@ -4,8 +4,7 @@ using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
-using UseCases.Interfaces.ServiceDelivery;
-using Wolverine;
+using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
@@ -13,9 +12,8 @@ public class ConfirmationBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
-    private readonly IServiceDeliveryLookupService _lookupService = Substitute.For<IServiceDeliveryLookupService>();
-    private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
-    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
+    private readonly IRepository<ServiceStart> _serviceStartRepository = Substitute.For<IRepository<ServiceStart>>();
+    private readonly IRepository<ServiceEvent> _serviceEventRepository = Substitute.For<IRepository<ServiceEvent>>();
     private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
 
     public ConfirmationBuilderCreateAsync()
@@ -23,9 +21,8 @@ public class ConfirmationBuilderCreateAsync
         _builder = new EnrollmentNotification_814_05_ImportBuilder(
             _serviceStartItemRepository,
             _referenceRepository,
-            _lookupService,
-            _valueMapper,
-            _bus);
+            _serviceStartRepository,
+            _serviceEventRepository);
     }
 
     private const string Xml = """
@@ -137,10 +134,11 @@ public class ConfirmationBuilderCreateAsync
 
         await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
         await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
+        await _serviceEventRepository.DidNotReceive().AddAsync(Arg.Any<ServiceEvent>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
-    public async Task ConfirmsServiceStartWhenResolved()
+    public async Task ConfirmsServiceStartAndRaisesScheduledEventWhenResolved()
     {
         var serviceStart = new ServiceStart { Id = 99 };
         var existingServiceStartItem = new ServiceStartItem
@@ -168,51 +166,50 @@ public class ConfirmationBuilderCreateAsync
             .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
-        _lookupService
-            .GetCustomerClassByNameAsync("RESIDENTIAL SERVICE", Arg.Any<CancellationToken>())
-            .Returns(Result.Success(new CustomerClass { Id = 11, Name = "RESIDENTIAL SERVICE" }));
-
-        _lookupService
-            .GetLoadProfileByNameAsync("RESHIWR_COAST_IDR_WS_NOTOU", Arg.Any<CancellationToken>())
-            .Returns(Result.Success(new LoadProfile { Id = 22, Name = "RESHIWR_COAST_IDR_WS_NOTOU" }));
-
-        _lookupService
-            .GetReadCycleByNameAsync("14", Arg.Any<CancellationToken>())
-            .Returns(Result.Success(new ReadCycle { Id = 33, Name = "14" }));
-
-        _lookupService
-            .GetCountyByNameAsync("TRAVIS", Arg.Any<CancellationToken>())
-            .Returns(Result.Success(new County { Id = 44, Name = "TRAVIS" }));
-
-        _valueMapper.GetCommodityId("E").Returns(Result.Success(2));
-        _valueMapper.IsAmsMeter("AMSR").Returns(true);
+        _serviceEventRepository
+            .AddAsync(Arg.Any<ServiceEvent>(), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var serviceEvent = callInfo.Arg<ServiceEvent>();
+                serviceEvent.Id = 77;
+                return serviceEvent;
+            });
 
         var item = CreateItem();
 
         var result = await _builder.CreateAsync(item, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
+
         await _serviceStartItemRepository.Received(1).AddAsync(
             Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),
             Arg.Any<CancellationToken>());
 
-        await _bus.Received(1).PublishAsync(
-            Arg.Is<ServiceStartScheduledEvent>(x =>
-                x.ServiceStartId == serviceStart.Id &&
-                x.ServiceDate == new DateOnly(2025, 11, 12) &&
-                x.ServicePointIdentifier == "1008901017189885037100" &&
-                x.CommodityId == 2 &&
-                x.CustomerClassId == 11 &&
-                x.LoadProfileId == 22 &&
-                x.ReadCycleId == 33 &&
-                x.IsAmsMeter &&
-                x.MeterIdentifier == "I88362388" &&
-                x.AddressLine1 == "123 MAIN ST" &&
-                x.City == "AUSTIN" &&
-                x.State == "TX" &&
-                x.Zip == "78701" &&
-                x.Zip4 == "0000" &&
-                x.CountyId == 44),
-            Arg.Any<DeliveryOptions>());
+        await _serviceEventRepository.Received(1).AddAsync(
+            Arg.Is<ServiceEvent>(x =>
+                x.EventTypeId == CoreConstants.ServiceEventTypes.ServiceStartConfirmed &&
+                x.ReferenceTypeId == CoreConstants.ServiceEventReferenceTypes.ServiceStartItem &&
+                x.ReferenceId == 2),
+            Arg.Any<CancellationToken>());
+
+        serviceStart.ServiceDate.ShouldBe(new DateOnly(2025, 11, 12));
+        serviceStart.ServiceOrderStatusId.ShouldBe(CoreConstants.ServiceOrderStatuses.Scheduled);
+
+        await _serviceStartRepository.Received(1).UpdateAsync(serviceStart, Arg.Any<CancellationToken>());
+
+        var domainEvent = serviceStart.DomainEvents.OfType<ServiceStartScheduledEvent>().ShouldHaveSingleItem();
+        domainEvent.ServiceEventId.ShouldBe(77L);
+        domainEvent.ServicePointIdentifier.ShouldBe("1008901017189885037100");
+        domainEvent.CommodityCode.ShouldBe("E");
+        domainEvent.CustomerClassCode.ShouldBe("RESIDENTIAL SERVICE");
+        domainEvent.LoadProfileCode.ShouldBe("RESHIWR_COAST_IDR_WS_NOTOU");
+        domainEvent.ReadCycleCode.ShouldBe("14");
+        domainEvent.AdvanceMeterInfoCode.ShouldBe("AMSR");
+        domainEvent.MeterNumber.ShouldBe("I88362388");
+        domainEvent.PremiseAddressLine1.ShouldBe("123 MAIN ST");
+        domainEvent.PremiseCity.ShouldBe("AUSTIN");
+        domainEvent.PremiseState.ShouldBe("TX");
+        domainEvent.PremisePostalCode.ShouldBe("787010000");
+        domainEvent.CountyName.ShouldBe("TRAVIS");
     }
 }

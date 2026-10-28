@@ -1,35 +1,31 @@
 namespace Core.ServiceDelivery.Events;
 
 public sealed class ServiceStartScheduledEvent(
-    long serviceStartId,
-    DateOnly serviceDate,
+    long serviceEventId,
     string servicePointIdentifier,
-    int commodityId,
-    int customerClassId,
-    int loadProfileId,
-    int readCycleId,
-    bool isAmsMeter,
-    string meterIdentifier,
-    string addressLine1,
-    string city,
-    string state,
-    string zip,
-    string? zip4,
-    int countyId) : DomainEventBase
+    string commodityCode,
+    string? customerClassCode,
+    string? loadProfileCode,
+    string? readCycleCode,
+    string? advanceMeterInfoCode,
+    string? meterNumber,
+    string? premiseAddressLine1,
+    string? premiseCity,
+    string? premiseState,
+    string? premisePostalCode,
+    string? countyName) : DomainEventBase
 {
-    public long ServiceStartId { get; set; } = serviceStartId;
-    public DateOnly ServiceDate { get; set; } = serviceDate;
+    public long ServiceEventId { get; set; } = serviceEventId;
     public string ServicePointIdentifier { get; set; } = servicePointIdentifier;
-    public int CommodityId { get; set; } = commodityId;
-    public int CustomerClassId { get; set; } = customerClassId;
-    public int LoadProfileId { get; set; } = loadProfileId;
-    public int ReadCycleId { get; set; } = readCycleId;
-    public bool IsAmsMeter { get; set; } = isAmsMeter;
-    public string MeterIdentifier { get; set; } = meterIdentifier;
-    public string AddressLine1 { get; set; } = addressLine1;
-    public string City { get; set; } = city;
-    public string State { get; set; } = state;
-    public string Zip { get; set; } = zip;
-    public string? Zip4 { get; set; } = zip4;
-    public int CountyId { get; set; } = countyId;
+    public string CommodityCode { get; set; } = commodityCode;
+    public string? CustomerClassCode { get; set; } = customerClassCode;
+    public string? LoadProfileCode { get; set; } = loadProfileCode;
+    public string? ReadCycleCode { get; set; } = readCycleCode;
+    public string? AdvanceMeterInfoCode { get; set; } = advanceMeterInfoCode;
+    public string? MeterNumber { get; set; } = meterNumber;
+    public string? PremiseAddressLine1 { get; set; } = premiseAddressLine1;
+    public string? PremiseCity { get; set; } = premiseCity;
+    public string? PremiseState { get; set; } = premiseState;
+    public string? PremisePostalCode { get; set; } = premisePostalCode;
+    public string? CountyName { get; set; } = countyName;
 }
