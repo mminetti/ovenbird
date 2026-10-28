@@ -3,7 +3,6 @@ using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
@@ -22,7 +21,7 @@ public class MarketDocumentImportedEventHandler(
         try
         {
             var configuration = await configurationRepository.FirstOrDefaultAsync(
-                new ConfigurationByTypeAndCompanySpec(CoreConstants.ConfigurationTypes.Edi, document.CompanyId), ct)
+                new ConfigurationByTypeAndCompanySpec(Constants.ConfigurationTypes.Edi, document.CompanyId), ct)
                 ?? throw new InvalidOperationException($"No EDI configuration was found for company '{document.CompanyId}'.");
 
             var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
@@ -38,11 +37,11 @@ public class MarketDocumentImportedEventHandler(
                 await itemRepository.AddAsync(item, ct);
             }
 
-            document.StatusId = CoreConstants.MarketDocumentStatuses.Done;
+            document.StatusId = Constants.MarketDocumentStatuses.Done;
         }
         catch (Exception)
         {
-            document.StatusId = CoreConstants.MarketDocumentStatuses.Error;
+            document.StatusId = Constants.MarketDocumentStatuses.Error;
         }
 
         await documentRepository.UpdateAsync(document, ct);

@@ -1,6 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
-using UseCases.Common.Constants;
+using Core.Common.Constants;
 using UseCases.Security.Roles.Delete;
 using Web.Extensions;
 using Web.Resources;

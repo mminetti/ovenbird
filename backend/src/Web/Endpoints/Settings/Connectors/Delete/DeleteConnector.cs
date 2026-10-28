@@ -1,6 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
-using UseCases.Common.Constants;
+using Core.Common.Constants;
 using UseCases.Settings.Connectors.Delete;
 using Web.Extensions;
 using Web.Resources;

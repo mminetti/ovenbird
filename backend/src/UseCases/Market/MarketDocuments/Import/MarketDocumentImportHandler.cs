@@ -2,7 +2,6 @@
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Import;
 
@@ -21,7 +20,7 @@ public class MarketDocumentImportHandler(
         var errors = new List<ValidationError>();
 
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
+            new ConfigurationByTypeSpec(Constants.ConfigurationTypes.Edi), ct);
 
         foreach (var configuration in configurations)
         {

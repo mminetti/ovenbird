@@ -1,7 +1,7 @@
 using Core.Settings;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace Infrastructure.Services.Files;
 
@@ -41,7 +41,7 @@ public class ConnectorFileStorageTransport(
 
     private async Task<FileStorageOptions> ResolveFileOptions(Configuration configuration, CancellationToken ct)
     {
-        var connector = configuration.GetRequiredConnector(CoreConstants.ConnectorTypes.FileStorage);
+        var connector = configuration.GetRequiredConnector(Constants.ConnectorTypes.FileStorage);
 
         var now = configuration.GetRequiredCompany().GetLocalNow(timeProvider);
 

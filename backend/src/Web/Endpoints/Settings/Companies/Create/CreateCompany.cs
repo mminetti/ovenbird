@@ -1,6 +1,6 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Http.HttpResults;
-using UseCases.Common.Constants;
+using Core.Common.Constants;
 using UseCases.Settings.Companies.Create;
 using Web.Endpoints.Settings.Companies.Get;
 using Web.Extensions;

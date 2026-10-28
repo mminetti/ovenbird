@@ -1,5 +1,5 @@
 using FluentValidation;
-using UseCases.Common.Constants;
+using Core.Common.Constants;
 
 namespace Web.Endpoints.Auditing.List;
 

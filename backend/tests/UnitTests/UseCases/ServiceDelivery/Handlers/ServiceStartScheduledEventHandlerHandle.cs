@@ -3,7 +3,7 @@ using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using UseCases.Interfaces.ServiceDelivery;
 using UseCases.ServiceDelivery.Handlers;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace UnitTests.UseCases.ServiceDelivery.Handlers;
 
@@ -47,8 +47,8 @@ public class ServiceStartScheduledEventHandlerHandle
         await _serviceEventActionRepository.Received(1).AddAsync(
             Arg.Is<ServiceEventAction>(x =>
                 x.ServiceEventId == domainEvent.ServiceEventId &&
-                x.ActionTypeId == CoreConstants.ServiceEventActionTypes.UpdateServicePoint &&
-                x.StatusId == CoreConstants.ServiceOrderStatuses.Completed &&
+                x.ActionTypeId == Constants.ServiceEventActionTypes.UpdateServicePoint &&
+                x.StatusId == Constants.ServiceOrderStatuses.Completed &&
                 x.Message == null),
             Arg.Any<CancellationToken>());
     }
@@ -67,8 +67,8 @@ public class ServiceStartScheduledEventHandlerHandle
         await _serviceEventActionRepository.Received(1).AddAsync(
             Arg.Is<ServiceEventAction>(x =>
                 x.ServiceEventId == domainEvent.ServiceEventId &&
-                x.ActionTypeId == CoreConstants.ServiceEventActionTypes.UpdateServicePoint &&
-                x.StatusId == CoreConstants.ServiceOrderStatuses.Error &&
+                x.ActionTypeId == Constants.ServiceEventActionTypes.UpdateServicePoint &&
+                x.StatusId == Constants.ServiceOrderStatuses.Error &&
                 x.Message == "ServicePoint 'SP1' was not found."),
             Arg.Any<CancellationToken>());
     }

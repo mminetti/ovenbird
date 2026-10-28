@@ -1,5 +1,4 @@
 ﻿using Core.Processing;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Common;
 
@@ -13,7 +12,7 @@ public class ProcessRunTracker(
         var processRun = new ProcessRun
         {
             ProcessTypeId = processTypeId,
-            StatusId = CoreConstants.ProcessRunStatuses.Running,
+            StatusId = Constants.ProcessRunStatuses.Running,
             StartedAtUtc = timeProvider.GetUtcNow(),
         };
 
@@ -35,7 +34,7 @@ public class ProcessRunTracker(
         var run = await processRunRepository.GetByIdAsync(processRunId, ct)
             ?? throw new InvalidOperationException($"ProcessRun '{processRunId}' was not found.");
 
-        run.StatusId = succeeded ? CoreConstants.ProcessRunStatuses.Succeeded : CoreConstants.ProcessRunStatuses.Failed;
+        run.StatusId = succeeded ? Constants.ProcessRunStatuses.Succeeded : Constants.ProcessRunStatuses.Failed;
         run.CompletedAtUtc = timeProvider.GetUtcNow();
 
         await processRunRepository.UpdateAsync(run, ct);
@@ -59,8 +58,8 @@ public class ProcessRunTracker(
 
     private static int MapSeverity(ValidationSeverity severity) => severity switch
     {
-        ValidationSeverity.Warning => CoreConstants.ProcessRunLogLevels.Warning,
-        ValidationSeverity.Info => CoreConstants.ProcessRunLogLevels.Info,
-        _ => CoreConstants.ProcessRunLogLevels.Error,
+        ValidationSeverity.Warning => Constants.ProcessRunLogLevels.Warning,
+        ValidationSeverity.Info => Constants.ProcessRunLogLevels.Info,
+        _ => Constants.ProcessRunLogLevels.Error,
     };
 }

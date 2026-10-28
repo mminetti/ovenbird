@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Core.Auditing;
 using Core.Common;
+using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.Security;
 using Core.ServiceDelivery;
@@ -188,7 +189,7 @@ public class AuditTrailInterceptorTests : BaseEfRepoTestFixture
         {
             Id = 1000,
             Name = "test.permission",
-            ModuleId = UseCases.Common.Constants.Constants.PermissionModules.Security,
+            ModuleId = Constants.PermissionModules.Security,
             Description = "Test permission"
         };
         _dbContext.Add(permission);

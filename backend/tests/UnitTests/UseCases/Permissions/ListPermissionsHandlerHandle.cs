@@ -1,5 +1,5 @@
 ﻿using UseCases.Common;
-using UseCases.Common.Constants;
+using Core.Common.Constants;
 using UseCases.Security.Permissions;
 using UseCases.Security.Permissions.List;
 

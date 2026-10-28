@@ -2,7 +2,6 @@ using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Export;
 
@@ -21,7 +20,7 @@ public class ExportMarketDocumentHandler(
         var documentIds = new List<long>();
 
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
+            new ConfigurationByTypeSpec(Constants.ConfigurationTypes.Edi), ct);
 
         foreach (var configuration in configurations)
         {

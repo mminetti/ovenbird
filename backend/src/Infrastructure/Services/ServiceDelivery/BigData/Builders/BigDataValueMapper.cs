@@ -1,5 +1,5 @@
 ﻿using Core.ServiceDelivery;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
@@ -7,19 +7,19 @@ public class BigDataValueMapper : IBigDataValueMapper
 {
     private static readonly Dictionary<string, int> _commodityIdsByCode = new()
     {
-        ["E"] = CoreConstants.Commodities.Electricity,
+        ["E"] = Constants.Commodities.Electricity,
     };
 
     private static readonly Dictionary<string, int> _unitOfMeasureIdsByCode = new()
     {
-        ["KH"] = CoreConstants.UnitOfMeasures.KilowattHour,
+        ["KH"] = Constants.UnitOfMeasures.KilowattHour,
     };
 
     private static readonly Dictionary<string, int> _usageTypeIdsByPurposeCode = new()
     {
-        ["00"] = CoreConstants.UsagePurposes.Original,
-        ["01"] = CoreConstants.UsagePurposes.Cancel,
-        ["05"] = CoreConstants.UsagePurposes.Replace,
+        ["00"] = Constants.UsagePurposes.Original,
+        ["01"] = Constants.UsagePurposes.Cancel,
+        ["05"] = Constants.UsagePurposes.Replace,
     };
 
     private static readonly HashSet<string> _amsMeterAdvanceMeterInfoCodes = new(StringComparer.OrdinalIgnoreCase)

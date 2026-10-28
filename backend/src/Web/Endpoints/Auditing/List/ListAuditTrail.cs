@@ -2,7 +2,7 @@
 using UseCases.Auditing;
 using UseCases.Auditing.List;
 using UseCases.Common;
-using UseCases.Common.Constants;
+using Core.Common.Constants;
 using Web.Resources;
 
 namespace Web.Endpoints.Auditing.List;

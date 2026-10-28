@@ -4,7 +4,7 @@ using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
@@ -187,13 +187,13 @@ public class ConfirmationBuilderCreateAsync
 
         await _serviceEventRepository.Received(1).AddAsync(
             Arg.Is<ServiceEvent>(x =>
-                x.EventTypeId == CoreConstants.ServiceEventTypes.ServiceStartConfirmed &&
-                x.ReferenceTypeId == CoreConstants.ServiceEventReferenceTypes.ServiceStartItem &&
+                x.EventTypeId == Constants.ServiceEventTypes.ServiceStartConfirmed &&
+                x.ReferenceTypeId == Constants.ServiceEventReferenceTypes.ServiceStartItem &&
                 x.ReferenceId == 2),
             Arg.Any<CancellationToken>());
 
         serviceStart.ServiceDate.ShouldBe(new DateOnly(2025, 11, 12));
-        serviceStart.ServiceOrderStatusId.ShouldBe(CoreConstants.ServiceOrderStatuses.Scheduled);
+        serviceStart.ServiceOrderStatusId.ShouldBe(Constants.ServiceOrderStatuses.Scheduled);
 
         await _serviceStartRepository.Received(1).UpdateAsync(serviceStart, Arg.Any<CancellationToken>());
 

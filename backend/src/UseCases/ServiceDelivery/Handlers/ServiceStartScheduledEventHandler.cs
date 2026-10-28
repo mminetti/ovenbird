@@ -1,7 +1,6 @@
 using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using UseCases.Interfaces.ServiceDelivery;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.ServiceDelivery.Handlers;
 
@@ -16,8 +15,8 @@ public class ServiceStartScheduledEventHandler(
         await serviceEventActionRepository.AddAsync(new ServiceEventAction
         {
             ServiceEventId = domainEvent.ServiceEventId,
-            ActionTypeId = CoreConstants.ServiceEventActionTypes.UpdateServicePoint,
-            StatusId = result.IsSuccess ? CoreConstants.ServiceOrderStatuses.Completed : CoreConstants.ServiceOrderStatuses.Error,
+            ActionTypeId = Constants.ServiceEventActionTypes.UpdateServicePoint,
+            StatusId = result.IsSuccess ? Constants.ServiceOrderStatuses.Completed : Constants.ServiceOrderStatuses.Error,
             Message = result.IsSuccess ? null : string.Join("; ", result.ValidationErrors.Select(e => e.ErrorMessage)),
         }, ct);
 

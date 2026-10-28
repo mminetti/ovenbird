@@ -2,7 +2,7 @@
 using Core.MarketExchange;
 using Infrastructure.Services.ServiceDelivery.BigData.Readers;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData;
 
@@ -29,7 +29,7 @@ public class BigDataDocumentImportParser(IServiceProvider serviceProvider) : IMa
             item.Set = set;
             item.SubSet = subSet;
             item.Raw = transaction.ToString();
-            item.MarketDocumentItemStatusId = CoreConstants.MarketDocumentItemStatuses.New;
+            item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.New;
 
             items.Add(item);
         }

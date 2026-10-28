@@ -3,7 +3,7 @@ using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace Worker.Jobs.Market;
 
@@ -18,7 +18,7 @@ public class MarketDocumentImportJob(
 
         try
         {
-            var run = await processRunTracker.StartAsync(CoreConstants.ProcessTypes.MarketDocumentImport, cancellationToken);
+            var run = await processRunTracker.StartAsync(Constants.ProcessTypes.MarketDocumentImport, cancellationToken);
 
             var result = await bus.InvokeAsync<ImportMarketDocumentResult>(
                 new MarketDocumentImportCommand(), cancellationToken);

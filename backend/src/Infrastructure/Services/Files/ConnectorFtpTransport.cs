@@ -1,7 +1,7 @@
 using Core.Settings;
 using UseCases.Interfaces.Files;
 using UseCases.Interfaces.Secrets;
-using CoreConstants = Core.Common.Constants.Constants;
+using Core.Common.Constants;
 
 namespace Infrastructure.Services.Files;
 
@@ -51,7 +51,7 @@ public class ConnectorFtpTransport(
 
     private async Task<FtpOptions> ResolveFtpOptions(Configuration configuration, CancellationToken ct)
     {
-        var connector = configuration.GetRequiredConnector(CoreConstants.ConnectorTypes.Ftp);
+        var connector = configuration.GetRequiredConnector(Constants.ConnectorTypes.Ftp);
 
         return new FtpOptions
         {

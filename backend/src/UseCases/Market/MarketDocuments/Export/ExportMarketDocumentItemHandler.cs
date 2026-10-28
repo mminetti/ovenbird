@@ -4,7 +4,6 @@ using Core.ServiceDelivery.Specifications;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
-using CoreConstants = Core.Common.Constants.Constants;
 
 namespace UseCases.Market.MarketDocuments.Export;
 
@@ -27,7 +26,7 @@ public class ExportMarketDocumentItemHandler(
         var itemIds = new List<long>();
 
         var configurations = await configurationReadRepository.ListAsync(
-            new ConfigurationByTypeSpec(CoreConstants.ConfigurationTypes.Edi), ct);
+            new ConfigurationByTypeSpec(Constants.ConfigurationTypes.Edi), ct);
 
         foreach (var configuration in configurations)
         {
@@ -41,8 +40,8 @@ public class ExportMarketDocumentItemHandler(
             {
                 var (set, subSet) = serviceStartItem.ServiceStart.ServiceStartTypeId switch
                 {
-                    CoreConstants.ServiceStartTypes.Switch => ("814", "01"),
-                    CoreConstants.ServiceStartTypes.MoveIn => ("814", "16"),
+                    Constants.ServiceStartTypes.Switch => ("814", "01"),
+                    Constants.ServiceStartTypes.MoveIn => ("814", "16"),
                     _ => throw new InvalidOperationException(
                         $"ServiceStart '{serviceStartItem.ServiceStartId}' has an unsupported ServiceStartTypeId '{serviceStartItem.ServiceStart.ServiceStartTypeId}'.")
                 };
@@ -53,14 +52,14 @@ public class ExportMarketDocumentItemHandler(
                 item.Set = set;
                 item.SubSet = subSet;
                 item.MarketDocumentId = null;
-                item.MarketDocumentItemStatusId = CoreConstants.MarketDocumentItemStatuses.New;
+                item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.New;
 
                 var created = await itemRepository.AddAsync(item, ct);
 
                 var reference = new MarketDocumentReference
                 {
                     MarketDocumentItemId = created.Id,
-                    ReferenceTypeId = CoreConstants.MarketDocumentReferenceTypes.ServiceStart,
+                    ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
                     ReferenceId = serviceStartItem.Id,
                 };
 
