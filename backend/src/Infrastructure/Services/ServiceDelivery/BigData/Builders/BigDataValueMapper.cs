@@ -42,9 +42,7 @@ public class BigDataValueMapper : IBigDataValueMapper
             ? Result.Success(id)
             : Result.Invalid(new ValidationError(nameof(UsageType), $"Unmapped usage purpose code '{purposeCode}'."));
 
-    public bool IsAmsMeter(string? advanceMeterInfoCode)
-    { 
-        return !string.IsNullOrWhiteSpace(advanceMeterInfoCode) && 
+    public bool IsAmsMeter(string? advanceMeterInfoCode) =>
+        !string.IsNullOrWhiteSpace(advanceMeterInfoCode) &&
             _amsMeterAdvanceMeterInfoCodes.Contains(advanceMeterInfoCode);
-    }
 }

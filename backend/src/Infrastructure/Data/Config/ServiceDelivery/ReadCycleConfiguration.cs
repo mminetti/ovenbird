@@ -4,9 +4,7 @@ namespace Infrastructure.Data.Config.ServiceDelivery;
 
 public class ReadCycleConfiguration : IEntityTypeConfiguration<ReadCycle>
 {
-    public void Configure(EntityTypeBuilder<ReadCycle> builder)
-    {
+    public void Configure(EntityTypeBuilder<ReadCycle> builder) =>
         builder.Property(x => x.Name)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-    }
 }

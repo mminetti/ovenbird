@@ -11,10 +11,7 @@ public class CurrentUserClaimsTransformationTests
 {
     private const string TestOid = "oid-test-123";
 
-    private static ClaimsPrincipal UnauthenticatedPrincipal()
-    {
-        return new ClaimsPrincipal(new ClaimsIdentity());
-    }
+    private static ClaimsPrincipal UnauthenticatedPrincipal() => new(new ClaimsIdentity());
 
     private static ClaimsPrincipal AuthenticatedPrincipal(string oid = TestOid, params Claim[] extraClaims)
     {

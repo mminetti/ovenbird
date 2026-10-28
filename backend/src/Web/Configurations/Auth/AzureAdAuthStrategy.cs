@@ -12,15 +12,10 @@ namespace Web.Configurations.Auth;
 /// </summary>
 public class AzureAdAuthStrategy : IAuthStrategy
 {
-    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-    {
+    public void ConfigureServices(IServiceCollection services, IConfiguration configuration) =>
         services.AddMicrosoftIdentityWebApiAuthentication(configuration, "AzureAd");
-    }
 
-    public void ConfigureMiddleware(WebApplication app)
-    {
-        app.UseAuthentication();
-    }
+    public void ConfigureMiddleware(WebApplication app) => app.UseAuthentication();
 
     public void ConfigureSwaggerAuth(AspNetCoreOpenApiDocumentGeneratorSettings settings, IConfiguration configuration)
     {
@@ -50,15 +45,13 @@ public class AzureAdAuthStrategy : IAuthStrategy
         settings.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("oauth2"));
     }
 
-    public void ConfigureScalarAuth(ScalarOptions options, IConfiguration configuration)
-    {
+    public void ConfigureScalarAuth(ScalarOptions options, IConfiguration configuration) =>
         options.AddAuthorizationCodeFlow("oauth2", flow =>
         {
             flow.WithClientId(configuration["AzureAd:ClientId"] ?? string.Empty)
                 .WithSelectedScopes([configuration["AzureAd:DefaultScope"] ?? string.Empty])
                 .WithPkce(Pkce.Sha256);
         });
-    }
 
     public string? GetExternalIdentifier(ClaimsPrincipal principal) =>
         principal.FindFirst(ClaimConstants.ObjectId)?.Value

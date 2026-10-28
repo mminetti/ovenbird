@@ -14,17 +14,13 @@ public class Configuration : AuditableEntityBase<int>, IAudited, IHasDisplayName
     public ConfigurationType ConfigurationType { get; set; } = default!;
     public Company? Company { get; set; }
 
-    public string? GetValue(string name)
-    {
-        return ConfigurationFields
+    public string? GetValue(string name) =>
+        ConfigurationFields
             .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase))
             ?.Value;
-    }
 
-    public Company GetRequiredCompany()
-    {
-        return Company ?? throw new InvalidOperationException($"Configuration '{Name}' has no company.");
-    }
+    public Company GetRequiredCompany() =>
+        Company ?? throw new InvalidOperationException($"Configuration '{Name}' has no company.");
 
     public string GetRequiredValue(string name)
     {
@@ -47,8 +43,6 @@ public class Configuration : AuditableEntityBase<int>, IAudited, IHasDisplayName
                 $"Configuration '{Name}' is missing required '{type}' connector type.");
     }
 
-    private Connector? GetConnector(int typeId)
-    {
-        return Connectors.FirstOrDefault(x => x.ConnectorImplementation.ConnectorTypeId == typeId);
-    }
+    private Connector? GetConnector(int typeId) =>
+        Connectors.FirstOrDefault(x => x.ConnectorImplementation.ConnectorTypeId == typeId);
 }

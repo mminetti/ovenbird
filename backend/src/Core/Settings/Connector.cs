@@ -12,16 +12,12 @@ public class Connector : AuditableEntityBase<int>, IAudited, IHasDisplayName
     public ICollection<ConnectorField> ConnectorFields { get; set; } = [];
     public ICollection<Configuration> Configurations { get; set; } = [];
 
-    public string? GetValue(string name)
-    {
-        return ConnectorFields
+    public string? GetValue(string name) =>
+        ConnectorFields
             .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase))
             ?.Value;
-    }
 
-    public ConnectorField? GetField(string name)
-    {
-        return ConnectorFields
+    public ConnectorField? GetField(string name) =>
+        ConnectorFields
             .FirstOrDefault(x => string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
-    }
 }

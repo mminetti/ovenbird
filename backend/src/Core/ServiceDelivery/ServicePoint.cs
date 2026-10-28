@@ -25,11 +25,9 @@ public class ServicePoint : AuditableEntityBase<long>
 
     public ICollection<Meter> Meters { get; set; } = [];
 
-    public Meter? GetMeter(string identifier)
-    {
-        return Meters?
+    public Meter? GetMeter(string identifier) =>
+        Meters?
             .FirstOrDefault(x => string.Equals(x.Identifier, identifier, StringComparison.OrdinalIgnoreCase));
-    }
 
     public Meter AddMeter(string identifier)
     {

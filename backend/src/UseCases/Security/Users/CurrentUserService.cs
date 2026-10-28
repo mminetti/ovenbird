@@ -15,9 +15,8 @@ public class CurrentUserService(
         Expiration = TimeSpan.FromMinutes(60)
     };
 
-    public async Task<CurrentUserInfo> GetOrCreateAsync(string externalIdentifier, string name, string email, CancellationToken ct)
-    {
-        return await cache.GetOrCreateAsync(
+    public async Task<CurrentUserInfo> GetOrCreateAsync(string externalIdentifier, string name, string email, CancellationToken ct) =>
+        await cache.GetOrCreateAsync(
             $"{Constants.CacheKeys.CurrentUserPrefix}{externalIdentifier}",
             async token =>
             {
@@ -44,11 +43,9 @@ public class CurrentUserService(
             _options,
             [Constants.CacheKeys.SecurityTag],
             ct);
-    }
 
-    public async Task<CurrentUserInfo?> GetAsync(string externalIdentifier, CancellationToken ct)
-    {
-        return await cache.GetOrCreateAsync(
+    public async Task<CurrentUserInfo?> GetAsync(string externalIdentifier, CancellationToken ct) =>
+        await cache.GetOrCreateAsync(
             $"{Constants.CacheKeys.CurrentUserPrefix}{externalIdentifier}",
             async token =>
             {
@@ -60,7 +57,6 @@ public class CurrentUserService(
             _options,
             [Constants.CacheKeys.SecurityTag],
             ct);
-    }
 
     private static CurrentUserInfo MapToCurrentUserInfo(User user)
     {

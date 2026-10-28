@@ -69,8 +69,6 @@ public class GetMe(IMessageBus bus, ICurrentUserContext currentUser)
 
 public sealed class GetMeMapper : Mapper<EmptyRequest, MeRecord, CurrentUserProfileDto>
 {
-    public override MeRecord FromEntity(CurrentUserProfileDto dto)
-    {
-        return new MeRecord(dto.Name, dto.Email) { Permissions = dto.Permissions };
-    }
+    public override MeRecord FromEntity(CurrentUserProfileDto dto) =>
+        new MeRecord(dto.Name, dto.Email) { Permissions = dto.Permissions };
 }

@@ -11,10 +11,7 @@ public class BigDataDocumentExportGeneratorWriteTransactionsAsync
     private readonly BigDataDocumentExportGenerator _generator = new();
 
     [Fact]
-    public void IdentifierIsBigData()
-    {
-        _generator.Identifier.ShouldBe("BigData");
-    }
+    public void IdentifierIsBigData() => _generator.Identifier.ShouldBe("BigData");
 
     [Fact]
     public async Task WrapsEachItemsRawTransactionInATransactionListAndRoundTripsThroughTheParser()

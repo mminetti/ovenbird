@@ -34,10 +34,7 @@ public class Auth0AuthStrategy(IConfiguration configuration) : IAuthStrategy
             });
     }
 
-    public void ConfigureMiddleware(WebApplication app)
-    {
-        app.UseAuthentication();
-    }
+    public void ConfigureMiddleware(WebApplication app) => app.UseAuthentication();
 
     public void ConfigureSwaggerAuth(AspNetCoreOpenApiDocumentGeneratorSettings settings, IConfiguration configuration)
     {

@@ -46,13 +46,7 @@ public abstract class BaseEfRepoTestFixture
         return builder.Options;
     }
 
-    protected EfRepository<User> GetRepository()
-    {
-        return new EfRepository<User>(_dbContext);
-    }
+    protected EfRepository<User> GetRepository() => new(_dbContext);
 
-    protected ReadDbContext GetReadDbContext()
-    {
-        return new ReadDbContext(_options);
-    }
+    protected ReadDbContext GetReadDbContext() => new(_options);
 }

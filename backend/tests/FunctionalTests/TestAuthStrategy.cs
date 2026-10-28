@@ -14,12 +14,10 @@ namespace FunctionalTests;
 /// </summary>
 sealed class TestAuthStrategy : IAuthStrategy
 {
-    public void ConfigureServices(IServiceCollection services, IConfiguration configuration)
-    {
+    public void ConfigureServices(IServiceCollection services, IConfiguration configuration) =>
         services
             .AddAuthentication(TestAuthHandler.SchemeName)
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
-    }
 
     public void ConfigureMiddleware(WebApplication app) => app.UseAuthentication();
 

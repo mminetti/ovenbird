@@ -9,10 +9,7 @@ public class KeyVaultConnectorFieldSecretResolverTests : IDisposable
 {
     private const string EnvVarName = "KEYVAULT_RESOLVER_TEST_SECRET";
 
-    public void Dispose()
-    {
-        Environment.SetEnvironmentVariable(EnvVarName, null);
-    }
+    public void Dispose() => Environment.SetEnvironmentVariable(EnvVarName, null);
 
     [Fact]
     public async Task ResolveAsyncReturnsValueFromKeyVaultWhenFound()

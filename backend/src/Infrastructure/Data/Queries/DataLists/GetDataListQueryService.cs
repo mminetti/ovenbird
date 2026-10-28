@@ -13,9 +13,8 @@ namespace Infrastructure.Data.Queries.DataLists;
 /// </summary>
 public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryService
 {
-    public async Task<IReadOnlyList<ValuePairDto>> GetListAsync(DataListType type, CancellationToken ct)
-    {
-        return type switch
+    public async Task<IReadOnlyList<ValuePairDto>> GetListAsync(DataListType type, CancellationToken ct) =>
+        type switch
         {
             DataListType.MarketDocumentDirections => await db.Set<MarketDocumentDirection>()
                 .AsNoTracking()
@@ -79,5 +78,4 @@ public class GetDataListQueryService(ReadDbContext db) : IGetDataListQueryServic
 
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, "Unknown data list type")
         };
-    }
 }

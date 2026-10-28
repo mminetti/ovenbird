@@ -134,19 +134,15 @@ public class BigDataEdiExportHandlerExecuteExportAsync
         secondResult.ShouldBeNull();
     }
 
-    private void SeedPendingItems(List<MarketDocumentItem> pendingItems)
-    {
+    private void SeedPendingItems(List<MarketDocumentItem> pendingItems) =>
         _itemReadRepository
             .ListAsync(Arg.Any<MarketDocumentItemsPendingExportSpec>(), Arg.Any<CancellationToken>())
             .Returns(_ => pendingItems.Where(i => i.MarketDocumentId == null).ToList());
-    }
 
-    private void SeedGeneratedContent(string content)
-    {
+    private void SeedGeneratedContent(string content) =>
         _generator
             .WriteTransactionsAsync(Arg.Any<IReadOnlyList<MarketDocumentItem>>(), Arg.Any<CancellationToken>())
             .Returns(_ => new MemoryStream(Encoding.UTF8.GetBytes(content)));
-    }
 
     private static Configuration CreateConfiguration(Company company)
     {
