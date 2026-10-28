@@ -1,4 +1,5 @@
 ﻿using Core.Common;
+using Core.MarketExchange.Events;
 
 namespace Core.MarketExchange;
 
@@ -14,4 +15,6 @@ public class MarketDocumentItem : AuditableEntityBase<long>
 
     public MarketDocument? MarketDocument { get; set; }
     public MarketDocumentItemStatus MarketDocumentItemStatus { get; set; } = default!;
+
+    public void MarkImported() => RegisterDomainEvent(new MarketDocumentItemImportedEvent(this));
 }

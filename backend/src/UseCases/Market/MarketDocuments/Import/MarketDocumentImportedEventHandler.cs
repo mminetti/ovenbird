@@ -11,8 +11,7 @@ public class MarketDocumentImportedEventHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IRepository<MarketDocument> documentRepository,
     IReadRepository<Configuration> configurationRepository,
-    EdiImportHandlerResolver ediResolver,
-    IMessageBus bus)
+    EdiImportHandlerResolver ediResolver)
 {
     private const string HandlerIdentifier = "handler";
 
@@ -33,11 +32,10 @@ public class MarketDocumentImportedEventHandler(
             foreach (var item in items)
             {
                 item.MarketDocumentId = document.Id;
+                item.MarketDocument = document;
+                item.MarkImported();
 
-                var created = await itemRepository.AddAsync(item, ct);
-
-                await bus.InvokeAsync<Result>(
-                    new MarketDocumentEntityBuilderCommand(configuration.Id, created.Id), ct);
+                await itemRepository.AddAsync(item, ct);
             }
 
             document.StatusId = CoreConstants.MarketDocumentStatuses.Done;

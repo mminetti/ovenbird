@@ -1,13 +1,10 @@
-using Ardalis.Result;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
-using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
-using Wolverine;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -17,7 +14,6 @@ public class MarketDocumentImportedEventHandlerHandle
     private readonly IRepository<MarketDocument> _documentRepository = Substitute.For<IRepository<MarketDocument>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly IEdiImportHandler _ediHandler = Substitute.For<IEdiImportHandler>();
-    private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly Configuration _configuration;
     private readonly MarketDocumentImportedEventHandler _handler;
 
@@ -31,20 +27,15 @@ public class MarketDocumentImportedEventHandlerHandle
             .FirstOrDefaultAsync(Arg.Any<ConfigurationByTypeAndCompanySpec>(), Arg.Any<CancellationToken>())
             .Returns(_configuration);
 
-        _bus
-            .InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>())
-            .Returns(Result.Success());
-
         _handler = new MarketDocumentImportedEventHandler(
             _itemRepository,
             _documentRepository,
             _configurationReadRepository,
-            new EdiImportHandlerResolver([_ediHandler]),
-            _bus);
+            new EdiImportHandlerResolver([_ediHandler]));
     }
 
     [Fact]
-    public async Task PersistsEachItemReturnedByTheHandler_TriggersEntityBuilding_AndMarksTheDocumentDone()
+    public async Task PersistsEachItemReturnedByTheHandler_RaisesItemImportedEvents_AndMarksTheDocumentDone()
     {
         var document = new MarketDocument { Id = 1, Identifier = "document.xml", CompanyId = _configuration.CompanyId!.Value };
 
@@ -72,53 +63,19 @@ public class MarketDocumentImportedEventHandlerHandle
         await _handler.Handle(new MarketDocumentImportedEvent(document), CancellationToken.None);
 
         created.Count.ShouldBe(2);
-        created[0].MarketDocumentId.ShouldBe(document.Id);
-        created[1].MarketDocumentId.ShouldBe(document.Id);
 
-        document.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Done);
-
-        await _bus.Received(2).InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
-        await _documentRepository.Received(1).UpdateAsync(document, Arg.Any<CancellationToken>());
-    }
-
-    [Fact]
-    public async Task IgnoresAnInvalidEntityBuilderResult_AndStillProcessesRemainingItems()
-    {
-        var document = new MarketDocument { Id = 1, Identifier = "document.xml", CompanyId = _configuration.CompanyId!.Value };
-
-        var parsedItems = new List<MarketDocumentItem>
+        foreach (var item in created)
         {
-            new() { Set = "814", SubSet = "05", ReferenceNumber = "REF-1", ServicePointIdentifier = "ACCT-1" },
-            new() { Set = "814", SubSet = "05", ReferenceNumber = "REF-2", ServicePointIdentifier = "ACCT-2" },
-        };
+            item.MarketDocumentId.ShouldBe(document.Id);
+            item.MarketDocument.ShouldBeSameAs(document);
 
-        _ediHandler
-            .ExecuteItemImportAsync(_configuration, document, Arg.Any<CancellationToken>())
-            .Returns(parsedItems);
-
-        long nextId = 500;
-        _itemRepository
-            .AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo =>
-            {
-                var item = callInfo.Arg<MarketDocumentItem>();
-                item.Id = nextId++;
-                return item;
-            });
-
-        _bus
-            .InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>())
-            .Returns(
-                Result.Invalid(new ValidationError(
-                    EntityReference.Format(nameof(MarketDocumentItem), 500), "bad data", "CustomerClass", ValidationSeverity.Error)),
-                Result.Success());
-
-        await _handler.Handle(new MarketDocumentImportedEvent(document), CancellationToken.None);
+            var domainEvent = item.DomainEvents.OfType<MarketDocumentItemImportedEvent>().ShouldHaveSingleItem();
+            domainEvent.MarketDocumentItem.ShouldBeSameAs(item);
+        }
 
         document.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Done);
 
-        await _bus.Received(2).InvokeAsync<Result>(Arg.Any<MarketDocumentEntityBuilderCommand>(), Arg.Any<CancellationToken>());
-        await _itemRepository.Received(2).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());
+        await _documentRepository.Received(1).UpdateAsync(document, Arg.Any<CancellationToken>());
     }
 
     [Fact]
