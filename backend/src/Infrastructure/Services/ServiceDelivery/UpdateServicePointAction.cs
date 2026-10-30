@@ -1,5 +1,4 @@
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
 using UseCases.Interfaces.ServiceDelivery;
@@ -12,9 +11,9 @@ public class UpdateServicePointAction(
     IBigDataValueMapper valueMapper)
     : IUpdateServicePointAction
 {
-    public async Task<Result> ExecuteAsync(ServiceStartScheduledEvent domainEvent, CancellationToken ct)
+    public async Task<Result> ExecuteAsync(UpdateServicePointRequest request, CancellationToken ct)
     {
-        var commodityIdResult = valueMapper.GetCommodityId(domainEvent.CommodityCode);
+        var commodityIdResult = valueMapper.GetCommodityId(request.CommodityCode);
         if (!commodityIdResult.IsSuccess)
         {
             return AsResult(commodityIdResult);
@@ -22,24 +21,24 @@ public class UpdateServicePointAction(
 
         var commodityId = commodityIdResult.Value;
 
-        if (string.IsNullOrWhiteSpace(domainEvent.PremiseAddressLine1))
+        if (string.IsNullOrWhiteSpace(request.PremiseAddressLine1))
         {
-            return Result.Invalid(new ValidationError(nameof(domainEvent.PremiseAddressLine1), "Premise Address is required."));
+            return Result.Invalid(new ValidationError(nameof(request.PremiseAddressLine1), "Premise Address is required."));
         }
 
-        if (string.IsNullOrWhiteSpace(domainEvent.PremiseCity))
+        if (string.IsNullOrWhiteSpace(request.PremiseCity))
         {
-            return Result.Invalid(new ValidationError(nameof(domainEvent.PremiseCity), "Premise City is required."));
+            return Result.Invalid(new ValidationError(nameof(request.PremiseCity), "Premise City is required."));
         }
 
-        if (string.IsNullOrWhiteSpace(domainEvent.PremiseState))
+        if (string.IsNullOrWhiteSpace(request.PremiseState))
         {
-            return Result.Invalid(new ValidationError(nameof(domainEvent.PremiseState), "Premise State is required."));
+            return Result.Invalid(new ValidationError(nameof(request.PremiseState), "Premise State is required."));
         }
 
-        var (zip, zip4) = SplitZip(domainEvent.PremisePostalCode);
+        var (zip, zip4) = SplitZip(request.PremisePostalCode);
 
-        var countyResult = await lookupService.GetCountyByNameAsync(domainEvent.CountyName, ct);
+        var countyResult = await lookupService.GetCountyByNameAsync(request.CountyName, ct);
         if (!countyResult.IsSuccess)
         {
             return AsResult(countyResult);
@@ -47,7 +46,7 @@ public class UpdateServicePointAction(
 
         var county = countyResult.Value;
 
-        var customerClassResult = await lookupService.GetCustomerClassByNameAsync(domainEvent.CustomerClassCode, ct);
+        var customerClassResult = await lookupService.GetCustomerClassByNameAsync(request.CustomerClassCode, ct);
         if (!customerClassResult.IsSuccess)
         {
             return AsResult(customerClassResult);
@@ -55,7 +54,7 @@ public class UpdateServicePointAction(
 
         var customerClass = customerClassResult.Value;
 
-        var loadProfileResult = await lookupService.GetLoadProfileByNameAsync(domainEvent.LoadProfileCode, ct);
+        var loadProfileResult = await lookupService.GetLoadProfileByNameAsync(request.LoadProfileCode, ct);
         if (!loadProfileResult.IsSuccess)
         {
             return AsResult(loadProfileResult);
@@ -63,7 +62,7 @@ public class UpdateServicePointAction(
 
         var loadProfile = loadProfileResult.Value;
 
-        var readCycleResult = await lookupService.GetReadCycleByNameAsync(domainEvent.ReadCycleCode, ct);
+        var readCycleResult = await lookupService.GetReadCycleByNameAsync(request.ReadCycleCode, ct);
         if (!readCycleResult.IsSuccess)
         {
             return AsResult(readCycleResult);
@@ -71,31 +70,31 @@ public class UpdateServicePointAction(
 
         var readCycle = readCycleResult.Value;
 
-        if (string.IsNullOrWhiteSpace(domainEvent.MeterNumber))
+        if (string.IsNullOrWhiteSpace(request.MeterNumber))
         {
-            return Result.Invalid(new ValidationError(nameof(domainEvent.MeterNumber), "Service Meter Number is required."));
+            return Result.Invalid(new ValidationError(nameof(request.MeterNumber), "Service Meter Number is required."));
         }
 
         var servicePoint = await servicePointRepository.FirstOrDefaultAsync(
-            new ServicePointByIdentifierAndCommoditySpec(domainEvent.ServicePointIdentifier, commodityId), ct);
+            new ServicePointByIdentifierAndCommoditySpec(request.ServicePointIdentifier, commodityId), ct);
 
         if (servicePoint is null)
         {
             return Result.Invalid(new ValidationError(
-                nameof(ServicePoint), $"ServicePoint '{domainEvent.ServicePointIdentifier}' was not found."));
+                nameof(ServicePoint), $"ServicePoint '{request.ServicePointIdentifier}' was not found."));
         }
 
         servicePoint.CustomerClassId = customerClass.Id;
         servicePoint.LoadProfileId = loadProfile.Id;
         servicePoint.ReadCycleId = readCycle.Id;
-        servicePoint.IsAmsMeter = valueMapper.IsAmsMeter(domainEvent.AdvanceMeterInfoCode);
+        servicePoint.IsAmsMeter = valueMapper.IsAmsMeter(request.AdvanceMeterInfoCode);
 
-        servicePoint.AddMeter(domainEvent.MeterNumber);
+        servicePoint.AddMeter(request.MeterNumber);
 
         var premise = servicePoint.Premise;
-        premise.AddressLine1 = domainEvent.PremiseAddressLine1;
-        premise.City = domainEvent.PremiseCity;
-        premise.State = domainEvent.PremiseState;
+        premise.AddressLine1 = request.PremiseAddressLine1;
+        premise.City = request.PremiseCity;
+        premise.State = request.PremiseState;
         premise.Zip = zip;
         premise.Zip4 = zip4;
         premise.CountyId = county.Id;

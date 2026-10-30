@@ -1,7 +1,6 @@
-namespace Core.ServiceDelivery.Events;
+namespace UseCases.Interfaces.ServiceDelivery;
 
-public sealed class ServiceStartScheduledEvent(
-    long serviceEventId,
+public sealed class UpdateServicePointRequest(
     string servicePointIdentifier,
     string commodityCode,
     string? customerClassCode,
@@ -13,9 +12,8 @@ public sealed class ServiceStartScheduledEvent(
     string? premiseCity,
     string? premiseState,
     string? premisePostalCode,
-    string? countyName) : DomainEventBase
+    string? countyName)
 {
-    public long ServiceEventId { get; set; } = serviceEventId;
     public string ServicePointIdentifier { get; set; } = servicePointIdentifier;
     public string CommodityCode { get; set; } = commodityCode;
     public string? CustomerClassCode { get; set; } = customerClassCode;

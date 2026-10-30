@@ -7,37 +7,25 @@ using Core.Common.Constants;
 
 namespace UnitTests.UseCases.ServiceDelivery.Handlers;
 
-public class ServiceStartScheduledEventHandlerHandle
+public class ServiceEventCreatedEventHandlerHandle
 {
-    private readonly IUpdateServicePointAction _updateServicePointAction = Substitute.For<IUpdateServicePointAction>();
+    private readonly IUpdateServicePointFromServiceEventAction _updateServicePointFromServiceEventAction =
+        Substitute.For<IUpdateServicePointFromServiceEventAction>();
     private readonly IRepository<ServiceEventAction> _serviceEventActionRepository = Substitute.For<IRepository<ServiceEventAction>>();
-    private readonly ServiceStartScheduledEventHandler _handler;
+    private readonly ServiceEventCreatedEventHandler _handler;
 
-    public ServiceStartScheduledEventHandlerHandle()
+    public ServiceEventCreatedEventHandlerHandle()
     {
-        _handler = new ServiceStartScheduledEventHandler(_updateServicePointAction, _serviceEventActionRepository);
+        _handler = new ServiceEventCreatedEventHandler(_updateServicePointFromServiceEventAction, _serviceEventActionRepository);
     }
 
-    private static ServiceStartScheduledEvent CreateDomainEvent() => new(
-        serviceEventId: 7,
-        servicePointIdentifier: "SP1",
-        commodityCode: "E",
-        customerClassCode: "RESIDENTIAL",
-        loadProfileCode: "PROFILE",
-        readCycleCode: "14",
-        advanceMeterInfoCode: "AMSR",
-        meterNumber: "M1",
-        premiseAddressLine1: "123 Main St",
-        premiseCity: "Austin",
-        premiseState: "TX",
-        premisePostalCode: "787010000",
-        countyName: "TRAVIS");
+    private static ServiceEventCreatedEvent CreateDomainEvent() => new(serviceEventId: 7);
 
     [Fact]
     public async Task RecordsCompletedActionWhenUpdateSucceeds()
     {
-        _updateServicePointAction
-            .ExecuteAsync(Arg.Any<ServiceStartScheduledEvent>(), Arg.Any<CancellationToken>())
+        _updateServicePointFromServiceEventAction
+            .ExecuteAsync(Arg.Any<long>(), Arg.Any<CancellationToken>())
             .Returns(Result.Success());
 
         var domainEvent = CreateDomainEvent();
@@ -56,8 +44,8 @@ public class ServiceStartScheduledEventHandlerHandle
     [Fact]
     public async Task RecordsErrorActionWithMessageWhenUpdateFails()
     {
-        _updateServicePointAction
-            .ExecuteAsync(Arg.Any<ServiceStartScheduledEvent>(), Arg.Any<CancellationToken>())
+        _updateServicePointFromServiceEventAction
+            .ExecuteAsync(Arg.Any<long>(), Arg.Any<CancellationToken>())
             .Returns(Result.Invalid(new ValidationError("ServicePoint", "ServicePoint 'SP1' was not found.")));
 
         var domainEvent = CreateDomainEvent();

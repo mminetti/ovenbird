@@ -1,6 +1,5 @@
 ﻿using Core.Common;
 using Core.Common.Constants;
-using Core.ServiceDelivery.Events;
 using Core.Subscription;
 
 namespace Core.ServiceDelivery;
@@ -17,11 +16,9 @@ public class ServiceStart : AuditableEntityBase<long>
     public ServiceOrderStatus Status { get; set; } = default!;
     public ICollection<ServiceStartItem> Items { get; set; } = [];
 
-    public void MarkScheduled(DateOnly serviceDate, ServiceStartScheduledEvent domainEvent)
+    public void MarkScheduled(DateOnly serviceDate)
     {
         ServiceDate = serviceDate;
         ServiceOrderStatusId = Constants.ServiceOrderStatuses.Scheduled;
-
-        RegisterDomainEvent(domainEvent);
     }
 }

@@ -1,6 +1,5 @@
 using Ardalis.Result;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
@@ -20,8 +19,7 @@ public class UpdateServicePointActionExecuteAsync
         _action = new UpdateServicePointAction(_servicePointRepository, _lookupService, _valueMapper);
     }
 
-    private static ServiceStartScheduledEvent CreateDomainEvent(string? premiseAddressLine1 = "123 MAIN ST") => new(
-        serviceEventId: 7,
+    private static UpdateServicePointRequest CreateRequest(string? premiseAddressLine1 = "123 MAIN ST") => new(
         servicePointIdentifier: "1008901017189885037100",
         commodityCode: "E",
         customerClassCode: "RESIDENTIAL SERVICE",
@@ -62,7 +60,7 @@ public class UpdateServicePointActionExecuteAsync
             .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierAndCommoditySpec>(), Arg.Any<CancellationToken>())
             .Returns(servicePoint);
 
-        var result = await _action.ExecuteAsync(CreateDomainEvent(), CancellationToken.None);
+        var result = await _action.ExecuteAsync(CreateRequest(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
 
@@ -91,7 +89,7 @@ public class UpdateServicePointActionExecuteAsync
             .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierAndCommoditySpec>(), Arg.Any<CancellationToken>())
             .Returns((ServicePoint?)null);
 
-        var result = await _action.ExecuteAsync(CreateDomainEvent(), CancellationToken.None);
+        var result = await _action.ExecuteAsync(CreateRequest(), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
         await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());
@@ -102,7 +100,7 @@ public class UpdateServicePointActionExecuteAsync
     {
         _valueMapper.GetCommodityId("E").Returns(Result.Success(2));
 
-        var result = await _action.ExecuteAsync(CreateDomainEvent(premiseAddressLine1: null), CancellationToken.None);
+        var result = await _action.ExecuteAsync(CreateRequest(premiseAddressLine1: null), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
         await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());
@@ -113,7 +111,7 @@ public class UpdateServicePointActionExecuteAsync
     {
         _valueMapper.GetCommodityId("E").Returns(Result.Invalid(new ValidationError("Commodity", "Unmapped commodity 'E'.")));
 
-        var result = await _action.ExecuteAsync(CreateDomainEvent(), CancellationToken.None);
+        var result = await _action.ExecuteAsync(CreateRequest(), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
         await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());

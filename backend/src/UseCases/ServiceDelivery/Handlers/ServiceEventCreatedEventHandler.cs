@@ -4,13 +4,13 @@ using UseCases.Interfaces.ServiceDelivery;
 
 namespace UseCases.ServiceDelivery.Handlers;
 
-public class ServiceStartScheduledEventHandler(
-    IUpdateServicePointAction updateServicePointAction,
+public class ServiceEventCreatedEventHandler(
+    IUpdateServicePointFromServiceEventAction updateServicePointFromServiceEventAction,
     IRepository<ServiceEventAction> serviceEventActionRepository)
 {
-    public async Task Handle(ServiceStartScheduledEvent domainEvent, CancellationToken ct)
+    public async Task Handle(ServiceEventCreatedEvent domainEvent, CancellationToken ct)
     {
-        var result = await updateServicePointAction.ExecuteAsync(domainEvent, ct);
+        var result = await updateServicePointFromServiceEventAction.ExecuteAsync(domainEvent.ServiceEventId, ct);
 
         await serviceEventActionRepository.AddAsync(new ServiceEventAction
         {

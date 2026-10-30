@@ -1,7 +1,6 @@
 ﻿using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
@@ -17,7 +16,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
     public const string Key = $"BigData_{Set}_{SubSet}";
     private const string Set = "814";
     private const string SubSet = "05";
-    private const string PremiseEntityType = "8R";
     protected override string RequiredElementName => "AccountMaint";
 
     public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
@@ -86,26 +84,10 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
         var createdServiceEvent = await serviceEventRepository.AddAsync(serviceEvent, ct);
 
-        var premise = accountMaint.NameAddresses.FirstOrDefault(x => x.EntityType == PremiseEntityType);
-        var serviceMeter = service.ServiceMeters.FirstOrDefault();
+        createdServiceEvent.MarkCreated();
+        await serviceEventRepository.UpdateAsync(createdServiceEvent, ct);
 
-        var domainEvent = new ServiceStartScheduledEvent(
-            createdServiceEvent.Id,
-            service.UtilityAccountNumber,
-            transaction.Commodity,
-            serviceMeter?.LDCRateClass,
-            serviceMeter?.LoadProfileCode,
-            serviceMeter?.OwnerMeterCycle,
-            serviceMeter?.AdvanceMeterInfo,
-            serviceMeter?.MeterNumber,
-            premise?.EntityAddress1,
-            premise?.EntityCity,
-            premise?.EntityState,
-            premise?.EntityPostalCode,
-            premise?.EntityCounty);
-
-        serviceStart.MarkScheduled(serviceDate, domainEvent);
-
+        serviceStart.MarkScheduled(serviceDate);
         await serviceStartRepository.UpdateAsync(serviceStart, ct);
 
         return Result.Success();

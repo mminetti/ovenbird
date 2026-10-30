@@ -166,12 +166,15 @@ public class ConfirmationBuilderCreateAsync
             .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
+        ServiceEvent? createdServiceEvent = null;
+
         _serviceEventRepository
             .AddAsync(Arg.Any<ServiceEvent>(), Arg.Any<CancellationToken>())
             .Returns(callInfo =>
             {
                 var serviceEvent = callInfo.Arg<ServiceEvent>();
                 serviceEvent.Id = 77;
+                createdServiceEvent = serviceEvent;
                 return serviceEvent;
             });
 
@@ -197,19 +200,12 @@ public class ConfirmationBuilderCreateAsync
 
         await _serviceStartRepository.Received(1).UpdateAsync(serviceStart, Arg.Any<CancellationToken>());
 
-        var domainEvent = serviceStart.DomainEvents.OfType<ServiceStartScheduledEvent>().ShouldHaveSingleItem();
+        await _serviceEventRepository.Received(1).UpdateAsync(
+            Arg.Is<ServiceEvent>(x => x.Id == 77), Arg.Any<CancellationToken>());
+
+        serviceStart.DomainEvents.ShouldBeEmpty();
+
+        var domainEvent = createdServiceEvent.ShouldNotBeNull().DomainEvents.OfType<ServiceEventCreatedEvent>().ShouldHaveSingleItem();
         domainEvent.ServiceEventId.ShouldBe(77L);
-        domainEvent.ServicePointIdentifier.ShouldBe("1008901017189885037100");
-        domainEvent.CommodityCode.ShouldBe("E");
-        domainEvent.CustomerClassCode.ShouldBe("RESIDENTIAL SERVICE");
-        domainEvent.LoadProfileCode.ShouldBe("RESHIWR_COAST_IDR_WS_NOTOU");
-        domainEvent.ReadCycleCode.ShouldBe("14");
-        domainEvent.AdvanceMeterInfoCode.ShouldBe("AMSR");
-        domainEvent.MeterNumber.ShouldBe("I88362388");
-        domainEvent.PremiseAddressLine1.ShouldBe("123 MAIN ST");
-        domainEvent.PremiseCity.ShouldBe("AUSTIN");
-        domainEvent.PremiseState.ShouldBe("TX");
-        domainEvent.PremisePostalCode.ShouldBe("787010000");
-        domainEvent.CountyName.ShouldBe("TRAVIS");
     }
 }
