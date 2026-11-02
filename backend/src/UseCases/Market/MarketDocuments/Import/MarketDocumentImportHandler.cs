@@ -24,9 +24,9 @@ public class MarketDocumentImportHandler(
 
         foreach (var configuration in configurations)
         {
-            var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+            var ediImportHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-            var importResult = await ediHandler.ExecuteImportAsync(configuration, ct);
+            var importResult = await ediImportHandler.ExecuteImportAsync(configuration, ct);
 
             errors.AddRange(importResult.Errors);
 

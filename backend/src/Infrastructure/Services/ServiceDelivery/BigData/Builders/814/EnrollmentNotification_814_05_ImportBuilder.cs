@@ -20,6 +20,8 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
     public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
+        // TODO: refactor this
+
         var transactionResult = DeserializeTransaction(item);
         if (!transactionResult.IsSuccess)
         {

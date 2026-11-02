@@ -24,9 +24,9 @@ public class MarketDocumentImportedEventHandler(
                 new ConfigurationByTypeAndCompanySpec(Constants.ConfigurationTypes.Edi, document.CompanyId), ct)
                 ?? throw new InvalidOperationException($"No EDI configuration was found for company '{document.CompanyId}'.");
 
-            var ediHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
+            var ediImportHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-            var items = await ediHandler.ExecuteItemImportAsync(configuration, document, ct);
+            var items = await ediImportHandler.ExecuteItemImportAsync(configuration, document, ct);
 
             foreach (var item in items)
             {
@@ -39,9 +39,10 @@ public class MarketDocumentImportedEventHandler(
 
             document.StatusId = Constants.MarketDocumentStatuses.Done;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             document.StatusId = Constants.MarketDocumentStatuses.Error;
+            document.Message = ex.Message;
         }
 
         await documentRepository.UpdateAsync(document, ct);

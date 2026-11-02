@@ -31,14 +31,18 @@ public class MarketDocumentItemImportedEventHandler(
 
             if (entityBuilder is not null)
             {
+                // we are missing a concept here: MarketDocumentEvent - lets discuss
+                // MarketDocumentEventItem will have the list of values to fix on the import
+
                 await entityBuilder.CreateAsync(item, ct);
             }
 
             item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Done;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Error;
+            item.Message = ex.Message;
         }
 
         await itemRepository.UpdateAsync(item, ct);

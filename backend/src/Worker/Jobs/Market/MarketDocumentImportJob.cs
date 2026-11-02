@@ -25,6 +25,8 @@ public class MarketDocumentImportJob(
 
             var succeeded = result.Errors.Count == 0;
 
+            // TODO: improve this logging
+            
             await processRunTracker.CompleteAsync(run.Id, succeeded, result.Errors, cancellationToken);
 
             if (!succeeded)
