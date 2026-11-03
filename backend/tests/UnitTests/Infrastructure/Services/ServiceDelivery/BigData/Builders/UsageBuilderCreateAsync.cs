@@ -341,4 +341,118 @@ public class UsageBuilderCreateAsync
         createdUsages[1].ServicePointId.ShouldBe(21);
         createdUsages[1].MeterId.ShouldBe(31);
     }
+
+    [Fact]
+    public async Task ReturnsAllThreeErrorsWhenCommodityUsageTypeAndOriginalUsageAreAllInvalid()
+    {
+        const string xml = """
+            <Transaction>
+              <TransactionSet>867</TransactionSet>
+              <TransactionSubSet>03</TransactionSubSet>
+              <Commodity>E</Commodity>
+              <Usage>
+                <PurposeCode>00</PurposeCode>
+                <UtilityAccountNumber>10443720004239415</UtilityAccountNumber>
+                <OriginalTransactionNumber>ORIG-REF</OriginalTransactionNumber>
+              </Usage>
+            </Transaction>
+            """;
+
+        _valueMapper.GetCommodityId(Arg.Any<string>())
+            .Returns(Result.Invalid(new ValidationError(nameof(Commodity), "Unmapped commodity code 'E'.")));
+        _valueMapper.GetUsageTypeId(Arg.Any<string>())
+            .Returns(Result.Invalid(new ValidationError(nameof(UsageType), "Unmapped usage purpose code '00'.")));
+
+        _usageReadRepository
+            .FirstOrDefaultAsync(Arg.Any<UsageByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((Usage?)null);
+
+        var result = await _builder.CreateAsync(CreateItem(xml), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(3);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(Commodity));
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(UsageType));
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "originalTransactionNumber");
+
+        await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReturnsOneErrorPerMeterWithUnresolvableService_AcrossAllMeters()
+    {
+        _serviceReadRepository
+            .ListAsync(Arg.Any<ServiceByServicePointAndPeriodSpec>(), Arg.Any<CancellationToken>())
+            .Returns([], []);
+
+        var result = await _builder.CreateAsync(CreateItem(TwoMetersXml), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(2);
+
+        await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReturnsOneErrorPerUnresolvableUnitOfMeasure_AcrossAllReads()
+    {
+        var serviceA = CreateService(80, 20, "10443720004239415", new DateOnly(2026, 1, 1), null, new Meter { Id = 30, Identifier = "MTR-A" });
+        var serviceB = CreateService(81, 21, "10443720004239415", new DateOnly(2026, 2, 1), null, new Meter { Id = 31, Identifier = "MTR-B" });
+
+        _serviceReadRepository
+            .ListAsync(Arg.Any<ServiceByServicePointAndPeriodSpec>(), Arg.Any<CancellationToken>())
+            .Returns([serviceA], [serviceB]);
+
+        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>())
+            .Returns(Result.Invalid(new ValidationError(nameof(UnitOfMeasure), "Unmapped unit of measure code 'KH'.")));
+
+        var result = await _builder.CreateAsync(CreateItem(TwoMetersXml), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(2);
+
+        await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReturnsInvalidWhenServicePeriodDateCannotBeParsed()
+    {
+        const string xml = """
+            <Transaction>
+              <TransactionSet>867</TransactionSet>
+              <TransactionSubSet>03</TransactionSubSet>
+              <Commodity>E</Commodity>
+              <Usage>
+                <PurposeCode>00</PurposeCode>
+                <UtilityAccountNumber>10443720004239415</UtilityAccountNumber>
+                <UsageMeterList>
+                  <UsageMeter>
+                    <UsageType>DET</UsageType>
+                    <ServicePeriodBeginDate>NOT-A-DATE</ServicePeriodBeginDate>
+                    <ServicePeriodEndDate>20260131</ServicePeriodEndDate>
+                    <MeterIdentifier>MTR-A</MeterIdentifier>
+                    <UsageQuantityList>
+                      <UsageQuantity>
+                        <UsageReadList>
+                          <UsageRead>
+                            <ReadConsumption>100</ReadConsumption>
+                            <ReadUOM>KH</ReadUOM>
+                          </UsageRead>
+                        </UsageReadList>
+                      </UsageQuantity>
+                    </UsageQuantityList>
+                  </UsageMeter>
+                </UsageMeterList>
+              </Usage>
+            </Transaction>
+            """;
+
+        var result = await _builder.CreateAsync(CreateItem(xml), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(UsageMeterXml.ServicePeriodBeginDate));
+
+        await _serviceReadRepository.DidNotReceive().ListAsync(Arg.Any<ServiceByServicePointAndPeriodSpec>(), Arg.Any<CancellationToken>());
+        await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
+    }
 }

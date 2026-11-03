@@ -100,6 +100,35 @@ public class ConfirmationBuilderCreateAsync
         </Transaction>
         """;
 
+    private const string XmlWithoutServiceStartDate = """
+        <Transaction>
+          <TransactionSet>814</TransactionSet>
+          <TransactionSubSet>05</TransactionSubSet>
+          <AccountMaint>
+            <ProcessTrackingNumber>181451702318211122510245294</ProcessTrackingNumber>
+            <ServiceList>
+              <Service>
+                <ProductID>EL</ProductID>
+                <UtilityAccountNumber>1008901017189885037100</UtilityAccountNumber>
+              </Service>
+            </ServiceList>
+          </AccountMaint>
+        </Transaction>
+        """;
+
+    [Fact]
+    public async Task ReturnsInvalidWhenRawIsNotValidXml()
+    {
+        var item = CreateItem();
+        item.Raw = "<Transaction><AccountMaint>";
+
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+
+        await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
+    }
+
     private static MarketDocumentItem CreateItem() => new()
     {
         Id = 42,
@@ -108,6 +137,24 @@ public class ConfirmationBuilderCreateAsync
         ReferenceNumber = "164535844520251112112933189069",
         Raw = Xml,
     };
+
+    [Fact]
+    public async Task ReturnsBothErrorsWhenServiceStartCannotBeResolvedAndServiceStartDateIsMissing()
+    {
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        var item = CreateItem();
+        item.Raw = XmlWithoutServiceStartDate;
+
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(2);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(ServiceStart));
+        result.ValidationErrors.ShouldContain(e => e.ErrorMessage == "Service Start Date is required.");
+    }
 
     [Fact]
     public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()

@@ -34,36 +34,35 @@ public class Usage_867_03_ImportBuilder(
         var usageTransaction = transaction.Usage;
 
         var commodityIdResult = valueMapper.GetCommodityId(transaction.Commodity);
-        if (!commodityIdResult.IsSuccess)
+        var usageTypeIdResult = valueMapper.GetUsageTypeId(usageTransaction.PurposeCode ?? string.Empty);
+        var originalUsageIdResult = await GetOriginalUsageIdAsync(usageTransaction.OriginalTransactionNumber, ct);
+
+        if (!commodityIdResult.IsSuccess || !usageTypeIdResult.IsSuccess || !originalUsageIdResult.IsSuccess)
         {
-            return AsResult(commodityIdResult);
+            return Result<IReadOnlyList<long>>.Invalid(
+                commodityIdResult.ValidationErrors
+                    .Concat(usageTypeIdResult.ValidationErrors)
+                    .Concat(originalUsageIdResult.ValidationErrors)
+                    .ToList());
         }
 
         var commodityId = commodityIdResult.Value;
-
-        var usageTypeIdResult = valueMapper.GetUsageTypeId(usageTransaction.PurposeCode ?? string.Empty);
-        if (!usageTypeIdResult.IsSuccess)
-        {
-            return AsResult(usageTypeIdResult);
-        }
-
         var usageTypeId = usageTypeIdResult.Value;
+        var originalUsageId = originalUsageIdResult.Value;
         var isFinal = usageTransaction.FinalIndicator == "F";
 
-        var originalUsageIdResult = await GetOriginalUsageIdAsync(usageTransaction.OriginalTransactionNumber, ct);
-        if (!originalUsageIdResult.IsSuccess)
-        {
-            return AsResult(originalUsageIdResult);
-        }
-
-        var originalUsageId = originalUsageIdResult.Value;
-
         var pendingUsages = new List<Usage>();
+        var errors = new List<ValidationError>();
 
         foreach (var usageMeter in usageTransaction.UsageMeters.Where(x => x.UsageType == DetailUsageType))
         {
-            var periodStartDate = DateOnly.ParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture);
-            var periodEndDate = DateOnly.ParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture);
+            if (!DateOnly.TryParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var periodStartDate) ||
+                !DateOnly.TryParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var periodEndDate))
+            {
+                errors.Add(new ValidationError(
+                    nameof(usageMeter.ServicePeriodBeginDate), $"Service Period is invalid for meter '{usageMeter.MeterIdentifier}'."));
+                continue;
+            }
 
             var serviceResult = await GetServiceAsync(
                 usageTransaction.UtilityAccountNumber,
@@ -75,7 +74,8 @@ public class Usage_867_03_ImportBuilder(
 
             if (!serviceResult.IsSuccess)
             {
-                return AsResult(serviceResult);
+                errors.AddRange(serviceResult.ValidationErrors);
+                continue;
             }
 
             var service = serviceResult.Value;
@@ -88,7 +88,8 @@ public class Usage_867_03_ImportBuilder(
                     var unitOfMeasureIdResult = valueMapper.GetUnitOfMeasureId(read.ReadUOM);
                     if (!unitOfMeasureIdResult.IsSuccess)
                     {
-                        return AsResult(unitOfMeasureIdResult);
+                        errors.AddRange(unitOfMeasureIdResult.ValidationErrors);
+                        continue;
                     }
 
                     pendingUsages.Add(new Usage
@@ -111,6 +112,11 @@ public class Usage_867_03_ImportBuilder(
                     });
                 }
             }
+        }
+
+        if (errors.Count > 0)
+        {
+            return Result<IReadOnlyList<long>>.Invalid(errors);
         }
 
         var createdIds = new List<long>();

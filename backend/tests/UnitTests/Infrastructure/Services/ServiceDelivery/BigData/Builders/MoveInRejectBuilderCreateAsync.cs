@@ -56,6 +56,16 @@ public class MoveInRejectBuilderCreateAsync
         </Transaction>
         """;
 
+    private const string XmlWithoutService = """
+        <Transaction>
+          <TransactionSet>814</TransactionSet>
+          <TransactionSubSet>17</TransactionSubSet>
+          <AccountMaint>
+            <ProcessTrackingNumber>181362701952511072501494563</ProcessTrackingNumber>
+          </AccountMaint>
+        </Transaction>
+        """;
+
     private static MarketDocumentItem CreateItem() => new()
     {
         Id = 42,
@@ -64,6 +74,24 @@ public class MoveInRejectBuilderCreateAsync
         ReferenceNumber = "163778614020251107135933189069",
         Raw = Xml,
     };
+
+    [Fact]
+    public async Task ReturnsBothErrorsWhenServiceStartCannotBeResolvedAndThereIsNoService()
+    {
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        var item = CreateItem();
+        item.Raw = XmlWithoutService;
+
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(2);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "trackingNumber");
+        result.ValidationErrors.ShouldContain(e => e.ErrorMessage == $"MarketDocumentItem '{item.Id}' has no Service.");
+    }
 
     [Fact]
     public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()

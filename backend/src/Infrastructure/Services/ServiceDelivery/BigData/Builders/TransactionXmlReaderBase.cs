@@ -1,4 +1,5 @@
-﻿using System.Xml.Linq;
+﻿using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 using Core.MarketExchange;
 
@@ -12,7 +13,15 @@ public abstract class TransactionXmlReaderBase<TXml>
 
     protected Result<TXml> DeserializeTransaction(MarketDocumentItem item)
     {
-        var transactionElement = XElement.Parse(item.Raw);
+        XElement transactionElement;
+        try
+        {
+            transactionElement = XElement.Parse(item.Raw);
+        }
+        catch (XmlException ex)
+        {
+            return Result.Invalid(new ValidationError(nameof(item.Raw), $"MarketDocumentItem '{item.Id}' Raw content is not valid XML: {ex.Message}"));
+        }
 
         if (transactionElement.Element(RequiredElementName) is null)
         {
@@ -25,7 +34,15 @@ public abstract class TransactionXmlReaderBase<TXml>
 
         using var reader = transactionElement.CreateReader();
 
-        return Result.Success((TXml)serializer.Deserialize(reader)!);
+        try
+        {
+            return Result.Success((TXml)serializer.Deserialize(reader)!);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Result.Invalid(new ValidationError(
+                RequiredElementName, $"MarketDocumentItem '{item.Id}' could not be deserialized: {ex.Message}"));
+        }
     }
 
     protected static Result<IReadOnlyList<long>> AsResult<T>(Result<T> result) =>

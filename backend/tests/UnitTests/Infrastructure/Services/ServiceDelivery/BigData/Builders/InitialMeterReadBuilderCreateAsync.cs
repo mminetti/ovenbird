@@ -59,6 +59,33 @@ public class InitialMeterReadBuilderCreateAsync
         </Transaction>
         """;
 
+    private const string XmlWithBadSwitchDate = """
+        <Transaction>
+          <TransactionSet>867</TransactionSet>
+          <TransactionSubSet>04</TransactionSubSet>
+          <Usage>
+            <TranNr814>814-REF</TranNr814>
+            <UsageMeterList>
+              <UsageMeter>
+                <UsageType>INT</UsageType>
+                <MeterIdentifier>I92452587</MeterIdentifier>
+                <SwitchDate>NOT-A-DATE</SwitchDate>
+                <UsageQuantityList>
+                  <UsageQuantity>
+                    <UsageReadList>
+                      <UsageRead>
+                        <ReadUOM>KH</ReadUOM>
+                        <StartMeterRead>62178</StartMeterRead>
+                      </UsageRead>
+                    </UsageReadList>
+                  </UsageQuantity>
+                </UsageQuantityList>
+              </UsageMeter>
+            </UsageMeterList>
+          </Usage>
+        </Transaction>
+        """;
+
     private static MarketDocumentItem CreateItem() => new()
     {
         Id = 42,
@@ -67,6 +94,33 @@ public class InitialMeterReadBuilderCreateAsync
         ReferenceNumber = "8670420251112000471536499",
         Raw = Xml,
     };
+
+    [Fact]
+    public async Task ReturnsInvalidWhenSwitchDateCannotBeParsed()
+    {
+        var serviceStart = new ServiceStart { Id = 99 };
+        var existingServiceStartItem = new ServiceStartItem
+        {
+            Id = 1,
+            ServiceStartId = serviceStart.Id,
+            Identifier = "814-REF",
+            ServiceStart = serviceStart,
+        };
+
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(existingServiceStartItem);
+
+        var item = CreateItem();
+        item.Raw = XmlWithBadSwitchDate;
+
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(UsageMeterXml.SwitchDate));
+
+        await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
+    }
 
     [Fact]
     public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()

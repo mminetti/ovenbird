@@ -157,6 +157,42 @@ public class HistoricalUsageEntityBuilderCreateAsync
     }
 
     [Fact]
+    public async Task ReturnsBothErrorsWhenCommodityIsInvalidAndServiceCannotBeResolved()
+    {
+        _valueMapper.GetCommodityId(Arg.Any<string>())
+            .Returns(Result.Invalid(new ValidationError(nameof(Commodity), "Unmapped commodity code 'E'.")));
+
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns((ServiceStartItem?)null);
+
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(2);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(Commodity));
+        result.ValidationErrors.ShouldContain(e => e.Identifier == "identifier");
+    }
+
+    [Fact]
+    public async Task ReturnsOneErrorPerUnresolvableUnitOfMeasure_AcrossAllReads()
+    {
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(CreateExistingServiceStartItem());
+
+        _valueMapper.GetUnitOfMeasureId(Arg.Any<string>())
+            .Returns(Result.Invalid(new ValidationError(nameof(UnitOfMeasure), "Unmapped unit of measure code 'KH'.")));
+
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(2);
+
+        await _historicalUsageRepository.DidNotReceive().AddAsync(Arg.Any<HistoricalUsage>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task NeverCallsPersistenceWhenServiceCannotBeResolved()
     {
         _serviceStartItemRepository
@@ -188,5 +224,52 @@ public class HistoricalUsageEntityBuilderCreateAsync
         await _historicalUsageRepository.Received(2).AddAsync(
             Arg.Is<HistoricalUsage>(x => x.MeterId == null),
             Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReturnsInvalidWhenServicePeriodDateCannotBeParsed()
+    {
+        const string xml = """
+            <Transaction>
+              <TransactionSet>867</TransactionSet>
+              <TransactionSubSet>02</TransactionSubSet>
+              <Commodity>E</Commodity>
+              <Usage>
+                <UtilityAccountNumber>ACCT-1</UtilityAccountNumber>
+                <TranNr814>814-REF</TranNr814>
+                <UsageMeterList>
+                  <UsageMeter>
+                    <MeterIdentifier>MTR-1</MeterIdentifier>
+                    <ServicePeriodBeginDate>NOT-A-DATE</ServicePeriodBeginDate>
+                    <ServicePeriodEndDate>20260630</ServicePeriodEndDate>
+                    <UsageQuantityList>
+                      <UsageQuantity>
+                        <UsageReadList>
+                          <UsageRead>
+                            <ReadConsumption>100</ReadConsumption>
+                            <ReadUOM>KH</ReadUOM>
+                          </UsageRead>
+                        </UsageReadList>
+                      </UsageQuantity>
+                    </UsageQuantityList>
+                  </UsageMeter>
+                </UsageMeterList>
+              </Usage>
+            </Transaction>
+            """;
+
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(CreateExistingServiceStartItem());
+
+        var item = CreateItem();
+        item.Raw = xml;
+
+        var result = await _builder.CreateAsync(item, CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.ShouldContain(e => e.Identifier == nameof(UsageMeterXml.ServicePeriodBeginDate));
+
+        await _historicalUsageRepository.DidNotReceive().AddAsync(Arg.Any<HistoricalUsage>(), Arg.Any<CancellationToken>());
     }
 }

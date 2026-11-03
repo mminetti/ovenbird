@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -38,7 +38,11 @@ public class InitialMeterRead_867_04_ImportBuilder(
 
         foreach (var usageMeter in usage.UsageMeters.Where(x => x.UsageType == InitialUsageType))
         {
-            var serviceDate = DateOnly.ParseExact(usageMeter.SwitchDate ?? string.Empty, DateFormat, CultureInfo.InvariantCulture);
+            if (!DateOnly.TryParseExact(usageMeter.SwitchDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var serviceDate))
+            {
+                return Result<IReadOnlyList<long>>.Invalid(new ValidationError(
+                    nameof(usageMeter.SwitchDate), $"Switch Date '{usageMeter.SwitchDate}' is invalid."));
+            }
 
             foreach (var quantity in usageMeter.UsageQuantities)
             {
@@ -56,7 +60,6 @@ public class InitialMeterRead_867_04_ImportBuilder(
                 }
             }
 
-            // TODO: move this to an event handler
             serviceStart.ServiceDate = serviceDate;
             serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Completed;
         }

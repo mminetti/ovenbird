@@ -21,8 +21,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
 
     public async Task<Result<IReadOnlyList<long>>> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
-        // TODO: refactor this
-
         var transactionResult = DeserializeTransaction(item);
         if (!transactionResult.IsSuccess)
         {
@@ -33,12 +31,16 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         var accountMaint = transaction.AccountMaint;
 
         var serviceStartResult = await GetServiceStartAsync(accountMaint.ProcessTrackingNumber, ct);
-        if (!serviceStartResult.IsSuccess)
+        var accountValidationResult = ValidateAccountMaint(accountMaint);
+
+        if (!serviceStartResult.IsSuccess || !accountValidationResult.IsSuccess)
         {
-            return AsResult(serviceStartResult);
+            return Result<IReadOnlyList<long>>.Invalid(
+                serviceStartResult.ValidationErrors.Concat(accountValidationResult.ValidationErrors).ToList());
         }
 
         var serviceStart = serviceStartResult.Value;
+        var serviceDate = accountValidationResult.Value;
 
         var serviceStartItem = new ServiceStartItem
         {
@@ -46,26 +48,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
             Identifier = item.ReferenceNumber,
             ServiceActionId = Constants.ServiceActions.Confirm,
         };
-
-        var service = accountMaint.Services.FirstOrDefault();
-        if (service is null)
-        {
-            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(nameof(accountMaint.Services), $"Service is required."));
-        }
-
-        var customerAgreementDate = service.ServiceDates.FirstOrDefault()?.CustomerAgreementDate;
-
-        if (customerAgreementDate is null)
-        {
-            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(nameof(customerAgreementDate),
-                $"Service Start Date is required."));
-        }
-
-        if (!DateOnly.TryParseExact(customerAgreementDate, DateFormat, out var serviceDate))
-        {
-            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(nameof(customerAgreementDate),
-                $"Service Start Date is invalid."));
-        }
 
         var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
 
@@ -100,5 +82,24 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         return serviceStartItem is not null
             ? Result.Success(serviceStartItem.ServiceStart)
             : Result.Invalid(new ValidationError(nameof(ServiceStart), $"Service Start Item with identifier '{identifier}' was not found."));
+    }
+
+    private static Result<DateOnly> ValidateAccountMaint(AccountMaintXml accountMaint)
+    {
+        var service = accountMaint.Services.FirstOrDefault();
+        if (service is null)
+        {
+            return Result.Invalid(new ValidationError(nameof(accountMaint.Services), "Service is required."));
+        }
+
+        var customerAgreementDate = service.ServiceDates.FirstOrDefault()?.CustomerAgreementDate;
+        if (customerAgreementDate is null)
+        {
+            return Result.Invalid(new ValidationError(nameof(customerAgreementDate), "Service Start Date is required."));
+        }
+
+        return DateOnly.TryParseExact(customerAgreementDate, DateFormat, out var serviceDate)
+            ? Result.Success(serviceDate)
+            : Result.Invalid(new ValidationError(nameof(customerAgreementDate), "Service Start Date is invalid."));
     }
 }

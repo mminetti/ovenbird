@@ -26,20 +26,16 @@ public abstract class ServiceStartRejectImportBuilderBase(
         var accountMaint = transaction.AccountMaint;
 
         var serviceStartResult = await GetServiceStartAsync(accountMaint.ProcessTrackingNumber, ct);
-        if (!serviceStartResult.IsSuccess)
+        var serviceResult = ValidateAccountMaint(accountMaint, item.Id);
+
+        if (!serviceStartResult.IsSuccess || !serviceResult.IsSuccess)
         {
-            return AsResult(serviceStartResult);
+            return Result<IReadOnlyList<long>>.Invalid(
+                serviceStartResult.ValidationErrors.Concat(serviceResult.ValidationErrors).ToList());
         }
 
         var serviceStart = serviceStartResult.Value;
-
-        var service = accountMaint.Services.FirstOrDefault();
-        if (service is null)
-        {
-            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(
-                nameof(accountMaint.Services),
-                $"MarketDocumentItem '{item.Id}' has no Service."));
-        }
+        var service = serviceResult.Value;
 
         var rejectReason = service.ServiceRejectReasons.FirstOrDefault();
 
@@ -72,5 +68,14 @@ public abstract class ServiceStartRejectImportBuilderBase(
         return serviceStartItem is not null
             ? Result.Success(serviceStartItem.ServiceStart)
             : Result.Invalid(new ValidationError(nameof(trackingNumber), $"ServiceStartItem with tracking number '{trackingNumber}' was not found."));
+    }
+
+    private static Result<ServiceXml> ValidateAccountMaint(AccountMaintXml accountMaint, long itemId)
+    {
+        var service = accountMaint.Services.FirstOrDefault();
+
+        return service is not null
+            ? Result.Success(service)
+            : Result.Invalid(new ValidationError(nameof(accountMaint.Services), $"MarketDocumentItem '{itemId}' has no Service."));
     }
 }
