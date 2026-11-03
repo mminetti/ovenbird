@@ -40,21 +40,14 @@ public class ProcessRunTracker(
         await processRunRepository.UpdateAsync(run, ct);
     }
 
-    private ProcessRunLogItem ToLogItem(long processRunId, ValidationError error)
+    private ProcessRunLogItem ToLogItem(long processRunId, ValidationError error) => new()
     {
-        _ = EntityReference.TryParse(error.Identifier, out var entityType, out var entityId);
-
-        return new ProcessRunLogItem
-        {
-            ProcessRunId = processRunId,
-            LevelId = MapSeverity(error.Severity),
-            EntityType = entityType,
-            EntityId = entityId,
-            Field = error.ErrorCode,
-            Message = error.ErrorMessage,
-            CreatedAtUtc = timeProvider.GetUtcNow(),
-        };
-    }
+        ProcessRunId = processRunId,
+        LevelId = MapSeverity(error.Severity),
+        Field = error.Identifier,
+        Message = error.ErrorMessage,
+        CreatedAtUtc = timeProvider.GetUtcNow(),
+    };
 
     private static int MapSeverity(ValidationSeverity severity) => severity switch
     {

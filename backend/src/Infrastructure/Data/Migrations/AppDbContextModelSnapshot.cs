@@ -575,15 +575,8 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("EntityId")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("EntityType")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
                     b.Property<string>("Field")
+                        .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
@@ -602,8 +595,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("LevelId");
 
                     b.HasIndex("ProcessRunId");
-
-                    b.HasIndex("EntityType", "EntityId");
 
                     b.ToTable("ProcessRunLogItem");
                 });

@@ -43,8 +43,7 @@ public class ProcessRunTrackerTests
 
         var errors = new[]
         {
-            new ValidationError(
-                EntityReference.Format("MarketDocumentItem", 500), "Unmapped customer class 'Residential'.", "CustomerClass", ValidationSeverity.Error),
+            new ValidationError("CustomerClass", "Unmapped customer class 'Residential'.", string.Empty, ValidationSeverity.Error),
             new ValidationError(string.Empty, "Skipped a duplicate document.", string.Empty, ValidationSeverity.Warning),
         };
 
@@ -52,10 +51,10 @@ public class ProcessRunTrackerTests
 
         await _logItemRepository.Received(1).AddRangeAsync(
             Arg.Is<IEnumerable<ProcessRunLogItem>>(items => items.Count() == 2
-                && items.Any(i => i.EntityType == "MarketDocumentItem" && i.EntityId == "500"
-                    && i.Field == "CustomerClass" && i.LevelId == Constants.ProcessRunLogLevels.Error)
-                && items.Any(i => i.EntityType == null && i.EntityId == null
-                    && i.Field == string.Empty && i.LevelId == Constants.ProcessRunLogLevels.Warning)),
+                && items.Any(i => i.Field == "CustomerClass" && i.Message == "Unmapped customer class 'Residential'."
+                    && i.LevelId == Constants.ProcessRunLogLevels.Error)
+                && items.Any(i => i.Field == string.Empty && i.Message == "Skipped a duplicate document."
+                    && i.LevelId == Constants.ProcessRunLogLevels.Warning)),
             Arg.Any<CancellationToken>());
 
         await _processRunRepository.Received(1).UpdateAsync(

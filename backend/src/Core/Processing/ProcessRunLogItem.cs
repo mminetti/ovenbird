@@ -4,9 +4,7 @@ public class ProcessRunLogItem : EntityBase<long>, IAggregateRoot
 {
     public long ProcessRunId { get; set; }
     public int LevelId { get; set; }
-    public string? EntityType { get; set; }
-    public string? EntityId { get; set; }
-    public string? Field { get; set; }
+    public string Field { get; set; } = string.Empty;
     public string Message { get; set; } = string.Empty;
     public DateTimeOffset CreatedAtUtc { get; set; }
 

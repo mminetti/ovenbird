@@ -6,19 +6,11 @@ public class ProcessRunLogItemConfiguration : IEntityTypeConfiguration<ProcessRu
 {
     public void Configure(EntityTypeBuilder<ProcessRunLogItem> builder)
     {
-        builder.Property(x => x.EntityType)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.EntityId)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
         builder.Property(x => x.Field)
             .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
 
         builder.Property(x => x.Message)
             .HasColumnType("nvarchar(max)");
-
-        builder.HasIndex(x => new { x.EntityType, x.EntityId });
 
         // NoAction: protect the referenced ProcessRun row from accidental/cascading deletion;
         // log items are removed explicitly alongside their run, never implicitly.
