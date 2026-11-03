@@ -2,13 +2,14 @@
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Specifications;
+using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public class InitialMeterRead_867_04_ImportBuilder(
-    IRepository<ServiceStartItem> serviceStartItemRepository)
+    IRepository<ServiceStartItem> serviceStartItemRepository,
+    IServiceStartService serviceStartService)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_867_04";
@@ -27,7 +28,7 @@ public class InitialMeterRead_867_04_ImportBuilder(
 
         var usage = transactionResult.Value.Usage;
 
-        var serviceStartResult = await GetServiceStartAsync(usage.TranNr814, ct);
+        var serviceStartResult = await serviceStartService.GetByIdentifierAsync(usage.TranNr814, ct);
         if (!serviceStartResult.IsSuccess)
         {
             return AsResult(serviceStartResult);
@@ -65,20 +66,5 @@ public class InitialMeterRead_867_04_ImportBuilder(
         }
 
         return Result.Success<IReadOnlyList<long>>(createdIds);
-    }
-
-    private async Task<Result<ServiceStart>> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(sourceReferenceNumber))
-        {
-            return Result.Invalid(new ValidationError(nameof(sourceReferenceNumber), "Transaction has no TranNr814."));
-        }
-
-        var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
-            new ServiceStartItemByIdentifierSpec(sourceReferenceNumber), ct);
-
-        return serviceStartItem is not null
-            ? Result.Success(serviceStartItem.ServiceStart)
-            : Result.Invalid(new ValidationError(nameof(sourceReferenceNumber), $"ServiceStartItem with tracking number '{sourceReferenceNumber}' was not found."));
     }
 }

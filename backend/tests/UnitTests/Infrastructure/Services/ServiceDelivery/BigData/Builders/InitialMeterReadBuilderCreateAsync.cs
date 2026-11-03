@@ -2,20 +2,22 @@ using Ardalis.Result;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
+using UseCases.Interfaces.ServiceDelivery;
 
 namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public class InitialMeterReadBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
+    private readonly IServiceStartService _serviceStartService = Substitute.For<IServiceStartService>();
     private readonly InitialMeterRead_867_04_ImportBuilder _builder;
 
     public InitialMeterReadBuilderCreateAsync()
     {
         _builder = new InitialMeterRead_867_04_ImportBuilder(
-            _serviceStartItemRepository);
+            _serviceStartItemRepository,
+            _serviceStartService);
     }
 
     private const string Xml = """
@@ -95,21 +97,19 @@ public class InitialMeterReadBuilderCreateAsync
         Raw = Xml,
     };
 
+    private void SetUpServiceStartNotFound() =>
+        _serviceStartService
+            .GetByIdentifierAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Invalid(new ValidationError(nameof(ServiceStart), "ServiceStart with identifier was not found.")));
+
     [Fact]
     public async Task ReturnsInvalidWhenSwitchDateCannotBeParsed()
     {
         var serviceStart = new ServiceStart { Id = 99 };
-        var existingServiceStartItem = new ServiceStartItem
-        {
-            Id = 1,
-            ServiceStartId = serviceStart.Id,
-            Identifier = "814-REF",
-            ServiceStart = serviceStart,
-        };
 
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(existingServiceStartItem);
+        _serviceStartService
+            .GetByIdentifierAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(serviceStart));
 
         var item = CreateItem();
         item.Raw = XmlWithBadSwitchDate;
@@ -125,9 +125,7 @@ public class InitialMeterReadBuilderCreateAsync
     [Fact]
     public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()
     {
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServiceStartItem?)null);
+        SetUpServiceStartNotFound();
 
         var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
@@ -137,9 +135,7 @@ public class InitialMeterReadBuilderCreateAsync
     [Fact]
     public async Task NeverCallsPersistenceWhenServiceStartCannotBeResolved()
     {
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServiceStartItem?)null);
+        SetUpServiceStartNotFound();
 
         await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
@@ -150,17 +146,10 @@ public class InitialMeterReadBuilderCreateAsync
     public async Task CompletesServiceStartWhenResolved()
     {
         var serviceStart = new ServiceStart { Id = 99 };
-        var existingServiceStartItem = new ServiceStartItem
-        {
-            Id = 1,
-            ServiceStartId = serviceStart.Id,
-            Identifier = "814-REF",
-            ServiceStart = serviceStart,
-        };
 
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(existingServiceStartItem);
+        _serviceStartService
+            .GetByIdentifierAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(serviceStart));
 
         _serviceStartItemRepository
             .AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>())

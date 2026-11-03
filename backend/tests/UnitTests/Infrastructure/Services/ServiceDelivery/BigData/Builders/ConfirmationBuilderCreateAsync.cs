@@ -2,7 +2,6 @@ using Ardalis.Result;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
-using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
 using UseCases.Interfaces.ServiceDelivery;
 using Core.Common.Constants;
@@ -14,6 +13,7 @@ public class ConfirmationBuilderCreateAsync
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<ServiceStart> _serviceStartRepository = Substitute.For<IRepository<ServiceStart>>();
     private readonly IRepository<ServiceEvent> _serviceEventRepository = Substitute.For<IRepository<ServiceEvent>>();
+    private readonly IServiceStartService _serviceStartService = Substitute.For<IServiceStartService>();
     private readonly IUpdateServicePointService _updateServicePointService = Substitute.For<IUpdateServicePointService>();
     private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
 
@@ -27,6 +27,7 @@ public class ConfirmationBuilderCreateAsync
             _serviceStartItemRepository,
             _serviceStartRepository,
             _serviceEventRepository,
+            _serviceStartService,
             _updateServicePointService);
     }
 
@@ -123,6 +124,11 @@ public class ConfirmationBuilderCreateAsync
         </Transaction>
         """;
 
+    private void SetUpServiceStartNotFound() =>
+        _serviceStartService
+            .GetByIdentifierAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Invalid(new ValidationError(nameof(ServiceStart), "ServiceStart with identifier was not found.")));
+
     [Fact]
     public async Task ReturnsInvalidWhenRawIsNotValidXml()
     {
@@ -148,9 +154,7 @@ public class ConfirmationBuilderCreateAsync
     [Fact]
     public async Task ReturnsBothErrorsWhenServiceStartCannotBeResolvedAndServiceStartDateIsMissing()
     {
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServiceStartItem?)null);
+        SetUpServiceStartNotFound();
 
         var item = CreateItem();
         item.Raw = XmlWithoutServiceStartDate;
@@ -166,9 +170,7 @@ public class ConfirmationBuilderCreateAsync
     [Fact]
     public async Task ReturnsInvalidWhenServiceStartCannotBeResolved()
     {
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServiceStartItem?)null);
+        SetUpServiceStartNotFound();
 
         var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
@@ -178,9 +180,7 @@ public class ConfirmationBuilderCreateAsync
     [Fact]
     public async Task NeverCallsPersistenceWhenServiceStartCannotBeResolved()
     {
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns((ServiceStartItem?)null);
+        SetUpServiceStartNotFound();
 
         await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
@@ -192,17 +192,10 @@ public class ConfirmationBuilderCreateAsync
     public async Task ConfirmsServiceStartAndRaisesScheduledEventWhenResolved()
     {
         var serviceStart = new ServiceStart { Id = 99 };
-        var existingServiceStartItem = new ServiceStartItem
-        {
-            Id = 1,
-            ServiceStartId = serviceStart.Id,
-            Identifier = "181451702318211122510245294",
-            ServiceStart = serviceStart,
-        };
 
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(existingServiceStartItem);
+        _serviceStartService
+            .GetByIdentifierAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(serviceStart));
 
         _serviceStartItemRepository
             .AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>())
@@ -277,17 +270,10 @@ public class ConfirmationBuilderCreateAsync
     public async Task ReturnsInvalidAndNeverPersistsWhenServicePointUpdateFails()
     {
         var serviceStart = new ServiceStart { Id = 99 };
-        var existingServiceStartItem = new ServiceStartItem
-        {
-            Id = 1,
-            ServiceStartId = serviceStart.Id,
-            Identifier = "181451702318211122510245294",
-            ServiceStart = serviceStart,
-        };
 
-        _serviceStartItemRepository
-            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
-            .Returns(existingServiceStartItem);
+        _serviceStartService
+            .GetByIdentifierAsync(Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success(serviceStart));
 
         _updateServicePointService
             .ExecuteAsync(Arg.Any<UpdateServicePointRequest>(), Arg.Any<CancellationToken>())

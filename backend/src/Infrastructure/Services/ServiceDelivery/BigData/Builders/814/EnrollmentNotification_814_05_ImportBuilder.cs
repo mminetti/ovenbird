@@ -1,7 +1,6 @@
 ﻿using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Specifications;
 using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
@@ -11,6 +10,7 @@ public class EnrollmentNotification_814_05_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<ServiceStart> serviceStartRepository,
     IRepository<ServiceEvent> serviceEventRepository,
+    IServiceStartService serviceStartService,
     IUpdateServicePointService updateServicePointService)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
@@ -33,7 +33,7 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         var transaction = transactionResult.Value;
         var accountMaint = transaction.AccountMaint;
 
-        var serviceStartResult = await GetServiceStartAsync(accountMaint.ProcessTrackingNumber, ct);
+        var serviceStartResult = await serviceStartService.GetByIdentifierAsync(accountMaint.ProcessTrackingNumber, ct);
         var accountValidationResult = ValidateAccountMaint(accountMaint);
 
         if (!serviceStartResult.IsSuccess || !accountValidationResult.IsSuccess)
@@ -94,21 +94,6 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         await serviceStartRepository.UpdateAsync(serviceStart, ct);
 
         return Result.Success<IReadOnlyList<long>>([created.Id]);
-    }
-
-    private async Task<Result<ServiceStart>> GetServiceStartAsync(string? identifier, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(identifier))
-        {
-            return Result.Invalid(new ValidationError(nameof(ServiceStart), "Service Start has no Identifier."));
-        }
-
-        var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
-            new ServiceStartItemByIdentifierSpec(identifier), ct);
-
-        return serviceStartItem is not null
-            ? Result.Success(serviceStartItem.ServiceStart)
-            : Result.Invalid(new ValidationError(nameof(ServiceStart), $"Service Start Item with identifier '{identifier}' was not found."));
     }
 
     private static Result<DateOnly> ValidateAccountMaint(AccountMaintXml accountMaint)

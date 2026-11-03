@@ -1,13 +1,14 @@
-using Core.Common.Constants;
+﻿using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
-using Core.ServiceDelivery.Specifications;
+using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public abstract class ServiceStartRejectImportBuilderBase(
-    IRepository<ServiceStartItem> serviceStartItemRepository)
+    IRepository<ServiceStartItem> serviceStartItemRepository,
+    IServiceStartService serviceStartService)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     protected override string RequiredElementName => "AccountMaint";
@@ -25,7 +26,7 @@ public abstract class ServiceStartRejectImportBuilderBase(
         var transaction = transactionResult.Value;
         var accountMaint = transaction.AccountMaint;
 
-        var serviceStartResult = await GetServiceStartAsync(accountMaint.ProcessTrackingNumber, ct);
+        var serviceStartResult = await serviceStartService.GetByIdentifierAsync(accountMaint.ProcessTrackingNumber, ct);
         var serviceResult = ValidateAccountMaint(accountMaint, item.Id);
 
         if (!serviceStartResult.IsSuccess || !serviceResult.IsSuccess)
@@ -49,25 +50,9 @@ public abstract class ServiceStartRejectImportBuilderBase(
 
         var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
 
-        // TODO:
         serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Rejected;
 
         return Result.Success<IReadOnlyList<long>>([created.Id]);
-    }
-
-    private async Task<Result<ServiceStart>> GetServiceStartAsync(string? trackingNumber, CancellationToken ct)
-    {
-        if (string.IsNullOrWhiteSpace(trackingNumber))
-        {
-            return Result.Invalid(new ValidationError(nameof(trackingNumber), "Transaction has no ProcessTrackingNumber."));
-        }
-
-        var serviceStartItem = await serviceStartItemRepository.FirstOrDefaultAsync(
-            new ServiceStartItemByIdentifierSpec(trackingNumber), ct);
-
-        return serviceStartItem is not null
-            ? Result.Success(serviceStartItem.ServiceStart)
-            : Result.Invalid(new ValidationError(nameof(trackingNumber), $"ServiceStartItem with tracking number '{trackingNumber}' was not found."));
     }
 
     private static Result<ServiceXml> ValidateAccountMaint(AccountMaintXml accountMaint, long itemId)

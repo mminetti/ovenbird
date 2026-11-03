@@ -115,6 +115,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<MarketDocumentEntityGeneratorResolver>()
             .AddScoped<IBigDataValueMapper, BigDataValueMapper>()
             .AddScoped<IServiceDeliveryLookupService, ServiceDeliveryLookupService>()
+            .AddScoped<IServiceStartService, ServiceStartService>()
             .AddScoped<IUpdateServicePointService, UpdateServicePointService>()
             .AddScoped<CurrentUserService>()
             .AddScoped<ProcessRunTracker>();
