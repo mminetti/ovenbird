@@ -26,9 +26,9 @@ public class MarketDocumentImportedEventHandler(
 
             var ediImportHandler = ediResolver.Resolve(configuration.GetRequiredValue(HandlerIdentifier));
 
-            var items = await ediImportHandler.ExecuteItemImportAsync(configuration, document, ct);
+            var marketDocumentItems = await ediImportHandler.ExecuteItemImportAsync(configuration, document, ct);
 
-            foreach (var item in items)
+            foreach (var item in marketDocumentItems)
             {
                 item.MarketDocumentId = document.Id;
                 item.MarketDocument = document;

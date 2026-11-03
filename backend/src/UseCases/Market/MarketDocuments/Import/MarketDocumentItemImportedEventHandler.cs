@@ -1,4 +1,4 @@
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -34,7 +34,9 @@ public class MarketDocumentItemImportedEventHandler(
             {
                 var result = await entityBuilder.CreateAsync(item, ct);
 
-                foreach (var marketDocumentEvent in ToMarketDocumentEvents(item.Id, entityBuilder.EventTypeId, result))
+                var marketDocumentEvents = ToMarketDocumentEvents(item.Id, entityBuilder.EventTypeId, result);
+
+                foreach (var marketDocumentEvent in marketDocumentEvents)
                 {
                     await eventRepository.AddAsync(marketDocumentEvent, ct);
                 }
@@ -57,7 +59,10 @@ public class MarketDocumentItemImportedEventHandler(
         await itemRepository.UpdateAsync(item, ct);
     }
 
-    private static IEnumerable<MarketDocumentEvent> ToMarketDocumentEvents(long itemId, int eventTypeId, Result<IReadOnlyList<long>> result)
+    private static IEnumerable<MarketDocumentEvent> ToMarketDocumentEvents(
+        long itemId, 
+        int eventTypeId, 
+        Result<IReadOnlyList<long>> result)
     {
         if (result.IsSuccess)
         {
@@ -77,13 +82,12 @@ public class MarketDocumentItemImportedEventHandler(
                 MarketDocumentItemId = itemId,
                 EventTypeId = eventTypeId,
                 StatusId = Constants.MarketDocumentEventStatuses.Error,
-                Message = string.Join("; ", result.ValidationErrors.Select(e => e.ErrorMessage)),
-                Items = result.ValidationErrors.Select(e => new MarketDocumentEventItem
+                Items = [.. result.ValidationErrors.Select(e => new MarketDocumentEventItem
                 {
                     LevelId = MapSeverity(e.Severity),
                     Field = e.Identifier,
                     Message = e.ErrorMessage,
-                }).ToList(),
+                })],
             },
         ];
     }
