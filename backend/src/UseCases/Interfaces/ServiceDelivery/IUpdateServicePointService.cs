@@ -1,6 +1,6 @@
 namespace UseCases.Interfaces.ServiceDelivery;
 
-public interface IUpdateServicePointAction
+public interface IUpdateServicePointService
 {
     Task<Result> ExecuteAsync(UpdateServicePointRequest request, CancellationToken ct);
 }

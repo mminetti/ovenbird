@@ -2,6 +2,7 @@
 using Core.MarketExchange;
 using Core.ServiceDelivery;
 using Core.ServiceDelivery.Specifications;
+using UseCases.Interfaces.ServiceDelivery;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
@@ -9,12 +10,14 @@ namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 public class EnrollmentNotification_814_05_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IRepository<ServiceStart> serviceStartRepository,
-    IRepository<ServiceEvent> serviceEventRepository)
+    IRepository<ServiceEvent> serviceEventRepository,
+    IUpdateServicePointService updateServicePointService)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = $"BigData_{Set}_{SubSet}";
     private const string Set = "814";
     private const string SubSet = "05";
+    private const string PremiseEntityType = "8R";
     protected override string RequiredElementName => "AccountMaint";
 
     public int EventTypeId => Constants.MarketDocumentEventTypes.ServiceStart;
@@ -40,7 +43,31 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         }
 
         var serviceStart = serviceStartResult.Value;
+        var service = accountMaint.Services.First();
         var serviceDate = accountValidationResult.Value;
+
+        var premise = accountMaint.NameAddresses.FirstOrDefault(x => x.EntityType == PremiseEntityType);
+        var serviceMeter = service.ServiceMeters.FirstOrDefault();
+
+        var updateServicePointRequest = new UpdateServicePointRequest(
+            service.UtilityAccountNumber,
+            transaction.Commodity,
+            serviceMeter?.LDCRateClass,
+            serviceMeter?.LoadProfileCode,
+            serviceMeter?.OwnerMeterCycle,
+            serviceMeter?.AdvanceMeterInfo,
+            serviceMeter?.MeterNumber,
+            premise?.EntityAddress1,
+            premise?.EntityCity,
+            premise?.EntityState,
+            premise?.EntityPostalCode,
+            premise?.EntityCounty);
+
+        var updateServicePointResult = await updateServicePointService.ExecuteAsync(updateServicePointRequest, ct);
+        if (!updateServicePointResult.IsSuccess)
+        {
+            return Result<IReadOnlyList<long>>.Invalid(updateServicePointResult.ValidationErrors.ToList());
+        }
 
         var serviceStartItem = new ServiceStartItem
         {

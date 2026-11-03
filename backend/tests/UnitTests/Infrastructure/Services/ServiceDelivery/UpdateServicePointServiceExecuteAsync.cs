@@ -7,30 +7,33 @@ using UseCases.Interfaces.ServiceDelivery;
 
 namespace UnitTests.Infrastructure.Services.ServiceDelivery;
 
-public class UpdateServicePointActionExecuteAsync
+public class UpdateServicePointServiceExecuteAsync
 {
     private readonly IRepository<ServicePoint> _servicePointRepository = Substitute.For<IRepository<ServicePoint>>();
     private readonly IServiceDeliveryLookupService _lookupService = Substitute.For<IServiceDeliveryLookupService>();
     private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
-    private readonly UpdateServicePointAction _action;
+    private readonly UpdateServicePointService _service;
 
-    public UpdateServicePointActionExecuteAsync()
+    public UpdateServicePointServiceExecuteAsync()
     {
-        _action = new UpdateServicePointAction(_servicePointRepository, _lookupService, _valueMapper);
+        _service = new UpdateServicePointService(_servicePointRepository, _lookupService, _valueMapper);
     }
 
-    private static UpdateServicePointRequest CreateRequest(string? premiseAddressLine1 = "123 MAIN ST") => new(
+    private static UpdateServicePointRequest CreateRequest(
+        string? premiseAddressLine1 = "123 MAIN ST",
+        string commodityCode = "E",
+        string? meterNumber = "I88362388") => new(
         servicePointIdentifier: "1008901017189885037100",
-        commodityCode: "E",
+        commodityCode: commodityCode,
         customerClassCode: "RESIDENTIAL SERVICE",
         loadProfileCode: "RESHIWR_COAST_IDR_WS_NOTOU",
         readCycleCode: "14",
-        advanceMeterInfoCode: "AMSR",
-        meterNumber: "I88362388",
+        amsMeterCode: "AMSR",
+        meterNumber: meterNumber,
         premiseAddressLine1: premiseAddressLine1,
         premiseCity: "AUSTIN",
         premiseState: "TX",
-        premisePostalCode: "787010000",
+        premiseZipCode: "787010000",
         countyName: "TRAVIS");
 
     private void SetUpSuccessfulLookups()
@@ -60,7 +63,7 @@ public class UpdateServicePointActionExecuteAsync
             .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierAndCommoditySpec>(), Arg.Any<CancellationToken>())
             .Returns(servicePoint);
 
-        var result = await _action.ExecuteAsync(CreateRequest(), CancellationToken.None);
+        var result = await _service.ExecuteAsync(CreateRequest(), CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
 
@@ -89,7 +92,7 @@ public class UpdateServicePointActionExecuteAsync
             .FirstOrDefaultAsync(Arg.Any<ServicePointByIdentifierAndCommoditySpec>(), Arg.Any<CancellationToken>())
             .Returns((ServicePoint?)null);
 
-        var result = await _action.ExecuteAsync(CreateRequest(), CancellationToken.None);
+        var result = await _service.ExecuteAsync(CreateRequest(), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
         await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());
@@ -98,22 +101,42 @@ public class UpdateServicePointActionExecuteAsync
     [Fact]
     public async Task ReturnsInvalidWhenPremiseAddressMissing()
     {
-        _valueMapper.GetCommodityId("E").Returns(Result.Success(2));
+        SetUpSuccessfulLookups();
 
-        var result = await _action.ExecuteAsync(CreateRequest(premiseAddressLine1: null), CancellationToken.None);
+        var result = await _service.ExecuteAsync(CreateRequest(premiseAddressLine1: null), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.ShouldHaveSingleItem().ErrorMessage.ShouldBe("Premise Address is required.");
         await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
     public async Task ReturnsInvalidWhenCommodityCodeIsUnmapped()
     {
+        SetUpSuccessfulLookups();
         _valueMapper.GetCommodityId("E").Returns(Result.Invalid(new ValidationError("Commodity", "Unmapped commodity 'E'.")));
 
-        var result = await _action.ExecuteAsync(CreateRequest(), CancellationToken.None);
+        var result = await _service.ExecuteAsync(CreateRequest(), CancellationToken.None);
 
         result.Status.ShouldBe(ResultStatus.Invalid);
+        await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReturnsEveryValidationErrorWhenMultipleChecksFail()
+    {
+        SetUpSuccessfulLookups();
+        _valueMapper.GetCommodityId("E").Returns(Result.Invalid(new ValidationError("Commodity", "Unmapped commodity 'E'.")));
+
+        var result = await _service.ExecuteAsync(
+            CreateRequest(premiseAddressLine1: null, meterNumber: null), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+        result.ValidationErrors.Count().ShouldBe(3);
+        result.ValidationErrors.ShouldContain(e => e.ErrorMessage == "Unmapped commodity 'E'.");
+        result.ValidationErrors.ShouldContain(e => e.ErrorMessage == "Premise Address is required.");
+        result.ValidationErrors.ShouldContain(e => e.ErrorMessage == "Service Meter Number is required.");
+
         await _servicePointRepository.DidNotReceive().UpdateAsync(Arg.Any<ServicePoint>(), Arg.Any<CancellationToken>());
     }
 }

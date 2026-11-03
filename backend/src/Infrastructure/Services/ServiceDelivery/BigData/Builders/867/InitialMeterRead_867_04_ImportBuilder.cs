@@ -38,7 +38,7 @@ public class InitialMeterRead_867_04_ImportBuilder(
 
         foreach (var usageMeter in usage.UsageMeters.Where(x => x.UsageType == InitialUsageType))
         {
-            if (!DateOnly.TryParseExact(usageMeter.SwitchDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var serviceDate))
+            if (!DateOnly.TryParseExact(usageMeter.SwitchDate, DateFormat, out var serviceDate))
             {
                 return Result<IReadOnlyList<long>>.Invalid(new ValidationError(
                     nameof(usageMeter.SwitchDate), $"Switch Date '{usageMeter.SwitchDate}' is invalid."));

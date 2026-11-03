@@ -115,9 +115,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<MarketDocumentEntityGeneratorResolver>()
             .AddScoped<IBigDataValueMapper, BigDataValueMapper>()
             .AddScoped<IServiceDeliveryLookupService, ServiceDeliveryLookupService>()
-            .AddScoped<IUpdateServicePointAction, UpdateServicePointAction>()
-            .AddScoped<IUpdateServicePointFromServiceEventAction, UpdateServicePointFromServiceEventAction>()
-            .AddScoped<ServicePointUpdateBuilderResolver>()
+            .AddScoped<IUpdateServicePointService, UpdateServicePointService>()
             .AddScoped<CurrentUserService>()
             .AddScoped<ProcessRunTracker>();
 
@@ -135,7 +133,6 @@ public static class InfrastructureServiceExtensions
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, InitialMeterRead_867_04_ImportBuilder>(InitialMeterRead_867_04_ImportBuilder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, SwitchReject_814_02_ImportBuilder>(SwitchReject_814_02_ImportBuilder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, EnrollmentNotification_814_05_ImportBuilder>(EnrollmentNotification_814_05_ImportBuilder.Key);
-        services.AddKeyedScoped<IServicePointUpdateBuilder, EnrollmentNotification_814_05_ServicePointUpdateBuilder>(EnrollmentNotification_814_05_ImportBuilder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityBuilder, MoveInReject_814_17_ImportBuilder>(MoveInReject_814_17_ImportBuilder.Key);
         services.AddKeyedScoped<IMarketDocumentEntityGenerator, SwitchRequest_814_01_ExportGenerator>(SwitchRequest_814_01_ExportGenerator.Key);
         services.AddKeyedScoped<IMarketDocumentEntityGenerator, MoveInRequest_814_16_ExportGenerator>(MoveInRequest_814_16_ExportGenerator.Key);

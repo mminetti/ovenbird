@@ -6,12 +6,12 @@ public sealed class UpdateServicePointRequest(
     string? customerClassCode,
     string? loadProfileCode,
     string? readCycleCode,
-    string? advanceMeterInfoCode,
+    string? amsMeterCode,
     string? meterNumber,
     string? premiseAddressLine1,
     string? premiseCity,
     string? premiseState,
-    string? premisePostalCode,
+    string? premiseZipCode,
     string? countyName)
 {
     public string ServicePointIdentifier { get; set; } = servicePointIdentifier;
@@ -19,11 +19,11 @@ public sealed class UpdateServicePointRequest(
     public string? CustomerClassCode { get; set; } = customerClassCode;
     public string? LoadProfileCode { get; set; } = loadProfileCode;
     public string? ReadCycleCode { get; set; } = readCycleCode;
-    public string? AdvanceMeterInfoCode { get; set; } = advanceMeterInfoCode;
+    public string? AmsMeterCode { get; set; } = amsMeterCode;
     public string? MeterNumber { get; set; } = meterNumber;
     public string? PremiseAddressLine1 { get; set; } = premiseAddressLine1;
     public string? PremiseCity { get; set; } = premiseCity;
     public string? PremiseState { get; set; } = premiseState;
-    public string? PremisePostalCode { get; set; } = premisePostalCode;
+    public string? PremiseZipCode { get; set; } = premiseZipCode;
     public string? CountyName { get; set; } = countyName;
 }

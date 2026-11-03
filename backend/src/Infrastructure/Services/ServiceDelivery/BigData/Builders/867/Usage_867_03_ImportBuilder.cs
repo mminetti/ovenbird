@@ -1,4 +1,4 @@
-using System.Globalization;
+﻿using System.Globalization;
 using Core.Common.Constants;
 using Core.MarketExchange;
 using Core.ServiceDelivery;
@@ -56,8 +56,8 @@ public class Usage_867_03_ImportBuilder(
 
         foreach (var usageMeter in usageTransaction.UsageMeters.Where(x => x.UsageType == DetailUsageType))
         {
-            if (!DateOnly.TryParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var periodStartDate) ||
-                !DateOnly.TryParseExact(usageMeter.ServicePeriodEndDate, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var periodEndDate))
+            if (!DateOnly.TryParseExact(usageMeter.ServicePeriodBeginDate, DateFormat, out var periodStartDate) ||
+                !DateOnly.TryParseExact(usageMeter.ServicePeriodEndDate, DateFormat, out var periodEndDate))
             {
                 errors.Add(new ValidationError(
                     nameof(usageMeter.ServicePeriodBeginDate), $"Service Period is invalid for meter '{usageMeter.MeterIdentifier}'."));

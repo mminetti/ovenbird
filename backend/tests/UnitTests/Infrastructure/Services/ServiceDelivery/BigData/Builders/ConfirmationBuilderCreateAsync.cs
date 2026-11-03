@@ -4,6 +4,7 @@ using Core.ServiceDelivery;
 using Core.ServiceDelivery.Events;
 using Core.ServiceDelivery.Specifications;
 using Infrastructure.Services.ServiceDelivery.BigData.Builders;
+using UseCases.Interfaces.ServiceDelivery;
 using Core.Common.Constants;
 
 namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
@@ -13,14 +14,20 @@ public class ConfirmationBuilderCreateAsync
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<ServiceStart> _serviceStartRepository = Substitute.For<IRepository<ServiceStart>>();
     private readonly IRepository<ServiceEvent> _serviceEventRepository = Substitute.For<IRepository<ServiceEvent>>();
+    private readonly IUpdateServicePointService _updateServicePointService = Substitute.For<IUpdateServicePointService>();
     private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
 
     public ConfirmationBuilderCreateAsync()
     {
+        _updateServicePointService
+            .ExecuteAsync(Arg.Any<UpdateServicePointRequest>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Success());
+
         _builder = new EnrollmentNotification_814_05_ImportBuilder(
             _serviceStartItemRepository,
             _serviceStartRepository,
-            _serviceEventRepository);
+            _serviceEventRepository,
+            _updateServicePointService);
     }
 
     private const string Xml = """
@@ -248,5 +255,50 @@ public class ConfirmationBuilderCreateAsync
 
         var domainEvent = createdServiceEvent.ShouldNotBeNull().DomainEvents.OfType<ServiceEventCreatedEvent>().ShouldHaveSingleItem();
         domainEvent.ServiceEventId.ShouldBe(77L);
+
+        await _updateServicePointService.Received(1).ExecuteAsync(
+            Arg.Is<UpdateServicePointRequest>(x =>
+                x.ServicePointIdentifier == "1008901017189885037100" &&
+                x.CommodityCode == "E" &&
+                x.CustomerClassCode == "RESIDENTIAL SERVICE" &&
+                x.LoadProfileCode == "RESHIWR_COAST_IDR_WS_NOTOU" &&
+                x.ReadCycleCode == "14" &&
+                x.AmsMeterCode == "AMSR" &&
+                x.MeterNumber == "I88362388" &&
+                x.PremiseAddressLine1 == "123 MAIN ST" &&
+                x.PremiseCity == "AUSTIN" &&
+                x.PremiseState == "TX" &&
+                x.PremiseZipCode == "787010000" &&
+                x.CountyName == "TRAVIS"),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task ReturnsInvalidAndNeverPersistsWhenServicePointUpdateFails()
+    {
+        var serviceStart = new ServiceStart { Id = 99 };
+        var existingServiceStartItem = new ServiceStartItem
+        {
+            Id = 1,
+            ServiceStartId = serviceStart.Id,
+            Identifier = "181451702318211122510245294",
+            ServiceStart = serviceStart,
+        };
+
+        _serviceStartItemRepository
+            .FirstOrDefaultAsync(Arg.Any<ServiceStartItemByIdentifierSpec>(), Arg.Any<CancellationToken>())
+            .Returns(existingServiceStartItem);
+
+        _updateServicePointService
+            .ExecuteAsync(Arg.Any<UpdateServicePointRequest>(), Arg.Any<CancellationToken>())
+            .Returns(Result.Invalid(new ValidationError("ServicePoint", "ServicePoint '1008901017189885037100' was not found.")));
+
+        var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
+
+        result.Status.ShouldBe(ResultStatus.Invalid);
+
+        await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
+        await _serviceEventRepository.DidNotReceive().AddAsync(Arg.Any<ServiceEvent>(), Arg.Any<CancellationToken>());
+        await _serviceStartRepository.DidNotReceive().UpdateAsync(Arg.Any<ServiceStart>(), Arg.Any<CancellationToken>());
     }
 }
