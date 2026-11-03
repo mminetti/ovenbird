@@ -11,7 +11,6 @@ namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
 public class ConfirmationBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
-    private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly IRepository<ServiceStart> _serviceStartRepository = Substitute.For<IRepository<ServiceStart>>();
     private readonly IRepository<ServiceEvent> _serviceEventRepository = Substitute.For<IRepository<ServiceEvent>>();
     private readonly EnrollmentNotification_814_05_ImportBuilder _builder;
@@ -20,7 +19,6 @@ public class ConfirmationBuilderCreateAsync
     {
         _builder = new EnrollmentNotification_814_05_ImportBuilder(
             _serviceStartItemRepository,
-            _referenceRepository,
             _serviceStartRepository,
             _serviceEventRepository);
     }
@@ -133,7 +131,6 @@ public class ConfirmationBuilderCreateAsync
         await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
         await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
-        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
         await _serviceEventRepository.DidNotReceive().AddAsync(Arg.Any<ServiceEvent>(), Arg.Any<CancellationToken>());
     }
 
@@ -162,10 +159,6 @@ public class ConfirmationBuilderCreateAsync
                 return item;
             });
 
-        _referenceRepository
-            .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
-
         ServiceEvent? createdServiceEvent = null;
 
         _serviceEventRepository
@@ -183,6 +176,7 @@ public class ConfirmationBuilderCreateAsync
         var result = await _builder.CreateAsync(item, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe([2L]);
 
         await _serviceStartItemRepository.Received(1).AddAsync(
             Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),

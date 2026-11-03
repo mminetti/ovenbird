@@ -13,7 +13,6 @@ public class HistoricalUsageEntityBuilderCreateAsync
     private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IRepository<HistoricalUsage> _historicalUsageRepository = Substitute.For<IRepository<HistoricalUsage>>();
-    private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly HistoricalUsage_867_02_ImportBuilder _builder;
 
     public HistoricalUsageEntityBuilderCreateAsync()
@@ -21,8 +20,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
         _builder = new HistoricalUsage_867_02_ImportBuilder(
             _valueMapper,
             _serviceStartItemRepository,
-            _historicalUsageRepository,
-            _referenceRepository);
+            _historicalUsageRepository);
 
         _valueMapper.GetCommodityId(Arg.Any<string>()).Returns(Result.Success(Constants.Commodities.Electricity));
         _valueMapper.GetUnitOfMeasureId(Arg.Any<string>()).Returns(Result.Success(Constants.UnitOfMeasures.KilowattHour));
@@ -124,11 +122,6 @@ public class HistoricalUsageEntityBuilderCreateAsync
                 return usage;
             });
 
-        var createdReferences = new List<MarketDocumentReference>();
-        _referenceRepository
-            .AddAsync(Arg.Do<MarketDocumentReference>(createdReferences.Add), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
-
         var item = CreateItem();
 
         var result = await _builder.CreateAsync(item, CancellationToken.None);
@@ -148,11 +141,7 @@ public class HistoricalUsageEntityBuilderCreateAsync
         createdUsages[1].MeterId.ShouldBe(31);
         createdUsages[1].Consumption.ShouldBe(200);
 
-        createdReferences.Count.ShouldBe(2);
-        createdReferences.ShouldAllBe(r =>
-            r.MarketDocumentItemId == item.Id && r.ReferenceTypeId == Constants.MarketDocumentReferenceTypes.HistoricalUsage);
-        createdReferences[0].ReferenceId.ShouldBe(createdUsages[0].Id);
-        createdReferences[1].ReferenceId.ShouldBe(createdUsages[1].Id);
+        result.Value.ShouldBe([createdUsages[0].Id, createdUsages[1].Id]);
     }
 
     [Fact]
@@ -177,7 +166,6 @@ public class HistoricalUsageEntityBuilderCreateAsync
         await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
         await _historicalUsageRepository.DidNotReceive().AddAsync(Arg.Any<HistoricalUsage>(), Arg.Any<CancellationToken>());
-        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -193,10 +181,6 @@ public class HistoricalUsageEntityBuilderCreateAsync
         _historicalUsageRepository
             .AddAsync(Arg.Any<HistoricalUsage>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<HistoricalUsage>());
-
-        _referenceRepository
-            .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
 
         var result = await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 

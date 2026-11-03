@@ -19,8 +19,8 @@ public class ExportMarketDocumentItemHandlerHandle
     private readonly IReadRepository<Configuration> _configurationReadRepository =
         Substitute.For<IReadRepository<Configuration>>();
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
-    private readonly IRepository<MarketDocumentReference> _referenceRepository =
-        Substitute.For<IRepository<MarketDocumentReference>>();
+    private readonly IRepository<MarketDocumentEvent> _eventRepository =
+        Substitute.For<IRepository<MarketDocumentEvent>>();
     private readonly IMessageBus _bus = Substitute.For<IMessageBus>();
     private readonly Configuration _configuration = new()
     {
@@ -110,13 +110,13 @@ public class ExportMarketDocumentItemHandlerHandle
                 return item;
             });
 
-        var createdReferences = new List<MarketDocumentReference>();
-        _referenceRepository
-            .AddAsync(Arg.Do<MarketDocumentReference>(r => createdReferences.Add(r)), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
+        var createdEvents = new List<MarketDocumentEvent>();
+        _eventRepository
+            .AddAsync(Arg.Do<MarketDocumentEvent>(e => createdEvents.Add(e)), Arg.Any<CancellationToken>())
+            .Returns(callInfo => callInfo.Arg<MarketDocumentEvent>());
 
         var handler = new ExportMarketDocumentItemHandler(
-            _serviceStartItemReadRepository, _configurationReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
+            _serviceStartItemReadRepository, _configurationReadRepository, _itemRepository, _eventRepository, resolver, _bus);
 
         var result = await handler.Handle(new ExportMarketDocumentItemCommand(), CancellationToken.None);
 
@@ -136,13 +136,14 @@ public class ExportMarketDocumentItemHandlerHandle
         createdItems[1].ReferenceNumber.ShouldBe("MOVEIN-1");
         createdItems[1].MarketDocumentId.ShouldBeNull();
 
-        createdReferences.Count.ShouldBe(2);
-        createdReferences[0].MarketDocumentItemId.ShouldBe(100);
-        createdReferences[0].ReferenceTypeId.ShouldBe(Constants.MarketDocumentReferenceTypes.ServiceStart);
-        createdReferences[0].ReferenceId.ShouldBe(switchItem.Id);
+        createdEvents.Count.ShouldBe(2);
+        createdEvents[0].MarketDocumentItemId.ShouldBe(100);
+        createdEvents[0].EventTypeId.ShouldBe(Constants.MarketDocumentEventTypes.ServiceStart);
+        createdEvents[0].StatusId.ShouldBe(Constants.MarketDocumentEventStatuses.Done);
+        createdEvents[0].ReferenceId.ShouldBe(switchItem.Id);
 
-        createdReferences[1].MarketDocumentItemId.ShouldBe(101);
-        createdReferences[1].ReferenceId.ShouldBe(moveInItem.Id);
+        createdEvents[1].MarketDocumentItemId.ShouldBe(101);
+        createdEvents[1].ReferenceId.ShouldBe(moveInItem.Id);
 
         await switchGenerator.Received(1).CreateAsync(switchItem, _configuration, Arg.Any<CancellationToken>());
         await moveInGenerator.Received(1).CreateAsync(moveInItem, _configuration, Arg.Any<CancellationToken>());
@@ -173,7 +174,7 @@ public class ExportMarketDocumentItemHandlerHandle
             .Returns([item]);
 
         var handler = new ExportMarketDocumentItemHandler(
-            _serviceStartItemReadRepository, _configurationReadRepository, _itemRepository, _referenceRepository, resolver, _bus);
+            _serviceStartItemReadRepository, _configurationReadRepository, _itemRepository, _eventRepository, resolver, _bus);
 
         await Should.ThrowAsync<InvalidOperationException>(
             () => handler.Handle(new ExportMarketDocumentItemCommand(), CancellationToken.None));

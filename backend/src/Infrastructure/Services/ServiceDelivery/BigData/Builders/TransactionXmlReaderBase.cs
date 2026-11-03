@@ -28,6 +28,6 @@ public abstract class TransactionXmlReaderBase<TXml>
         return Result.Success((TXml)serializer.Deserialize(reader)!);
     }
 
-    protected static Result AsResult<T>(Result<T> result) =>
-        Result.Invalid(result.ValidationErrors.ToList());
+    protected static Result<IReadOnlyList<long>> AsResult<T>(Result<T> result) =>
+        Result<IReadOnlyList<long>>.Invalid(result.ValidationErrors.ToList());
 }

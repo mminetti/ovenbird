@@ -4,5 +4,7 @@ namespace UseCases.Market.MarketDocuments.Import.Interfaces;
 
 public interface IMarketDocumentEntityBuilder
 {
-    Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct);
+    int EventTypeId { get; }
+
+    Task<Result<IReadOnlyList<long>>> CreateAsync(MarketDocumentItem item, CancellationToken ct);
 }

@@ -10,14 +10,12 @@ namespace UnitTests.Infrastructure.Services.ServiceDelivery.BigData.Builders;
 public class MoveInRejectBuilderCreateAsync
 {
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
-    private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly MoveInReject_814_17_ImportBuilder _builder;
 
     public MoveInRejectBuilderCreateAsync()
     {
         _builder = new MoveInReject_814_17_ImportBuilder(
-            _serviceStartItemRepository,
-            _referenceRepository);
+            _serviceStartItemRepository);
     }
 
     private const string Xml = """
@@ -89,7 +87,6 @@ public class MoveInRejectBuilderCreateAsync
         await _builder.CreateAsync(CreateItem(), CancellationToken.None);
 
         await _serviceStartItemRepository.DidNotReceive().AddAsync(Arg.Any<ServiceStartItem>(), Arg.Any<CancellationToken>());
-        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -117,15 +114,12 @@ public class MoveInRejectBuilderCreateAsync
                 return item;
             });
 
-        _referenceRepository
-            .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
-
         var item = CreateItem();
 
         var result = await _builder.CreateAsync(item, CancellationToken.None);
 
         result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe([2L]);
         await _serviceStartItemRepository.Received(1).AddAsync(
             Arg.Is<ServiceStartItem>(x => x.ServiceStartId == serviceStart.Id && x.Identifier == item.ReferenceNumber),
             Arg.Any<CancellationToken>());

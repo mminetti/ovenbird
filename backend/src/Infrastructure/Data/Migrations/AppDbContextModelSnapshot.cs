@@ -17,7 +17,7 @@ namespace Infrastructure.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -161,6 +161,9 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 
@@ -204,6 +207,206 @@ namespace Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("EventTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("MarketDocumentItemId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("ReferenceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventTypeId");
+
+                    b.HasIndex("MarketDocumentItemId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("MarketDocumentEvent");
+                });
+
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Field")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("LevelId")
+                        .HasColumnType("int");
+
+                    b.Property<long>("MarketDocumentEventId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LevelId");
+
+                    b.HasIndex("MarketDocumentEventId");
+
+                    b.ToTable("MarketDocumentEventItem");
+                });
+
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItemLevel", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MarketDocumentEventItemLevel");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Error"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Warning"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Info"
+                        });
+                });
+
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MarketDocumentEventStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Done"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Error"
+                        });
+                });
+
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MarketDocumentEventType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "HistoricalUsage"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Usage"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Invoice"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "ServiceStart"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "ServiceEnd"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "ServiceRequest"
+                        });
+                });
+
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentItem", b =>
                 {
                     b.Property<long>("Id")
@@ -231,6 +434,9 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<int>("MarketDocumentItemStatusId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Raw")
                         .IsRequired()
@@ -294,93 +500,6 @@ namespace Infrastructure.Data.Migrations
                         {
                             Id = 3,
                             Name = "Error"
-                        });
-                });
-
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentReference", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long>("MarketDocumentItemId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("ReferenceId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("ReferenceTypeId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MarketDocumentItemId");
-
-                    b.HasIndex("ReferenceTypeId");
-
-                    b.ToTable("MarketDocumentReference");
-                });
-
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentReferenceType", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MarketDocumentReferenceType");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "HistoricalUsage"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Usage"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Invoice"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "ServiceStart"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Name = "ServiceEnd"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Name = "ServiceRequest"
                         });
                 });
 
@@ -2946,6 +3065,52 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Status");
                 });
 
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEvent", b =>
+                {
+                    b.HasOne("Core.MarketExchange.MarketDocumentEventType", "EventType")
+                        .WithMany()
+                        .HasForeignKey("EventTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.MarketExchange.MarketDocumentItem", "MarketDocumentItem")
+                        .WithMany()
+                        .HasForeignKey("MarketDocumentItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.MarketExchange.MarketDocumentEventStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("EventType");
+
+                    b.Navigation("MarketDocumentItem");
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItem", b =>
+                {
+                    b.HasOne("Core.MarketExchange.MarketDocumentEventItemLevel", "Level")
+                        .WithMany()
+                        .HasForeignKey("LevelId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.MarketExchange.MarketDocumentEvent", "MarketDocumentEvent")
+                        .WithMany("Items")
+                        .HasForeignKey("MarketDocumentEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Level");
+
+                    b.Navigation("MarketDocumentEvent");
+                });
+
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentItem", b =>
                 {
                     b.HasOne("Core.MarketExchange.MarketDocument", "MarketDocument")
@@ -2962,25 +3127,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("MarketDocument");
 
                     b.Navigation("MarketDocumentItemStatus");
-                });
-
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentReference", b =>
-                {
-                    b.HasOne("Core.MarketExchange.MarketDocumentItem", "MarketDocumentItem")
-                        .WithMany()
-                        .HasForeignKey("MarketDocumentItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.MarketExchange.MarketDocumentReferenceType", "ReferenceType")
-                        .WithMany()
-                        .HasForeignKey("ReferenceTypeId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("MarketDocumentItem");
-
-                    b.Navigation("ReferenceType");
                 });
 
             modelBuilder.Entity("Core.Processing.ProcessRun", b =>
@@ -3612,6 +3758,11 @@ namespace Infrastructure.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEvent", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Core.Processing.ProcessRun", b =>

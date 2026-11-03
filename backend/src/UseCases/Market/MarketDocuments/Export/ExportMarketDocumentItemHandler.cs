@@ -13,7 +13,7 @@ public class ExportMarketDocumentItemHandler(
     IReadRepository<ServiceStartItem> serviceStartItemReadRepository,
     IReadRepository<Configuration> configurationReadRepository,
     IRepository<MarketDocumentItem> itemRepository,
-    IRepository<MarketDocumentReference> referenceRepository,
+    IRepository<MarketDocumentEvent> eventRepository,
     MarketDocumentEntityGeneratorResolver generatorResolver,
     IMessageBus bus)
 {
@@ -56,14 +56,15 @@ public class ExportMarketDocumentItemHandler(
 
                 var created = await itemRepository.AddAsync(item, ct);
 
-                var reference = new MarketDocumentReference
+                var marketDocumentEvent = new MarketDocumentEvent
                 {
                     MarketDocumentItemId = created.Id,
-                    ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
+                    EventTypeId = Constants.MarketDocumentEventTypes.ServiceStart,
                     ReferenceId = serviceStartItem.Id,
+                    StatusId = Constants.MarketDocumentEventStatuses.Done,
                 };
 
-                await referenceRepository.AddAsync(reference, ct);
+                await eventRepository.AddAsync(marketDocumentEvent, ct);
 
                 itemIds.Add(created.Id);
             }

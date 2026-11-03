@@ -13,7 +13,6 @@ public class UsageBuilderCreateAsync
     private readonly IReadRepository<Usage> _usageReadRepository = Substitute.For<IReadRepository<Usage>>();
     private readonly IBigDataValueMapper _valueMapper = Substitute.For<IBigDataValueMapper>();
     private readonly IRepository<Usage> _usageRepository = Substitute.For<IRepository<Usage>>();
-    private readonly IRepository<MarketDocumentReference> _referenceRepository = Substitute.For<IRepository<MarketDocumentReference>>();
     private readonly IRepository<ServiceStartItem> _serviceStartItemRepository = Substitute.For<IRepository<ServiceStartItem>>();
     private readonly IReadRepository<Service> _serviceReadRepository = Substitute.For<IReadRepository<Service>>();
     private readonly Usage_867_03_ImportBuilder _builder;
@@ -24,7 +23,6 @@ public class UsageBuilderCreateAsync
             _usageReadRepository,
             _valueMapper,
             _usageRepository,
-            _referenceRepository,
             _serviceStartItemRepository,
             _serviceReadRepository);
 
@@ -35,10 +33,6 @@ public class UsageBuilderCreateAsync
         _usageRepository
             .AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>())
             .Returns(callInfo => callInfo.Arg<Usage>());
-
-        _referenceRepository
-            .AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>())
-            .Returns(callInfo => callInfo.Arg<MarketDocumentReference>());
     }
 
     private const string Xml = """
@@ -303,7 +297,6 @@ public class UsageBuilderCreateAsync
         result.Status.ShouldBe(ResultStatus.Invalid);
 
         await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
-        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -321,7 +314,6 @@ public class UsageBuilderCreateAsync
         result.Status.ShouldBe(ResultStatus.Invalid);
 
         await _usageRepository.DidNotReceive().AddAsync(Arg.Any<Usage>(), Arg.Any<CancellationToken>());
-        await _referenceRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentReference>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

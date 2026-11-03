@@ -7,13 +7,14 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public abstract class ServiceStartRejectImportBuilderBase(
-    IRepository<ServiceStartItem> serviceStartItemRepository,
-    IRepository<MarketDocumentReference> referenceRepository)
+    IRepository<ServiceStartItem> serviceStartItemRepository)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
 {
     protected override string RequiredElementName => "AccountMaint";
 
-    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public int EventTypeId => Constants.MarketDocumentEventTypes.ServiceStart;
+
+    public async Task<Result<IReadOnlyList<long>>> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
         var transactionResult = DeserializeTransaction(item);
         if (!transactionResult.IsSuccess)
@@ -35,7 +36,7 @@ public abstract class ServiceStartRejectImportBuilderBase(
         var service = accountMaint.Services.FirstOrDefault();
         if (service is null)
         {
-            return Result.Invalid(new ValidationError(
+            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(
                 nameof(accountMaint.Services),
                 $"MarketDocumentItem '{item.Id}' has no Service."));
         }
@@ -52,19 +53,10 @@ public abstract class ServiceStartRejectImportBuilderBase(
 
         var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
 
-        var reference = new MarketDocumentReference
-        {
-            MarketDocumentItemId = item.Id,
-            ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
-            ReferenceId = created.Id,
-        };
-
-        await referenceRepository.AddAsync(reference, ct);
-
         // TODO:
         serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Rejected;
 
-        return Result.Success();
+        return Result.Success<IReadOnlyList<long>>([created.Id]);
     }
 
     private async Task<Result<ServiceStart>> GetServiceStartAsync(string? trackingNumber, CancellationToken ct)

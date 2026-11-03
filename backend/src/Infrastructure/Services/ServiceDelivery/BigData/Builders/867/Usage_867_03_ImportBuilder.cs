@@ -12,7 +12,6 @@ public class Usage_867_03_ImportBuilder(
     IReadRepository<Usage> usageReadRepository,
     IBigDataValueMapper valueMapper,
     IRepository<Usage> usageRepository,
-    IRepository<MarketDocumentReference> referenceRepository,
     IRepository<ServiceStartItem> serviceStartItemRepository,
     IReadRepository<Service> serviceReadRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
@@ -21,7 +20,9 @@ public class Usage_867_03_ImportBuilder(
     private const string DetailUsageType = "DET";
     protected override string RequiredElementName => "Usage";
 
-    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public int EventTypeId => Constants.MarketDocumentEventTypes.Usage;
+
+    public async Task<Result<IReadOnlyList<long>>> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
         var transactionResult = DeserializeTransaction(item);
         if (!transactionResult.IsSuccess)
@@ -112,21 +113,15 @@ public class Usage_867_03_ImportBuilder(
             }
         }
 
+        var createdIds = new List<long>();
+
         foreach (var usage in pendingUsages)
         {
             var created = await usageRepository.AddAsync(usage, ct);
-
-            var reference = new MarketDocumentReference
-            {
-                MarketDocumentItemId = item.Id,
-                ReferenceTypeId = Constants.MarketDocumentReferenceTypes.Usage,
-                ReferenceId = created.Id,
-            };
-
-            await referenceRepository.AddAsync(reference, ct);
+            createdIds.Add(created.Id);
         }
 
-        return Result.Success();
+        return Result.Success<IReadOnlyList<long>>(createdIds);
     }
 
     private async Task<Result<long?>> GetOriginalUsageIdAsync(string? originalTransactionNumber, CancellationToken ct)

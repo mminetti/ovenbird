@@ -1,4 +1,4 @@
-﻿using Core.MarketExchange;
+using Core.MarketExchange;
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -9,6 +9,7 @@ namespace UseCases.Market.MarketDocuments.Import;
 public class MarketDocumentItemImportedEventHandler(
     IReadRepository<Configuration> configurationReadRepository,
     IRepository<MarketDocumentItem> itemRepository,
+    IRepository<MarketDocumentEvent> eventRepository,
     MarketDocumentEntityBuilderResolver entityBuilderResolver)
 {
     private const string HandlerIdentifier = "handler";
@@ -31,13 +32,21 @@ public class MarketDocumentItemImportedEventHandler(
 
             if (entityBuilder is not null)
             {
-                // we are missing a concept here: MarketDocumentEvent - lets discuss
-                // MarketDocumentEventItem will have the list of values to fix on the import
+                var result = await entityBuilder.CreateAsync(item, ct);
 
-                await entityBuilder.CreateAsync(item, ct);
+                foreach (var marketDocumentEvent in ToMarketDocumentEvents(item.Id, entityBuilder.EventTypeId, result))
+                {
+                    await eventRepository.AddAsync(marketDocumentEvent, ct);
+                }
+
+                item.MarketDocumentItemStatusId = result.IsSuccess
+                    ? Constants.MarketDocumentItemStatuses.Done
+                    : Constants.MarketDocumentItemStatuses.Error;
             }
-
-            item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Done;
+            else
+            {
+                item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Done;
+            }
         }
         catch (Exception ex)
         {
@@ -47,4 +56,42 @@ public class MarketDocumentItemImportedEventHandler(
 
         await itemRepository.UpdateAsync(item, ct);
     }
+
+    private static IEnumerable<MarketDocumentEvent> ToMarketDocumentEvents(long itemId, int eventTypeId, Result<IReadOnlyList<long>> result)
+    {
+        if (result.IsSuccess)
+        {
+            return result.Value.Select(referenceId => new MarketDocumentEvent
+            {
+                MarketDocumentItemId = itemId,
+                EventTypeId = eventTypeId,
+                ReferenceId = referenceId,
+                StatusId = Constants.MarketDocumentEventStatuses.Done,
+            });
+        }
+
+        return
+        [
+            new MarketDocumentEvent
+            {
+                MarketDocumentItemId = itemId,
+                EventTypeId = eventTypeId,
+                StatusId = Constants.MarketDocumentEventStatuses.Error,
+                Message = string.Join("; ", result.ValidationErrors.Select(e => e.ErrorMessage)),
+                Items = result.ValidationErrors.Select(e => new MarketDocumentEventItem
+                {
+                    LevelId = MapSeverity(e.Severity),
+                    Field = e.Identifier,
+                    Message = e.ErrorMessage,
+                }).ToList(),
+            },
+        ];
+    }
+
+    private static int MapSeverity(ValidationSeverity severity) => severity switch
+    {
+        ValidationSeverity.Warning => Constants.MarketDocumentEventItemLevels.Warning,
+        ValidationSeverity.Info => Constants.MarketDocumentEventItemLevels.Info,
+        _ => Constants.MarketDocumentEventItemLevels.Error,
+    };
 }

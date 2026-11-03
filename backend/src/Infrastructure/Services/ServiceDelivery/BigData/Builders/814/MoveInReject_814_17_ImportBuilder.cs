@@ -1,12 +1,10 @@
-﻿using Core.MarketExchange;
-using Core.ServiceDelivery;
+﻿using Core.ServiceDelivery;
 
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public class MoveInReject_814_17_ImportBuilder(
-    IRepository<ServiceStartItem> serviceStartItemRepository,
-    IRepository<MarketDocumentReference> referenceRepository)
-    : ServiceStartRejectImportBuilderBase(serviceStartItemRepository, referenceRepository)
+    IRepository<ServiceStartItem> serviceStartItemRepository)
+    : ServiceStartRejectImportBuilderBase(serviceStartItemRepository)
 {
     public const string Key = $"BigData_{Set}_{SubSet}";
     private const string Set = "814";

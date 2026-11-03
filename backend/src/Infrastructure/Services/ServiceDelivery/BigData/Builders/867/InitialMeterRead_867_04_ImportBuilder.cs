@@ -8,15 +8,16 @@ using UseCases.Market.MarketDocuments.Import.Interfaces;
 namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public class InitialMeterRead_867_04_ImportBuilder(
-    IRepository<ServiceStartItem> serviceStartItemRepository,
-    IRepository<MarketDocumentReference> referenceRepository)
+    IRepository<ServiceStartItem> serviceStartItemRepository)
     : TransactionXmlReaderBase<UsageTransactionXml>, IMarketDocumentEntityBuilder
 {
     public const string Key = "BigData_867_04";
     private const string InitialUsageType = "INT";
     protected override string RequiredElementName => "Usage";
 
-    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public int EventTypeId => Constants.MarketDocumentEventTypes.ServiceStart;
+
+    public async Task<Result<IReadOnlyList<long>>> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
         var transactionResult = DeserializeTransaction(item);
         if (!transactionResult.IsSuccess)
@@ -33,6 +34,7 @@ public class InitialMeterRead_867_04_ImportBuilder(
         }
 
         var serviceStart = serviceStartResult.Value;
+        var createdIds = new List<long>();
 
         foreach (var usageMeter in usage.UsageMeters.Where(x => x.UsageType == InitialUsageType))
         {
@@ -50,15 +52,7 @@ public class InitialMeterRead_867_04_ImportBuilder(
                     };
 
                     var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
-
-                    var reference = new MarketDocumentReference
-                    {
-                        MarketDocumentItemId = item.Id,
-                        ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
-                        ReferenceId = created.Id,
-                    };
-
-                    await referenceRepository.AddAsync(reference, ct);
+                    createdIds.Add(created.Id);
                 }
             }
 
@@ -67,7 +61,7 @@ public class InitialMeterRead_867_04_ImportBuilder(
             serviceStart.ServiceOrderStatusId = Constants.ServiceOrderStatuses.Completed;
         }
 
-        return Result.Success();
+        return Result.Success<IReadOnlyList<long>>(createdIds);
     }
 
     private async Task<Result<ServiceStart>> GetServiceStartAsync(string? sourceReferenceNumber, CancellationToken ct)

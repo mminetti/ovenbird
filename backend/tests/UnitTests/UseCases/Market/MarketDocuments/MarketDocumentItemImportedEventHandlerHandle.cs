@@ -16,6 +16,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
 
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
+    private readonly IRepository<MarketDocumentEvent> _eventRepository = Substitute.For<IRepository<MarketDocumentEvent>>();
 
     private readonly Company _company = new() { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
 
@@ -44,7 +45,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
         };
 
     private MarketDocumentItemImportedEventHandler CreateHandler(IServiceProvider services) =>
-        new(_configurationReadRepository, _itemRepository, new MarketDocumentEntityBuilderResolver(services));
+        new(_configurationReadRepository, _itemRepository, _eventRepository, new MarketDocumentEntityBuilderResolver(services));
 
     [Fact]
     public async Task CreatesTheEntityWhenABuilderIsRegisteredForTheItemsSetAndSubSet_AndMarksTheItemDone()
@@ -52,7 +53,8 @@ public class MarketDocumentItemImportedEventHandlerHandle
         var item = CreateItem("867", "02");
 
         var builder = Substitute.For<IMarketDocumentEntityBuilder>();
-        builder.CreateAsync(item, Arg.Any<CancellationToken>()).Returns(Result.Success());
+        builder.EventTypeId.Returns(Constants.MarketDocumentEventTypes.HistoricalUsage);
+        builder.CreateAsync(item, Arg.Any<CancellationToken>()).Returns(Result.Success<IReadOnlyList<long>>([42]));
 
         var services = new ServiceCollection();
         services.AddKeyedSingleton(Key, builder);
@@ -65,6 +67,49 @@ public class MarketDocumentItemImportedEventHandlerHandle
 
         item.MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Done);
         await _itemRepository.Received(1).UpdateAsync(item, Arg.Any<CancellationToken>());
+
+        await _eventRepository.Received(1).AddAsync(
+            Arg.Is<MarketDocumentEvent>(e =>
+                e.MarketDocumentItemId == item.Id &&
+                e.EventTypeId == Constants.MarketDocumentEventTypes.HistoricalUsage &&
+                e.ReferenceId == 42 &&
+                e.StatusId == Constants.MarketDocumentEventStatuses.Done),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task RecordsAnErrorEventWithOneItemPerValidationError_WhenTheBuilderReturnsInvalid()
+    {
+        var item = CreateItem("867", "02");
+
+        var builder = Substitute.For<IMarketDocumentEntityBuilder>();
+        builder.EventTypeId.Returns(Constants.MarketDocumentEventTypes.HistoricalUsage);
+        builder.CreateAsync(item, Arg.Any<CancellationToken>()).Returns(
+            Result<IReadOnlyList<long>>.Invalid(new List<ValidationError>
+            {
+                new("Field1", "Field1 is required.", string.Empty, ValidationSeverity.Error),
+                new("Field2", "Field2 is out of range.", string.Empty, ValidationSeverity.Warning),
+            }));
+
+        var services = new ServiceCollection();
+        services.AddKeyedSingleton(Key, builder);
+
+        var handler = CreateHandler(services.BuildServiceProvider());
+
+        await handler.Handle(new MarketDocumentItemImportedEvent(item), CancellationToken.None);
+
+        item.MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
+
+        await _eventRepository.Received(1).AddAsync(
+            Arg.Is<MarketDocumentEvent>(e =>
+                e.MarketDocumentItemId == item.Id &&
+                e.EventTypeId == Constants.MarketDocumentEventTypes.HistoricalUsage &&
+                e.ReferenceId == null &&
+                e.StatusId == Constants.MarketDocumentEventStatuses.Error &&
+                e.Items.Count == 2 &&
+                e.Items.Any(i => i.Field == "Field1" && i.Message == "Field1 is required." && i.LevelId == Constants.MarketDocumentEventItemLevels.Error) &&
+                e.Items.Any(i => i.Field == "Field2" && i.Message == "Field2 is out of range." && i.LevelId == Constants.MarketDocumentEventItemLevels.Warning)),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -91,7 +136,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
 
         var builder = Substitute.For<IMarketDocumentEntityBuilder>();
         builder.CreateAsync(item, Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<Result>(new InvalidOperationException("boom")));
+            .Returns(Task.FromException<Result<IReadOnlyList<long>>>(new InvalidOperationException("boom")));
 
         var services = new ServiceCollection();
         services.AddKeyedSingleton(Key, builder);

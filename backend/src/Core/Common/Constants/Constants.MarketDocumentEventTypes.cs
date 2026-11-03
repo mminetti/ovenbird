@@ -2,7 +2,7 @@ namespace Core.Common.Constants;
 
 public static partial class Constants
 {
-    public static class MarketDocumentReferenceTypes
+    public static class MarketDocumentEventTypes
     {
         public const int HistoricalUsage = 1;
         public const int Usage = 2;

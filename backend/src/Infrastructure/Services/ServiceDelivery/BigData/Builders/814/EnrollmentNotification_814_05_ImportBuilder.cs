@@ -8,7 +8,6 @@ namespace Infrastructure.Services.ServiceDelivery.BigData.Builders;
 
 public class EnrollmentNotification_814_05_ImportBuilder(
     IRepository<ServiceStartItem> serviceStartItemRepository,
-    IRepository<MarketDocumentReference> referenceRepository,
     IRepository<ServiceStart> serviceStartRepository,
     IRepository<ServiceEvent> serviceEventRepository)
     : TransactionXmlReaderBase<ServiceRequestTransactionXml>, IMarketDocumentEntityBuilder
@@ -18,7 +17,9 @@ public class EnrollmentNotification_814_05_ImportBuilder(
     private const string SubSet = "05";
     protected override string RequiredElementName => "AccountMaint";
 
-    public async Task<Result> CreateAsync(MarketDocumentItem item, CancellationToken ct)
+    public int EventTypeId => Constants.MarketDocumentEventTypes.ServiceStart;
+
+    public async Task<Result<IReadOnlyList<long>>> CreateAsync(MarketDocumentItem item, CancellationToken ct)
     {
         // TODO: refactor this
 
@@ -49,33 +50,24 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         var service = accountMaint.Services.FirstOrDefault();
         if (service is null)
         {
-            return Result.Invalid(new ValidationError(nameof(accountMaint.Services), $"Service is required."));
+            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(nameof(accountMaint.Services), $"Service is required."));
         }
 
         var customerAgreementDate = service.ServiceDates.FirstOrDefault()?.CustomerAgreementDate;
 
         if (customerAgreementDate is null)
         {
-            return Result.Invalid(new ValidationError(nameof(customerAgreementDate),
+            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(nameof(customerAgreementDate),
                 $"Service Start Date is required."));
         }
 
         if (!DateOnly.TryParseExact(customerAgreementDate, DateFormat, out var serviceDate))
         {
-            return Result.Invalid(new ValidationError(nameof(customerAgreementDate),
+            return Result<IReadOnlyList<long>>.Invalid(new ValidationError(nameof(customerAgreementDate),
                 $"Service Start Date is invalid."));
         }
 
         var created = await serviceStartItemRepository.AddAsync(serviceStartItem, ct);
-
-        var reference = new MarketDocumentReference
-        {
-            MarketDocumentItemId = item.Id,
-            ReferenceTypeId = Constants.MarketDocumentReferenceTypes.ServiceStart,
-            ReferenceId = created.Id,
-        };
-
-        await referenceRepository.AddAsync(reference, ct);
 
         var serviceEvent = new ServiceEvent
         {
@@ -92,7 +84,7 @@ public class EnrollmentNotification_814_05_ImportBuilder(
         serviceStart.MarkScheduled(serviceDate);
         await serviceStartRepository.UpdateAsync(serviceStart, ct);
 
-        return Result.Success();
+        return Result.Success<IReadOnlyList<long>>([created.Id]);
     }
 
     private async Task<Result<ServiceStart>> GetServiceStartAsync(string? identifier, CancellationToken ct)

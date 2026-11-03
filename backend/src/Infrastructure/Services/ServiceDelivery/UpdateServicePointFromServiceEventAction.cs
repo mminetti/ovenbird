@@ -11,7 +11,7 @@ namespace Infrastructure.Services.ServiceDelivery;
 
 public class UpdateServicePointFromServiceEventAction(
     IReadRepository<ServiceEvent> serviceEventRepository,
-    IReadRepository<MarketDocumentReference> referenceRepository,
+    IReadRepository<MarketDocumentEvent> marketDocumentEventRepository,
     IReadRepository<Configuration> configurationRepository,
     ServicePointUpdateBuilderResolver builderResolver,
     IUpdateServicePointAction updateServicePointAction)
@@ -27,10 +27,10 @@ public class UpdateServicePointFromServiceEventAction(
             return Result.Invalid(new ValidationError(nameof(ServiceEvent), $"ServiceEvent '{serviceEventId}' was not found."));
         }
 
-        var reference = await referenceRepository.FirstOrDefaultAsync(
-            new MarketDocumentReferenceByReferenceSpec(Constants.MarketDocumentReferenceTypes.ServiceStart, serviceEvent.ReferenceId), ct);
+        var marketDocumentEvent = await marketDocumentEventRepository.FirstOrDefaultAsync(
+            new MarketDocumentEventByReferenceSpec(Constants.MarketDocumentEventTypes.ServiceStart, serviceEvent.ReferenceId), ct);
 
-        var item = reference?.MarketDocumentItem;
+        var item = marketDocumentEvent?.MarketDocumentItem;
         if (item is null)
         {
             return Result.Invalid(new ValidationError(
