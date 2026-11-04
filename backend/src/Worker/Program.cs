@@ -38,12 +38,12 @@ var exportCronSchedule = builder.Configuration["ExportMarketDocument:CronSchedul
 
 builder.Services.AddQuartz(q =>
 {
-    q.ScheduleJob<MarketDocumentImportJob>(
+    q.ScheduleJob<ImportMarketDocumentJob>(
         trigger => trigger
             .WithIdentity("MarketDocumentImportTrigger")
             //.StartNow(),
             .WithCronSchedule(cronSchedule),
-        job => job.WithIdentity("MarketDocumentImportJob"));
+        job => job.WithIdentity("ImportMarketDocumentJob"));
 
     q.ScheduleJob<ExportMarketDocumentItemJob>(
         trigger => trigger

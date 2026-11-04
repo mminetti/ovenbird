@@ -9,10 +9,10 @@ using Wolverine;
 
 namespace Worker.Jobs.Market;
 
-public class MarketDocumentImportJob(
+public class ImportMarketDocumentJob(
     IMessageBus bus,
     ProcessRunTracker processRunTracker,
-    ILogger<MarketDocumentImportJob> logger) : IJob
+    ILogger<ImportMarketDocumentJob> logger) : IJob
 {
     public async ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
     {
