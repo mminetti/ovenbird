@@ -22,8 +22,8 @@ public class BigDataDocumentImportParser(IServiceProvider serviceProvider) : IMa
             string set = transaction.Element("TransactionSet")?.Value!;
             string subSet = transaction.Element("TransactionSubSet")?.Value!;
 
-            var reader = GetRequiredReader(set);
-            var item = reader.Read(transaction);
+            var reader = serviceProvider.GetKeyedService<IMarketDocumentTransactionReader>(set);
+            var item = reader?.Read(transaction) ?? new MarketDocumentItem();
 
             item.Set = set;
             item.SubSet = subSet;
@@ -34,18 +34,5 @@ public class BigDataDocumentImportParser(IServiceProvider serviceProvider) : IMa
         }
 
         return items;
-    }
-
-    private IMarketDocumentTransactionReader GetRequiredReader(string set)
-    {
-        try
-        {
-            return serviceProvider.GetRequiredKeyedService<IMarketDocumentTransactionReader>(set);
-        }
-        catch (InvalidOperationException ex)
-        {
-            throw new InvalidOperationException(
-                $"Market Document Transaction Reader couldn't resolve TransactionSet '{set}'.", ex);
-        }
     }
 }

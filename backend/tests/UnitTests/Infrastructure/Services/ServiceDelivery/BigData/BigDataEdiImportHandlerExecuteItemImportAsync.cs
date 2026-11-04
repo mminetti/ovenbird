@@ -98,7 +98,7 @@ public class BigDataEdiImportHandlerExecuteItemImportAsync
     }
 
     [Fact]
-    public async Task ThrowsWhenTransactionSetCannotBeResolved()
+    public async Task MarksItemAsErrorWhenTransactionSetCannotBeResolved()
     {
         const string xml = """
             <Document>
@@ -113,8 +113,11 @@ public class BigDataEdiImportHandlerExecuteItemImportAsync
 
         var document = await UploadDocumentAsync(xml);
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => _handler.ExecuteItemImportAsync(_configuration, document, CancellationToken.None));
+        var items = await _handler.ExecuteItemImportAsync(_configuration, document, CancellationToken.None);
+
+        items.Count.ShouldBe(1);
+        items[0].Set.ShouldBe("999");
+        items[0].MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
     }
 
     private async Task<MarketDocument> UploadDocumentAsync(string xml)

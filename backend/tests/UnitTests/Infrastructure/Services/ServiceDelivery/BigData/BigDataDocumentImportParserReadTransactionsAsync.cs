@@ -105,7 +105,7 @@ public class BigDataDocumentImportParserReadTransactionsAsync
     }
 
     [Fact]
-    public async Task PropagatesExceptionWhenTransactionSetCannotBeResolved()
+    public async Task MarksItemAsErrorWhenTransactionSetCannotBeResolved()
     {
         var services = new ServiceCollection();
         var parser = CreateParser(services.BuildServiceProvider());
@@ -123,7 +123,11 @@ public class BigDataDocumentImportParserReadTransactionsAsync
 
         using var content = new MemoryStream(Encoding.UTF8.GetBytes(xml));
 
-        await Should.ThrowAsync<InvalidOperationException>(
-            () => parser.ReadTransactionsAsync(content, CancellationToken.None));
+        var items = await parser.ReadTransactionsAsync(content, CancellationToken.None);
+
+        items.Count.ShouldBe(1);
+        items[0].Set.ShouldBe("999");
+        items[0].SubSet.ShouldBe("01");
+        items[0].MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
     }
 }
