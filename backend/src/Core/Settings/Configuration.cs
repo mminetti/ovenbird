@@ -40,7 +40,7 @@ public class Configuration : AuditableEntityBase<int>, IAudited, IHasDisplayName
 
         return connector ??
             throw new InvalidOperationException(
-                $"Configuration '{Name}' is missing required '{type}' connector type.");
+                $"Configuration '{Name}' is missing required connector type id '{type}'.");
     }
 
     private Connector? GetConnector(int typeId) =>

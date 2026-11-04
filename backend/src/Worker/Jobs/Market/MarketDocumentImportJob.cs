@@ -1,9 +1,11 @@
-﻿using Quartz;
+﻿using Ardalis.Result;
+using Core.Common.Constants;
+using Core.MarketExchange;
+using Quartz;
 using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Wolverine;
-using Core.Common.Constants;
 
 namespace Worker.Jobs.Market;
 
@@ -20,23 +22,35 @@ public class MarketDocumentImportJob(
         {
             var run = await processRunTracker.StartAsync(Constants.ProcessTypes.MarketDocumentImport, cancellationToken);
 
-            var result = await bus.InvokeAsync<ImportMarketDocumentResult>(
-                new MarketDocumentImportCommand(), cancellationToken);
+            ImportMarketDocumentResult? result = null;
+            IReadOnlyList<ValidationError> errors;
 
-            var succeeded = result.Errors.Count == 0;
+            try
+            {
+                result = await bus.InvokeAsync<ImportMarketDocumentResult>(
+                    new MarketDocumentImportCommand(), cancellationToken);
 
-            await processRunTracker.CompleteAsync(run.Id, succeeded, result.Errors, cancellationToken);
+                errors = result.Errors;
+            }
+            catch (Exception ex)
+            {
+                errors = [new ValidationError(nameof(MarketDocument), ex.Message)];
+            }
+
+            var succeeded = errors.Count == 0;
+
+            await processRunTracker.CompleteAsync(run.Id, succeeded, errors, cancellationToken);
 
             if (!succeeded)
             {
                 logger.LogError("MarketDocument import failed. ProcessRunId={ProcessRunId}, Errors={Errors}",
-                    run.Id, string.Join(", ", result.Errors.Select(v => v.ErrorMessage)));
+                    run.Id, string.Join(", ", errors.Select(v => v.ErrorMessage)));
             }
             else
             {
                 logger.LogInformation(
                     "Imported {ImportedCount} MarketDocument(s). ProcessRunId={ProcessRunId}",
-                    result.Imported.Count, run.Id);
+                    result!.Imported.Count, run.Id);
             }
         }
         catch (Exception ex)

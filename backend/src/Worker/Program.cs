@@ -1,8 +1,8 @@
 ﻿using Core.MarketExchange;
 using Infrastructure;
 using Infrastructure.Data;
+using JasperFx;
 using Quartz;
-using UseCases.Market.MarketDocuments.Export;
 using UseCases.Market.MarketDocuments.Export.Interfaces;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -26,6 +26,10 @@ builder.UseWolverine(opts =>
     opts.CodeGeneration.AlwaysUseServiceLocationFor<ReadDbContext>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentParserResolver>();
     opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentGeneratorResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<EdiImportHandlerResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<EdiExportHandlerResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentEntityBuilderResolver>();
+    opts.CodeGeneration.AlwaysUseServiceLocationFor<MarketDocumentEntityGeneratorResolver>();
 });
 
 var cronSchedule = builder.Configuration["MarketDocumentImport:CronSchedule"] ?? "0 0 2 * * ?";
@@ -57,4 +61,4 @@ builder.Services.AddQuartz(q =>
 builder.Services.AddQuartzHostedService(opts => opts.WaitForJobsToComplete = true);
 
 var host = builder.Build();
-host.Run();
+return await host.RunJasperFxCommands(args);

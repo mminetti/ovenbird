@@ -23,6 +23,7 @@ env:
   DOTNET_VERSION: '10.x'
   SOLUTION_PATH: 'Ovenbird.slnx'
   API_PROJECT_PATH: 'src/Web/Web.csproj'
+  WORKER_PROJECT_PATH: 'src/Worker/Worker.csproj'
   PUBLISH_DIR: './publish'
 
 jobs:
@@ -42,6 +43,13 @@ jobs:
 
       - name: Build
         run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+      - name: Verify Wolverine code generation
+        # Catches handler dependency chains that need container service location (e.g. a new
+        # keyed-service resolver) before they fail at runtime the first time a job actually executes.
+        run: dotnet run --project ${{ env.WORKER_PROJECT_PATH }} --configuration Release --no-build -- codegen test
+        env:
+          ConnectionStrings__db: 'Server=localhost;Database=dummy;Trusted_Connection=True;'
 
       - name: Test
         run: dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --verbosity normal
