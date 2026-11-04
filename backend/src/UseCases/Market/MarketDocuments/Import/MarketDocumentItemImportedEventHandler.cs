@@ -2,6 +2,7 @@
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 
 namespace UseCases.Market.MarketDocuments.Import;
@@ -82,20 +83,8 @@ public class MarketDocumentItemImportedEventHandler(
                 MarketDocumentItemId = itemId,
                 EventTypeId = eventTypeId,
                 StatusId = Constants.MarketDocumentEventStatuses.Error,
-                Items = [.. result.ValidationErrors.Select(e => new MarketDocumentEventItem
-                {
-                    LevelId = MapSeverity(e.Severity),
-                    Field = e.Identifier,
-                    Message = e.ErrorMessage,
-                })],
+                Items = [.. result.ValidationErrors.Select(ErrorLogItemFactory.Create<MarketDocumentEventItem>)],
             },
         ];
     }
-
-    private static int MapSeverity(ValidationSeverity severity) => severity switch
-    {
-        ValidationSeverity.Warning => Constants.MarketDocumentEventItemLevels.Warning,
-        ValidationSeverity.Info => Constants.MarketDocumentEventItemLevels.Info,
-        _ => Constants.MarketDocumentEventItemLevels.Error,
-    };
 }

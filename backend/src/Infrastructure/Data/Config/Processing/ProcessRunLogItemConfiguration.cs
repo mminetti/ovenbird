@@ -1,28 +1,21 @@
 using Core.Processing;
+using Infrastructure.Data.Config.Common;
 
 namespace Infrastructure.Data.Config.Processing;
 
-public class ProcessRunLogItemConfiguration : IEntityTypeConfiguration<ProcessRunLogItem>
+public class ProcessRunLogItemConfiguration : BaseEntityTypeConfiguration<ProcessRunLogItem, long>
 {
-    public void Configure(EntityTypeBuilder<ProcessRunLogItem> builder)
+    public override void Configure(EntityTypeBuilder<ProcessRunLogItem> builder)
     {
-        builder.Property(x => x.Field)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
+        base.Configure(builder);
 
-        builder.Property(x => x.Message)
-            .HasColumnType("nvarchar(max)");
+        builder.ConfigureErrorLogItem();
 
         // NoAction: protect the referenced ProcessRun row from accidental/cascading deletion;
         // log items are removed explicitly alongside their run, never implicitly.
         builder.HasOne(x => x.ProcessRun)
             .WithMany(x => x.LogItems)
             .HasForeignKey(x => x.ProcessRunId)
-            .OnDelete(DeleteBehavior.NoAction);
-
-        // NoAction: protect the referenced lookup row from accidental/cascading deletion.
-        builder.HasOne(x => x.Level)
-            .WithMany()
-            .HasForeignKey(x => x.LevelId)
             .OnDelete(DeleteBehavior.NoAction);
     }
 }

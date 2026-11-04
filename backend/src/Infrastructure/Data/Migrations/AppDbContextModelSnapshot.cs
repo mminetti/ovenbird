@@ -125,6 +125,38 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AuditTrail", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Common.ErrorSeverity", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ErrorSeverity");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Error"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Warning"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Info"
+                        });
+                });
+
             modelBuilder.Entity("Core.MarketExchange.MarketDocument", b =>
                 {
                     b.Property<long>("Id")
@@ -235,9 +267,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("MarketDocumentItemId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long?>("ReferenceId")
                         .HasColumnType("bigint");
 
@@ -282,9 +311,6 @@ namespace Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("LevelId")
-                        .HasColumnType("int");
-
                     b.Property<long>("MarketDocumentEventId")
                         .HasColumnType("bigint");
 
@@ -292,45 +318,16 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<int>("SeverityId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("LevelId");
+                    b.HasKey("Id");
 
                     b.HasIndex("MarketDocumentEventId");
 
+                    b.HasIndex("SeverityId");
+
                     b.ToTable("MarketDocumentEventItem");
-                });
-
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItemLevel", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MarketDocumentEventItemLevel");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Error"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Warning"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Info"
-                        });
                 });
 
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventStatus", b =>
@@ -575,13 +572,21 @@ namespace Infrastructure.Data.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Field")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<int>("LevelId")
-                        .HasColumnType("int");
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Message")
                         .IsRequired()
@@ -590,45 +595,16 @@ namespace Infrastructure.Data.Migrations
                     b.Property<long>("ProcessRunId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                    b.Property<int>("SeverityId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("LevelId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ProcessRunId");
 
+                    b.HasIndex("SeverityId");
+
                     b.ToTable("ProcessRunLogItem");
-                });
-
-            modelBuilder.Entity("Core.Processing.ProcessRunLogLevel", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProcessRunLogLevel");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Error"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Warning"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Info"
-                        });
                 });
 
             modelBuilder.Entity("Core.Processing.ProcessRunStatus", b =>
@@ -3085,21 +3061,21 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItem", b =>
                 {
-                    b.HasOne("Core.MarketExchange.MarketDocumentEventItemLevel", "Level")
-                        .WithMany()
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Core.MarketExchange.MarketDocumentEvent", "MarketDocumentEvent")
                         .WithMany("Items")
                         .HasForeignKey("MarketDocumentEventId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Level");
+                    b.HasOne("Core.Common.ErrorSeverity", "Severity")
+                        .WithMany()
+                        .HasForeignKey("SeverityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("MarketDocumentEvent");
+
+                    b.Navigation("Severity");
                 });
 
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentItem", b =>
@@ -3141,21 +3117,21 @@ namespace Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Core.Processing.ProcessRunLogItem", b =>
                 {
-                    b.HasOne("Core.Processing.ProcessRunLogLevel", "Level")
-                        .WithMany()
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.HasOne("Core.Processing.ProcessRun", "ProcessRun")
                         .WithMany("LogItems")
                         .HasForeignKey("ProcessRunId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("Level");
+                    b.HasOne("Core.Common.ErrorSeverity", "Severity")
+                        .WithMany()
+                        .HasForeignKey("SeverityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("ProcessRun");
+
+                    b.Navigation("Severity");
                 });
 
             modelBuilder.Entity("Core.Security.Permission", b =>

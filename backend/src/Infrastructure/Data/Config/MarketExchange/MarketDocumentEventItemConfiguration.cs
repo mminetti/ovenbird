@@ -1,4 +1,5 @@
 using Core.MarketExchange;
+using Infrastructure.Data.Config.Common;
 
 namespace Infrastructure.Data.Config.MarketExchange;
 
@@ -8,22 +9,12 @@ public class MarketDocumentEventItemConfiguration : BaseEntityTypeConfiguration<
     {
         base.Configure(builder);
 
-        builder.Property(x => x.Field)
-            .HasMaxLength(DataSchemaConstants.DEFAULT_NAME_LENGTH);
-
-        builder.Property(x => x.Message)
-            .HasColumnType("nvarchar(max)");
+        builder.ConfigureErrorLogItem();
 
         // Cascade: items are owned by the event, delete with it.
         builder.HasOne(x => x.MarketDocumentEvent)
             .WithMany(x => x.Items)
             .HasForeignKey(x => x.MarketDocumentEventId)
             .OnDelete(DeleteBehavior.Cascade);
-
-        // NoAction: protect the referenced lookup row from accidental/cascading deletion.
-        builder.HasOne(x => x.Level)
-            .WithMany()
-            .HasForeignKey(x => x.LevelId)
-            .OnDelete(DeleteBehavior.NoAction);
     }
 }

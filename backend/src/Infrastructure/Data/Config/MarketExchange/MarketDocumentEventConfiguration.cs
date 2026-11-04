@@ -8,9 +8,6 @@ public class MarketDocumentEventConfiguration : BaseEntityTypeConfiguration<Mark
     {
         base.Configure(builder);
 
-        builder.Property(x => x.Message)
-            .HasColumnType("nvarchar(max)");
-
         // Cascade: events are owned by the item, delete with it.
         builder.HasOne(x => x.MarketDocumentItem)
             .WithMany()

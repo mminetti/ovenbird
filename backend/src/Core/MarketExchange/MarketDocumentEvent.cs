@@ -8,7 +8,6 @@ public class MarketDocumentEvent : AuditableEntityBase<long>
     public int EventTypeId { get; set; }
     public long? ReferenceId { get; set; }
     public int StatusId { get; set; }
-    public string? Message { get; set; }
 
     public MarketDocumentItem MarketDocumentItem { get; set; } = default!;
     public MarketDocumentEventType EventType { get; set; } = default!;

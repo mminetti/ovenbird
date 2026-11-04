@@ -107,8 +107,8 @@ public class MarketDocumentItemImportedEventHandlerHandle
                 e.ReferenceId == null &&
                 e.StatusId == Constants.MarketDocumentEventStatuses.Error &&
                 e.Items.Count == 2 &&
-                e.Items.Any(i => i.Field == "Field1" && i.Message == "Field1 is required." && i.LevelId == Constants.MarketDocumentEventItemLevels.Error) &&
-                e.Items.Any(i => i.Field == "Field2" && i.Message == "Field2 is out of range." && i.LevelId == Constants.MarketDocumentEventItemLevels.Warning)),
+                e.Items.Any(i => i.Field == "Field1" && i.Message == "Field1 is required." && i.SeverityId == Constants.ErrorSeverities.Error) &&
+                e.Items.Any(i => i.Field == "Field2" && i.Message == "Field2 is out of range." && i.SeverityId == Constants.ErrorSeverities.Warning)),
             Arg.Any<CancellationToken>());
     }
 

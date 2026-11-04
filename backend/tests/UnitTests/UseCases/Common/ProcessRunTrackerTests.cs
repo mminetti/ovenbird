@@ -52,9 +52,9 @@ public class ProcessRunTrackerTests
         await _logItemRepository.Received(1).AddRangeAsync(
             Arg.Is<IEnumerable<ProcessRunLogItem>>(items => items.Count() == 2
                 && items.Any(i => i.Field == "CustomerClass" && i.Message == "Unmapped customer class 'Residential'."
-                    && i.LevelId == Constants.ProcessRunLogLevels.Error)
+                    && i.SeverityId == Constants.ErrorSeverities.Error)
                 && items.Any(i => i.Field == string.Empty && i.Message == "Skipped a duplicate document."
-                    && i.LevelId == Constants.ProcessRunLogLevels.Warning)),
+                    && i.SeverityId == Constants.ErrorSeverities.Warning)),
             Arg.Any<CancellationToken>());
 
         await _processRunRepository.Received(1).UpdateAsync(
