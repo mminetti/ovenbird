@@ -1,4 +1,5 @@
 ﻿using Core.Common;
+using Core.Common.Constants;
 using Core.MarketExchange.Events;
 
 namespace Core.MarketExchange;
@@ -18,4 +19,12 @@ public class MarketDocumentItem : AuditableEntityBase<long>
     public MarketDocumentItemStatus MarketDocumentItemStatus { get; set; } = default!;
 
     public void MarkImported() => RegisterDomainEvent(new MarketDocumentItemImportedEvent(this));
+
+    public void SetStatus() =>
+        MarketDocumentItemStatusId = !string.IsNullOrWhiteSpace(Set)
+            && !string.IsNullOrWhiteSpace(SubSet)
+            && !string.IsNullOrWhiteSpace(ReferenceNumber)
+            && !string.IsNullOrWhiteSpace(ServicePointIdentifier)
+                ? Constants.MarketDocumentItemStatuses.New
+                : Constants.MarketDocumentItemStatuses.Error;
 }

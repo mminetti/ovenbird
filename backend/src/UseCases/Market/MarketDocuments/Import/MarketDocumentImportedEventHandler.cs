@@ -32,7 +32,11 @@ public class MarketDocumentImportedEventHandler(
             {
                 item.MarketDocumentId = document.Id;
                 item.MarketDocument = document;
-                item.MarkImported();
+
+                if (item.MarketDocumentItemStatusId == Constants.MarketDocumentItemStatuses.New)
+                {
+                    item.MarkImported();
+                }
 
                 await itemRepository.AddAsync(item, ct);
             }

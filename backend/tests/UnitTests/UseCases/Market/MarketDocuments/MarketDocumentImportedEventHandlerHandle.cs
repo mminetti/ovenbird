@@ -41,8 +41,16 @@ public class MarketDocumentImportedEventHandlerHandle
 
         var parsedItems = new List<MarketDocumentItem>
         {
-            new() { Set = "867", SubSet = "03", ReferenceNumber = "REF-1", ServicePointIdentifier = "ACCT-1" },
-            new() { Set = "810", SubSet = "02", ReferenceNumber = "BILL-1", ServicePointIdentifier = "LDC-1" },
+            new()
+            {
+                Set = "867", SubSet = "03", ReferenceNumber = "REF-1", ServicePointIdentifier = "ACCT-1",
+                MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.New,
+            },
+            new()
+            {
+                Set = "810", SubSet = "02", ReferenceNumber = "BILL-1", ServicePointIdentifier = "LDC-1",
+                MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.New,
+            },
         };
 
         _ediHandler
@@ -72,6 +80,45 @@ public class MarketDocumentImportedEventHandlerHandle
             var domainEvent = item.DomainEvents.OfType<MarketDocumentItemImportedEvent>().ShouldHaveSingleItem();
             domainEvent.MarketDocumentItem.ShouldBeSameAs(item);
         }
+
+        document.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Done);
+
+        await _documentRepository.Received(1).UpdateAsync(document, Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task PersistsAnErrorItemWithoutRaisingItsImportedEvent()
+    {
+        var document = new MarketDocument { Id = 1, Identifier = "document.xml", CompanyId = _configuration.CompanyId!.Value };
+
+        var parsedItems = new List<MarketDocumentItem>
+        {
+            new()
+            {
+                Set = "810", SubSet = "02", ReferenceNumber = string.Empty, ServicePointIdentifier = string.Empty,
+                MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Error,
+            },
+        };
+
+        _ediHandler
+            .ExecuteItemImportAsync(_configuration, document, Arg.Any<CancellationToken>())
+            .Returns(parsedItems);
+
+        var created = new List<MarketDocumentItem>();
+        _itemRepository
+            .AddAsync(Arg.Do<MarketDocumentItem>(i => created.Add(i)), Arg.Any<CancellationToken>())
+            .Returns(callInfo =>
+            {
+                var item = callInfo.Arg<MarketDocumentItem>();
+                item.Id = 500;
+                return item;
+            });
+
+        await _handler.Handle(new MarketDocumentImportedEvent(document), CancellationToken.None);
+
+        created.ShouldHaveSingleItem();
+        created[0].DomainEvents.OfType<MarketDocumentItemImportedEvent>().ShouldBeEmpty();
+        created[0].MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
 
         document.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Done);
 
