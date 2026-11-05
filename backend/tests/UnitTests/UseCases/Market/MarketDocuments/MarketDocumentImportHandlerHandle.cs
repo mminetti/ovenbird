@@ -54,8 +54,7 @@ public class MarketDocumentImportHandlerHandle
 
         var result = await _handler.Handle(new MarketDocumentImportCommand(), CancellationToken.None);
 
-        result.Imported.ShouldBe(["newfile.csv"]);
-        result.Errors.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
 
         created.ShouldBeSameAs(newDocument);
 
@@ -80,8 +79,7 @@ public class MarketDocumentImportHandlerHandle
 
         var result = await _handler.Handle(new MarketDocumentImportCommand(), CancellationToken.None);
 
-        result.Imported.ShouldBeEmpty();
-        result.Errors.ShouldBeEmpty();
+        result.IsSuccess.ShouldBeTrue();
 
         await _documentRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocument>(), Arg.Any<CancellationToken>());
     }

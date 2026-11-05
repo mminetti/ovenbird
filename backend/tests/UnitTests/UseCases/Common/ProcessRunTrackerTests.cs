@@ -48,7 +48,7 @@ public class ProcessRunTrackerTests
             new ValidationError(string.Empty, "Skipped a duplicate document.", string.Empty, ValidationSeverity.Warning),
         };
 
-        await _tracker.CompleteAsync(1, succeeded: false, errors, CancellationToken.None);
+        await _tracker.CompleteAsync(1, errors, CancellationToken.None);
 
         await _caseRepository.Received(1).AddAsync(
             Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.ProcessRun
@@ -70,7 +70,7 @@ public class ProcessRunTrackerTests
         _processRunRepository.GetByIdAsync(1L, Arg.Any<CancellationToken>())
             .Returns(new ProcessRun { Id = 1, StatusId = Constants.ProcessRunStatuses.Running });
 
-        await _tracker.CompleteAsync(1, succeeded: true, [], CancellationToken.None);
+        await _tracker.CompleteAsync(1, [], CancellationToken.None);
 
         await _caseRepository.DidNotReceive().AddAsync(Arg.Any<Case>(), Arg.Any<CancellationToken>());
 

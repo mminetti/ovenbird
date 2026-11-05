@@ -1,4 +1,4 @@
-﻿using Core.MarketExchange;
+using Core.MarketExchange;
 using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
@@ -14,9 +14,8 @@ public class MarketDocumentImportHandler(
 {
     private const string HandlerIdentifier = "handler";
 
-    public async Task<ImportMarketDocumentResult> Handle(MarketDocumentImportCommand command, CancellationToken ct)
+    public async Task<Result> Handle(MarketDocumentImportCommand command, CancellationToken ct)
     {
-        var imported = new List<string>();
         var errors = new List<ValidationError>();
 
         var configurations = await configurationReadRepository.ListAsync(
@@ -34,12 +33,10 @@ public class MarketDocumentImportHandler(
             {
                 document.MarkImported();
 
-                var created = await documentRepository.AddAsync(document, ct);
-
-                imported.Add(created.Identifier);
+                await documentRepository.AddAsync(document, ct);
             }
         }
 
-        return new ImportMarketDocumentResult(imported, errors);
+        return errors.Count == 0 ? Result.Success() : Result.Invalid(errors);
     }
 }

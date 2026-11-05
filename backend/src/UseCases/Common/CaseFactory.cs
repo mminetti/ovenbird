@@ -1,4 +1,4 @@
-using Core.Common;
+﻿using Core.Common;
 
 namespace UseCases.Common;
 
@@ -25,7 +25,7 @@ public static class CaseFactory
             new CaseItem
             {
                 SeverityId = Constants.ErrorSeverities.Error,
-                Field = string.Empty,
+                Field = nameof(Exception),
                 Message = exception.Message,
             },
         ]);

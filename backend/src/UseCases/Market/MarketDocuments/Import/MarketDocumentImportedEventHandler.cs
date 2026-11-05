@@ -19,7 +19,7 @@ public class MarketDocumentImportedEventHandler(
     public async Task Handle(MarketDocumentImportedEvent domainEvent, CancellationToken ct)
     {
         var document = domainEvent.MarketDocument;
-        Exception? failure = null;
+        Case? @case = null;
 
         try
         {
@@ -48,15 +48,15 @@ public class MarketDocumentImportedEventHandler(
         }
         catch (Exception ex)
         {
-            failure = ex;
+            @case = CaseFactory.Create(Constants.CaseEntityTypes.MarketDocument, document.Id, ex);
             document.StatusId = Constants.MarketDocumentStatuses.Error;
         }
 
         await documentRepository.UpdateAsync(document, ct);
 
-        if (failure is not null)
+        if (@case is not null)
         {
-            await caseRepository.AddAsync(CaseFactory.Create(Constants.CaseEntityTypes.MarketDocument, document.Id, failure), ct);
+            await caseRepository.AddAsync(@case, ct);
         }
     }
 }
