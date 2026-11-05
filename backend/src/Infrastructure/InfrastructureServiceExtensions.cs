@@ -118,6 +118,7 @@ public static class InfrastructureServiceExtensions
             .AddScoped<IServiceStartService, ServiceStartService>()
             .AddScoped<IUpdateServicePointService, UpdateServicePointService>()
             .AddScoped<CurrentUserService>()
+            .AddScoped<CaseRecorder>()
             .AddScoped<ProcessRunTracker>();
 
         services.AddKeyedTransient<IFtpService, FluentFtpService>(nameof(FluentFtpService));

@@ -23,7 +23,7 @@ public class ProcessRunTrackerTests
                 return run;
             });
 
-        _tracker = new ProcessRunTracker(_processRunRepository, _caseRepository, TimeProvider.System);
+        _tracker = new ProcessRunTracker(_processRunRepository, new CaseRecorder(_caseRepository), TimeProvider.System);
     }
 
     [Fact]

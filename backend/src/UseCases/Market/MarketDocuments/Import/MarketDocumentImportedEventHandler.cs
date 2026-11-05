@@ -1,5 +1,4 @@
-﻿using Core.Common;
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -10,7 +9,7 @@ namespace UseCases.Market.MarketDocuments.Import;
 public class MarketDocumentImportedEventHandler(
     IRepository<MarketDocumentItem> itemRepository,
     IRepository<MarketDocument> documentRepository,
-    IRepository<Case> caseRepository,
+    CaseRecorder caseRecorder,
     IReadRepository<Configuration> configurationRepository,
     EdiImportHandlerResolver ediResolver)
 {
@@ -19,7 +18,6 @@ public class MarketDocumentImportedEventHandler(
     public async Task Handle(MarketDocumentImportedEvent domainEvent, CancellationToken ct)
     {
         var document = domainEvent.MarketDocument;
-        Case? @case = null;
 
         try
         {
@@ -48,15 +46,10 @@ public class MarketDocumentImportedEventHandler(
         }
         catch (Exception ex)
         {
-            @case = CaseFactory.Create(Constants.CaseEntityTypes.MarketDocument, document.Id, ex);
+            await caseRecorder.RecordAsync(Constants.CaseEntityTypes.MarketDocument, document.Id, ex, ct);
             document.StatusId = Constants.MarketDocumentStatuses.Error;
         }
 
         await documentRepository.UpdateAsync(document, ct);
-
-        if (@case is not null)
-        {
-            await caseRepository.AddAsync(@case, ct);
-        }
     }
 }

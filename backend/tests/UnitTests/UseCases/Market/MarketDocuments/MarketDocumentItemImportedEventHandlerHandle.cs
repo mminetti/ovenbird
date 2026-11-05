@@ -5,6 +5,7 @@ using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
+using UseCases.Common;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
 using Case = Core.Common.Case;
@@ -47,7 +48,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
         };
 
     private MarketDocumentItemImportedEventHandler CreateHandler(IServiceProvider services) =>
-        new(_configurationReadRepository, _itemRepository, _eventRepository, _caseRepository, new MarketDocumentEntityBuilderResolver(services));
+        new(_configurationReadRepository, _itemRepository, _eventRepository, new CaseRecorder(_caseRepository), new MarketDocumentEntityBuilderResolver(services));
 
     [Fact]
     public async Task CreatesTheEntityWhenABuilderIsRegisteredForTheItemsSetAndSubSet_AndMarksTheItemDone()

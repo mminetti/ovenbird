@@ -1,5 +1,4 @@
-﻿using Core.Common;
-using Core.MarketExchange;
+﻿using Core.MarketExchange;
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -11,7 +10,7 @@ public class MarketDocumentItemImportedEventHandler(
     IReadRepository<Configuration> configurationReadRepository,
     IRepository<MarketDocumentItem> itemRepository,
     IRepository<MarketDocumentEvent> eventRepository,
-    IRepository<Case> caseRepository,
+    CaseRecorder caseRecorder,
     MarketDocumentEntityBuilderResolver entityBuilderResolver)
 {
     private const string HandlerIdentifier = "handler";
@@ -19,7 +18,6 @@ public class MarketDocumentItemImportedEventHandler(
     public async Task Handle(MarketDocumentItemImportedEvent domainEvent, CancellationToken ct)
     {
         var item = domainEvent.MarketDocumentItem;
-        Case? @case = null;
 
         try
         {
@@ -54,7 +52,7 @@ public class MarketDocumentItemImportedEventHandler(
                 }
                 else
                 {
-                    @case = CaseFactory.Create(Constants.CaseEntityTypes.MarketDocumentItem, item.Id, result.ValidationErrors);
+                    await caseRecorder.RecordAsync(Constants.CaseEntityTypes.MarketDocumentItem, item.Id, result.ValidationErrors, ct);
                     item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Error;
                 }
             }
@@ -65,15 +63,10 @@ public class MarketDocumentItemImportedEventHandler(
         }
         catch (Exception ex)
         {
-            @case = CaseFactory.Create(Constants.CaseEntityTypes.MarketDocumentItem, item.Id, ex);
+            await caseRecorder.RecordAsync(Constants.CaseEntityTypes.MarketDocumentItem, item.Id, ex, ct);
             item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Error;
         }
 
         await itemRepository.UpdateAsync(item, ct);
-
-        if (@case is not null)
-        {
-            await caseRepository.AddAsync(@case, ct);
-        }
     }
 }

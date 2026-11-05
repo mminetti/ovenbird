@@ -5,7 +5,7 @@ namespace UseCases.Common;
 
 public class ProcessRunTracker(
     IRepository<ProcessRun> processRunRepository,
-    IRepository<Case> caseRepository,
+    CaseRecorder caseRecorder,
     TimeProvider timeProvider)
 {
     public Task<ProcessRun> StartAsync(int processTypeId, CancellationToken ct)
@@ -33,11 +33,6 @@ public class ProcessRunTracker(
 
         await processRunRepository.UpdateAsync(run, ct);
 
-        var @case = CaseFactory.Create(Constants.CaseEntityTypes.ProcessRun, processRunId, errors);
-
-        if (@case is not null)
-        {
-            await caseRepository.AddAsync(@case, ct);
-        }
+        await caseRecorder.RecordAsync(Constants.CaseEntityTypes.ProcessRun, processRunId, errors, ct);
     }
 }
