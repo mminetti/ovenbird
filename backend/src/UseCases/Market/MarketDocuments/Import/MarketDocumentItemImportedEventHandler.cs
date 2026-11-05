@@ -1,4 +1,5 @@
-﻿using Core.MarketExchange;
+using Core.Common;
+using Core.MarketExchange;
 using Core.MarketExchange.Events;
 using Core.Settings;
 using Core.Settings.Specifications;
@@ -11,6 +12,7 @@ public class MarketDocumentItemImportedEventHandler(
     IReadRepository<Configuration> configurationReadRepository,
     IRepository<MarketDocumentItem> itemRepository,
     IRepository<MarketDocumentEvent> eventRepository,
+    IRepository<Case> caseRepository,
     MarketDocumentEntityBuilderResolver entityBuilderResolver)
 {
     private const string HandlerIdentifier = "handler";
@@ -18,6 +20,7 @@ public class MarketDocumentItemImportedEventHandler(
     public async Task Handle(MarketDocumentItemImportedEvent domainEvent, CancellationToken ct)
     {
         var item = domainEvent.MarketDocumentItem;
+        Case? @case = null;
 
         try
         {
@@ -35,16 +38,26 @@ public class MarketDocumentItemImportedEventHandler(
             {
                 var result = await entityBuilder.CreateAsync(item, ct);
 
-                var marketDocumentEvents = ToMarketDocumentEvents(item.Id, entityBuilder.EventTypeId, result);
-
-                foreach (var marketDocumentEvent in marketDocumentEvents)
+                if (result.IsSuccess)
                 {
-                    await eventRepository.AddAsync(marketDocumentEvent, ct);
-                }
+                    foreach (var referenceId in result.Value)
+                    {
+                        await eventRepository.AddAsync(new MarketDocumentEvent
+                        {
+                            MarketDocumentItemId = item.Id,
+                            EventTypeId = entityBuilder.EventTypeId,
+                            ReferenceId = referenceId,
+                            StatusId = Constants.MarketDocumentEventStatuses.Done,
+                        }, ct);
+                    }
 
-                item.MarketDocumentItemStatusId = result.IsSuccess
-                    ? Constants.MarketDocumentItemStatuses.Done
-                    : Constants.MarketDocumentItemStatuses.Error;
+                    item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Done;
+                }
+                else
+                {
+                    @case = CaseFactory.Create(Constants.CaseEntityTypes.MarketDocumentItem, item.Id, result.ValidationErrors);
+                    item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Error;
+                }
             }
             else
             {
@@ -53,38 +66,15 @@ public class MarketDocumentItemImportedEventHandler(
         }
         catch (Exception ex)
         {
+            @case = CaseFactory.Create(Constants.CaseEntityTypes.MarketDocumentItem, item.Id, ex);
             item.MarketDocumentItemStatusId = Constants.MarketDocumentItemStatuses.Error;
-            item.Message = ex.Message;
         }
 
         await itemRepository.UpdateAsync(item, ct);
-    }
 
-    private static IEnumerable<MarketDocumentEvent> ToMarketDocumentEvents(
-        long itemId, 
-        int eventTypeId, 
-        Result<IReadOnlyList<long>> result)
-    {
-        if (result.IsSuccess)
+        if (@case is not null)
         {
-            return result.Value.Select(referenceId => new MarketDocumentEvent
-            {
-                MarketDocumentItemId = itemId,
-                EventTypeId = eventTypeId,
-                ReferenceId = referenceId,
-                StatusId = Constants.MarketDocumentEventStatuses.Done,
-            });
+            await caseRepository.AddAsync(@case, ct);
         }
-
-        return
-        [
-            new MarketDocumentEvent
-            {
-                MarketDocumentItemId = itemId,
-                EventTypeId = eventTypeId,
-                StatusId = Constants.MarketDocumentEventStatuses.Error,
-                Items = [.. result.ValidationErrors.Select(ErrorLogItemFactory.Create<MarketDocumentEventItem>)],
-            },
-        ];
     }
 }

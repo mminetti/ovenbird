@@ -125,6 +125,166 @@ namespace Infrastructure.Data.Migrations
                     b.ToTable("AuditTrail", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Common.Case", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<int?>("AssignedToUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("EntityId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("EntityTypeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedToUserId");
+
+                    b.HasIndex("EntityTypeId");
+
+                    b.HasIndex("StatusId");
+
+                    b.ToTable("Case");
+                });
+
+            modelBuilder.Entity("Core.Common.CaseEntityType", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CaseEntityType");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ProcessRun"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "MarketDocumentItem"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "MarketDocument"
+                        });
+                });
+
+            modelBuilder.Entity("Core.Common.CaseItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("CaseId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Field")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SeverityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.HasIndex("SeverityId");
+
+                    b.ToTable("CaseItem");
+                });
+
+            modelBuilder.Entity("Core.Common.CaseStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CaseStatus");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Open"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "InProgress"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Resolved"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Cancelled"
+                        });
+                });
+
             modelBuilder.Entity("Core.Common.ErrorSeverity", b =>
                 {
                     b.Property<int>("Id")
@@ -192,9 +352,6 @@ namespace Infrastructure.Data.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
@@ -282,52 +439,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("StatusId");
 
                     b.ToTable("MarketDocumentEvent");
-                });
-
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Field")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<long>("MarketDocumentEventId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SeverityId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MarketDocumentEventId");
-
-                    b.HasIndex("SeverityId");
-
-                    b.ToTable("MarketDocumentEventItem");
                 });
 
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventStatus", b =>
@@ -431,9 +542,6 @@ namespace Infrastructure.Data.Migrations
 
                     b.Property<int>("MarketDocumentItemStatusId")
                         .HasColumnType("int");
-
-                    b.Property<string>("Message")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Raw")
                         .IsRequired()
@@ -559,52 +667,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasIndex("StatusId");
 
                     b.ToTable("ProcessRun");
-                });
-
-            modelBuilder.Entity("Core.Processing.ProcessRunLogItem", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Field")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<DateTimeOffset>("LastModifiedAtUtc")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ProcessRunId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("SeverityId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProcessRunId");
-
-                    b.HasIndex("SeverityId");
-
-                    b.ToTable("ProcessRunLogItem");
                 });
 
             modelBuilder.Entity("Core.Processing.ProcessRunStatus", b =>
@@ -2998,6 +3060,51 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("References");
                 });
 
+            modelBuilder.Entity("Core.Common.Case", b =>
+                {
+                    b.HasOne("Core.Security.User", "AssignedToUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedToUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Core.Common.CaseEntityType", "EntityType")
+                        .WithMany()
+                        .HasForeignKey("EntityTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Core.Common.CaseStatus", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("AssignedToUser");
+
+                    b.Navigation("EntityType");
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("Core.Common.CaseItem", b =>
+                {
+                    b.HasOne("Core.Common.Case", "Case")
+                        .WithMany("Items")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Common.ErrorSeverity", "Severity")
+                        .WithMany()
+                        .HasForeignKey("SeverityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Case");
+
+                    b.Navigation("Severity");
+                });
+
             modelBuilder.Entity("Core.MarketExchange.MarketDocument", b =>
                 {
                     b.HasOne("Core.Assets.Asset", "Asset")
@@ -3059,25 +3166,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("Status");
                 });
 
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEventItem", b =>
-                {
-                    b.HasOne("Core.MarketExchange.MarketDocumentEvent", "MarketDocumentEvent")
-                        .WithMany("Items")
-                        .HasForeignKey("MarketDocumentEventId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Common.ErrorSeverity", "Severity")
-                        .WithMany()
-                        .HasForeignKey("SeverityId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("MarketDocumentEvent");
-
-                    b.Navigation("Severity");
-                });
-
             modelBuilder.Entity("Core.MarketExchange.MarketDocumentItem", b =>
                 {
                     b.HasOne("Core.MarketExchange.MarketDocument", "MarketDocument")
@@ -3113,25 +3201,6 @@ namespace Infrastructure.Data.Migrations
                     b.Navigation("ProcessType");
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("Core.Processing.ProcessRunLogItem", b =>
-                {
-                    b.HasOne("Core.Processing.ProcessRun", "ProcessRun")
-                        .WithMany("LogItems")
-                        .HasForeignKey("ProcessRunId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Core.Common.ErrorSeverity", "Severity")
-                        .WithMany()
-                        .HasForeignKey("SeverityId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("ProcessRun");
-
-                    b.Navigation("Severity");
                 });
 
             modelBuilder.Entity("Core.Security.Permission", b =>
@@ -3727,14 +3796,9 @@ namespace Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Core.MarketExchange.MarketDocumentEvent", b =>
+            modelBuilder.Entity("Core.Common.Case", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Core.Processing.ProcessRun", b =>
-                {
-                    b.Navigation("LogItems");
                 });
 
             modelBuilder.Entity("Core.Security.PermissionModule", b =>

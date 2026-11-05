@@ -1,5 +1,6 @@
 ﻿using Core.Assets;
 using Core.Auditing;
+using Core.Common;
 using Core.MarketExchange;
 using Core.Processing;
 using Core.Security;
@@ -27,7 +28,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ConfigurationType> ConfigurationType => Set<ConfigurationType>();
     public DbSet<AuditTrail> AuditTrail => Set<AuditTrail>();
     public DbSet<ProcessRun> ProcessRun => Set<ProcessRun>();
-    public DbSet<ProcessRunLogItem> ProcessRunLogItem => Set<ProcessRunLogItem>();
+    public DbSet<Case> Case => Set<Case>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

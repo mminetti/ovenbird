@@ -12,5 +12,4 @@ public class MarketDocumentEvent : AuditableEntityBase<long>
     public MarketDocumentItem MarketDocumentItem { get; set; } = default!;
     public MarketDocumentEventType EventType { get; set; } = default!;
     public MarketDocumentEventStatus Status { get; set; } = default!;
-    public ICollection<MarketDocumentEventItem> Items { get; set; } = [];
 }

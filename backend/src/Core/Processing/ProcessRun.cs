@@ -9,5 +9,4 @@ public class ProcessRun : EntityBase<long>, IAggregateRoot
 
     public ProcessType ProcessType { get; set; } = default!;
     public ProcessRunStatus Status { get; set; } = default!;
-    public ICollection<ProcessRunLogItem> LogItems { get; set; } = [];
 }

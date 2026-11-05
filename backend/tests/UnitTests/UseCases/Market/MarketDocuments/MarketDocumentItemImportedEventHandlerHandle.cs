@@ -7,6 +7,7 @@ using Core.Settings.Specifications;
 using Microsoft.Extensions.DependencyInjection;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
+using Case = Core.Common.Case;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -17,6 +18,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
     private readonly IRepository<MarketDocumentEvent> _eventRepository = Substitute.For<IRepository<MarketDocumentEvent>>();
+    private readonly IRepository<Case> _caseRepository = Substitute.For<IRepository<Case>>();
 
     private readonly Company _company = new() { Id = 1, Name = "Acme", TimeZoneId = "UTC" };
 
@@ -45,7 +47,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
         };
 
     private MarketDocumentItemImportedEventHandler CreateHandler(IServiceProvider services) =>
-        new(_configurationReadRepository, _itemRepository, _eventRepository, new MarketDocumentEntityBuilderResolver(services));
+        new(_configurationReadRepository, _itemRepository, _eventRepository, _caseRepository, new MarketDocumentEntityBuilderResolver(services));
 
     [Fact]
     public async Task CreatesTheEntityWhenABuilderIsRegisteredForTheItemsSetAndSubSet_AndMarksTheItemDone()
@@ -78,7 +80,7 @@ public class MarketDocumentItemImportedEventHandlerHandle
     }
 
     [Fact]
-    public async Task RecordsAnErrorEventWithOneItemPerValidationError_WhenTheBuilderReturnsInvalid()
+    public async Task RaisesACaseWithOneItemPerErrorSeverityValidationError_WhenTheBuilderReturnsInvalid()
     {
         var item = CreateItem("867", "02");
 
@@ -100,15 +102,15 @@ public class MarketDocumentItemImportedEventHandlerHandle
 
         item.MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
 
-        await _eventRepository.Received(1).AddAsync(
-            Arg.Is<MarketDocumentEvent>(e =>
-                e.MarketDocumentItemId == item.Id &&
-                e.EventTypeId == Constants.MarketDocumentEventTypes.HistoricalUsage &&
-                e.ReferenceId == null &&
-                e.StatusId == Constants.MarketDocumentEventStatuses.Error &&
-                e.Items.Count == 2 &&
-                e.Items.Any(i => i.Field == "Field1" && i.Message == "Field1 is required." && i.SeverityId == Constants.ErrorSeverities.Error) &&
-                e.Items.Any(i => i.Field == "Field2" && i.Message == "Field2 is out of range." && i.SeverityId == Constants.ErrorSeverities.Warning)),
+        await _eventRepository.DidNotReceive().AddAsync(Arg.Any<MarketDocumentEvent>(), Arg.Any<CancellationToken>());
+
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c =>
+                c.EntityTypeId == Constants.CaseEntityTypes.MarketDocumentItem &&
+                c.EntityId == item.Id &&
+                c.StatusId == Constants.CaseStatuses.Open &&
+                c.Items.Count == 1 &&
+                c.Items.Any(i => i.Field == "Field1" && i.Message == "Field1 is required." && i.SeverityId == Constants.ErrorSeverities.Error)),
             Arg.Any<CancellationToken>());
     }
 
@@ -150,6 +152,12 @@ public class MarketDocumentItemImportedEventHandlerHandle
 
         item.MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
         await _itemRepository.Received(1).UpdateAsync(item, Arg.Any<CancellationToken>());
+
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.MarketDocumentItem
+                && c.EntityId == item.Id
+                && c.Items.Count == 1),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -166,6 +174,12 @@ public class MarketDocumentItemImportedEventHandlerHandle
 
         item.MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
         await _itemRepository.Received(1).UpdateAsync(item, Arg.Any<CancellationToken>());
+
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.MarketDocumentItem
+                && c.EntityId == item.Id
+                && c.Items.Count == 1),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -185,6 +199,12 @@ public class MarketDocumentItemImportedEventHandlerHandle
             handler.Handle(new MarketDocumentItemImportedEvent(item), CancellationToken.None));
 
         item.MarketDocumentItemStatusId.ShouldBe(Constants.MarketDocumentItemStatuses.Error);
+
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.MarketDocumentItem
+                && c.EntityId == item.Id
+                && c.Items.Count == 1),
+            Arg.Any<CancellationToken>());
         await _itemRepository.Received(1).UpdateAsync(item, Arg.Any<CancellationToken>());
     }
 }

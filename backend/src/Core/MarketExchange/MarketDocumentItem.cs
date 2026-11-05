@@ -13,7 +13,6 @@ public class MarketDocumentItem : AuditableEntityBase<long>
     public string ReferenceNumber { get; set; } = string.Empty;
     public string ServicePointIdentifier {  get; set; } = string.Empty;
     public string Raw { get; set; } = string.Empty;
-    public string? Message { get; set; }
 
     public MarketDocument? MarketDocument { get; set; }
     public MarketDocumentItemStatus MarketDocumentItemStatus { get; set; } = default!;

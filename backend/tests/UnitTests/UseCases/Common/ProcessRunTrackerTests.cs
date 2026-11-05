@@ -2,13 +2,14 @@ using Ardalis.Result;
 using Core.Common.Constants;
 using Core.Processing;
 using UseCases.Common;
+using Case = Core.Common.Case;
 
 namespace UnitTests.UseCases.Common;
 
 public class ProcessRunTrackerTests
 {
     private readonly IRepository<ProcessRun> _processRunRepository = Substitute.For<IRepository<ProcessRun>>();
-    private readonly IRepository<ProcessRunLogItem> _logItemRepository = Substitute.For<IRepository<ProcessRunLogItem>>();
+    private readonly IRepository<Case> _caseRepository = Substitute.For<IRepository<Case>>();
     private readonly ProcessRunTracker _tracker;
 
     public ProcessRunTrackerTests()
@@ -22,7 +23,7 @@ public class ProcessRunTrackerTests
                 return run;
             });
 
-        _tracker = new ProcessRunTracker(_processRunRepository, _logItemRepository, TimeProvider.System);
+        _tracker = new ProcessRunTracker(_processRunRepository, _caseRepository, TimeProvider.System);
     }
 
     [Fact]
@@ -36,7 +37,7 @@ public class ProcessRunTrackerTests
     }
 
     [Fact]
-    public async Task CompleteAsync_PersistsLogItemsParsedFromEachValidationError_AndCompletesTheRun()
+    public async Task CompleteAsync_RaisesACaseWithOneItemPerErrorSeverityValidationError_AndCompletesTheRun()
     {
         _processRunRepository.GetByIdAsync(1L, Arg.Any<CancellationToken>())
             .Returns(new ProcessRun { Id = 1, StatusId = Constants.ProcessRunStatuses.Running });
@@ -49,12 +50,13 @@ public class ProcessRunTrackerTests
 
         await _tracker.CompleteAsync(1, succeeded: false, errors, CancellationToken.None);
 
-        await _logItemRepository.Received(1).AddRangeAsync(
-            Arg.Is<IEnumerable<ProcessRunLogItem>>(items => items.Count() == 2
-                && items.Any(i => i.Field == "CustomerClass" && i.Message == "Unmapped customer class 'Residential'."
-                    && i.SeverityId == Constants.ErrorSeverities.Error)
-                && items.Any(i => i.Field == string.Empty && i.Message == "Skipped a duplicate document."
-                    && i.SeverityId == Constants.ErrorSeverities.Warning)),
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.ProcessRun
+                && c.EntityId == 1
+                && c.StatusId == Constants.CaseStatuses.Open
+                && c.Items.Count == 1
+                && c.Items.Any(i => i.Field == "CustomerClass" && i.Message == "Unmapped customer class 'Residential'."
+                    && i.SeverityId == Constants.ErrorSeverities.Error)),
             Arg.Any<CancellationToken>());
 
         await _processRunRepository.Received(1).UpdateAsync(
@@ -63,14 +65,14 @@ public class ProcessRunTrackerTests
     }
 
     [Fact]
-    public async Task CompleteAsync_WithNoErrors_StillCompletesTheRunAsSucceeded_WithoutPersistingLogItems()
+    public async Task CompleteAsync_WithNoErrors_StillCompletesTheRunAsSucceeded_WithoutRaisingACase()
     {
         _processRunRepository.GetByIdAsync(1L, Arg.Any<CancellationToken>())
             .Returns(new ProcessRun { Id = 1, StatusId = Constants.ProcessRunStatuses.Running });
 
         await _tracker.CompleteAsync(1, succeeded: true, [], CancellationToken.None);
 
-        await _logItemRepository.DidNotReceive().AddRangeAsync(Arg.Any<IEnumerable<ProcessRunLogItem>>(), Arg.Any<CancellationToken>());
+        await _caseRepository.DidNotReceive().AddAsync(Arg.Any<Case>(), Arg.Any<CancellationToken>());
 
         await _processRunRepository.Received(1).UpdateAsync(
             Arg.Is<ProcessRun>(r => r.StatusId == Constants.ProcessRunStatuses.Succeeded),

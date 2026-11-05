@@ -5,6 +5,7 @@ using Core.Settings;
 using Core.Settings.Specifications;
 using UseCases.Market.MarketDocuments.Import;
 using UseCases.Market.MarketDocuments.Import.Interfaces;
+using Case = Core.Common.Case;
 
 namespace UnitTests.UseCases.Market.MarketDocuments;
 
@@ -12,6 +13,7 @@ public class MarketDocumentImportedEventHandlerHandle
 {
     private readonly IRepository<MarketDocumentItem> _itemRepository = Substitute.For<IRepository<MarketDocumentItem>>();
     private readonly IRepository<MarketDocument> _documentRepository = Substitute.For<IRepository<MarketDocument>>();
+    private readonly IRepository<Case> _caseRepository = Substitute.For<IRepository<Case>>();
     private readonly IReadRepository<Configuration> _configurationReadRepository = Substitute.For<IReadRepository<Configuration>>();
     private readonly IEdiImportHandler _ediHandler = Substitute.For<IEdiImportHandler>();
     private readonly Configuration _configuration;
@@ -30,6 +32,7 @@ public class MarketDocumentImportedEventHandlerHandle
         _handler = new MarketDocumentImportedEventHandler(
             _itemRepository,
             _documentRepository,
+            _caseRepository,
             _configurationReadRepository,
             new EdiImportHandlerResolver([_ediHandler]));
     }
@@ -151,6 +154,12 @@ public class MarketDocumentImportedEventHandlerHandle
 
         await _itemRepository.Received(1).AddAsync(Arg.Any<MarketDocumentItem>(), Arg.Any<CancellationToken>());
         await _documentRepository.Received(1).UpdateAsync(document, Arg.Any<CancellationToken>());
+
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.MarketDocument
+                && c.EntityId == document.Id
+                && c.Items.Count == 1),
+            Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -168,6 +177,12 @@ public class MarketDocumentImportedEventHandlerHandle
         document.StatusId.ShouldBe(Constants.MarketDocumentStatuses.Error);
 
         await _documentRepository.Received(1).UpdateAsync(document, Arg.Any<CancellationToken>());
+
+        await _caseRepository.Received(1).AddAsync(
+            Arg.Is<Case>(c => c.EntityTypeId == Constants.CaseEntityTypes.MarketDocument
+                && c.EntityId == document.Id
+                && c.Items.Count == 1),
+            Arg.Any<CancellationToken>());
     }
 
     private static Configuration CreateConfiguration()

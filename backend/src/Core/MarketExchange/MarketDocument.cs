@@ -12,7 +12,6 @@ public class MarketDocument : AuditableEntityBase<long>
     public int CompanyId { get; set; }
     public int StatusId { get; set; }
     public long? AssetId { get; set; }
-    public string? Message { get; set; }
 
     public MarketDocumentDirection Direction { get; set; } = default!;
     public Company Company { get; set; } = default!;
