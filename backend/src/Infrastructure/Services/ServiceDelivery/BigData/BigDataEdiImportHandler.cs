@@ -17,9 +17,7 @@ public class BigDataEdiImportHandler(
 {
     public string Identifier => "BigData";
 
-    public async Task<EdiImportResult> ExecuteImportAsync(
-        Configuration configuration,
-        CancellationToken ct)
+    public async Task<EdiImportResult> ExecuteImportAsync(Configuration configuration, CancellationToken ct)
     {
         var documents = new List<MarketDocument>();
         var errors = new List<ValidationError>();
@@ -63,13 +61,13 @@ public class BigDataEdiImportHandler(
                 }
                 catch (Exception ex)
                 {
-                    errors.Add(new ValidationError(identifier, ex.Message, nameof(MarketDocument), ValidationSeverity.Error));
+                    errors.Add(new ValidationError(nameof(MarketDocument), ex.Message));
                 }
             }
         }
         catch (Exception ex)
         {
-            errors.Add(new ValidationError(configuration.Name, ex.Message, nameof(Configuration), ValidationSeverity.Error));
+            errors.Add(new ValidationError(nameof(Configuration), ex.Message));
         }
 
         return new EdiImportResult(documents, errors);
